@@ -13,7 +13,16 @@ import {
   Star,
   ChevronRight,
   Menu,
-  X
+  X,
+  Moon,
+  Sun,
+  Monitor,
+  Smartphone,
+  Check,
+  Hash,
+  Trash2,
+  MoreVertical,
+  Type
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Note, NoteType, GitHubConfig } from '@/types/note';
@@ -31,14 +40,24 @@ export default function Home() {
   const [ghConfig, setGhConfig] = useState<GitHubConfig | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // Load notes and config from localStorage on mount
+  // New States: Theme & Device View
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
+
+  // Load persistence
   useEffect(() => {
     const savedNotes = localStorage.getItem('jsonote_notes');
     const savedConfig = localStorage.getItem('jsonote_gh_config');
+    const savedTheme = localStorage.getItem('jsonote_theme') as 'dark' | 'light';
+    const savedView = localStorage.getItem('jsonote_view') as 'desktop' | 'mobile';
 
-    if (savedNotes) {
-      setNotes(JSON.parse(savedNotes));
-    } else {
+    if (savedNotes) setNotes(JSON.parse(savedNotes));
+    if (savedConfig) setGhConfig(JSON.parse(savedConfig));
+    if (savedTheme) setTheme(savedTheme);
+    if (savedView) setViewMode(savedView);
+
+    if (!savedNotes) {
       const mockNotes: Note[] = [
         {
           metadata: {
@@ -55,36 +74,43 @@ export default function Home() {
       setNotes(mockNotes);
       localStorage.setItem('jsonote_notes', JSON.stringify(mockNotes));
     }
-
-    if (savedConfig) {
-      setGhConfig(JSON.parse(savedConfig));
-    }
   }, []);
 
-  // Auto-sync effect: Poll GitHub every 60 seconds if configured
+  // Theme effect
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('jsonote_theme', theme);
+  }, [theme]);
+
+  // View mode effect
+  useEffect(() => {
+    localStorage.setItem('jsonote_view', viewMode);
+  }, [viewMode]);
+
+  // Auto-sync
   useEffect(() => {
     if (!ghConfig || !ghConfig.token) return;
-
-    const interval = setInterval(() => {
-      console.log('Background Sync Initialized...');
-      handleSync(true); // silent sync
-    }, 60000);
-
+    const interval = setInterval(() => handleSync(true), 60000);
     return () => clearInterval(interval);
   }, [ghConfig, notes]);
 
   const handleSaveNote = (updatedNote: Note) => {
-    let newNotes;
-    const exists = notes.find(n => n.metadata.id === updatedNote.metadata.id);
-    if (exists) {
-      newNotes = notes.map(n => n.metadata.id === updatedNote.metadata.id ? updatedNote : n);
-    } else {
-      newNotes = [...notes, updatedNote];
-    }
+    const newNotes = notes.find(n => n.metadata.id === updatedNote.metadata.id)
+      ? notes.map(n => n.metadata.id === updatedNote.metadata.id ? updatedNote : n)
+      : [...notes, updatedNote];
     setNotes(newNotes);
     localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
     setIsEditorOpen(false);
     setSelectedNote(null);
+  };
+
+  const deleteNote = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('정말 이 노트를 삭제하시겠습니까?')) {
+      const newNotes = notes.filter(n => n.metadata.id !== id);
+      setNotes(newNotes);
+      localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
+    }
   };
 
   const createNewNote = () => {
@@ -104,54 +130,45 @@ export default function Home() {
   };
 
   const handleSync = async (silent: boolean = false) => {
-    if (!ghConfig || !ghConfig.token || !ghConfig.owner || !ghConfig.repo) {
+    if (!ghConfig || !ghConfig.token) {
       if (!silent) setIsSettingsOpen(true);
       return;
     }
-
     if (!silent) setIsSyncing(true);
     try {
       const storage = new GitHubStorage(ghConfig);
-
-      const remoteNotes = await storage.fetchNotes();
-
-      // Basic merge: push local notes to remote
-      // To prevent бесконечные (endless) push/pull, we'd need more logic, 
-      // but for this version, we ensure remote has all local edits.
-      for (const note of notes) {
-        await storage.saveNote(note);
-      }
-
-      const finalNotes = await storage.fetchNotes();
-      setNotes(finalNotes);
-      localStorage.setItem('jsonote_notes', JSON.stringify(finalNotes));
-      if (!silent) alert('동기화가 성공적으로 완료되었습니다!');
-    } catch (error) {
-      console.error('Sync failed:', error);
-      if (!silent) alert('동기화 실패: GitHub 설정과 권한을 확인해주세요.');
+      for (const note of notes) await storage.saveNote(note);
+      const resynced = await storage.fetchNotes();
+      setNotes(resynced);
+      localStorage.setItem('jsonote_notes', JSON.stringify(resynced));
+      if (!silent) alert('동기화 완료!');
+    } catch (e) {
+      if (!silent) alert('동기화 실패!');
     } finally {
       if (!silent) setIsSyncing(false);
     }
   };
 
-  const handleSaveSettings = (config: GitHubConfig) => {
-    setGhConfig(config);
-    localStorage.setItem('jsonote_gh_config', JSON.stringify(config));
-    setIsSettingsOpen(false);
-  };
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  const toggleViewMode = () => setViewMode(prev => prev === 'desktop' ? 'mobile' : 'desktop');
 
-  const filteredNotes = notes.filter(n =>
-    n.metadata.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    n.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    n.metadata.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredNotes = notes.filter(n => {
+    const matchesSearch = n.metadata.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      n.content.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesType = filterType === 'all' || n.metadata.type === filterType;
+    return matchesSearch && matchesType;
+  });
 
   return (
-    <div className="layout">
+    <div className={`layout-container ${viewMode}-view`}>
       {/* Sidebar */}
       <motion.aside
         initial={false}
-        animate={{ width: isSidebarOpen ? 280 : 0, opacity: isSidebarOpen ? 1 : 0 }}
+        animate={{
+          width: isSidebarOpen ? (viewMode === 'mobile' ? '100%' : '280px') : '0',
+          x: isSidebarOpen ? 0 : -280,
+          opacity: isSidebarOpen ? 1 : 0
+        }}
         className="sidebar glass"
       >
         <div className="sidebar-header">
@@ -159,36 +176,41 @@ export default function Home() {
             <div className="logo-icon">J</div>
             <span className="logo-text">jsonote</span>
           </div>
+          <button onClick={() => setIsSidebarOpen(false)} className="icon-btn mobile-only">
+            <X size={20} />
+          </button>
         </div>
 
         <div className="sidebar-content">
           <button className="new-note-btn glass-card" onClick={createNewNote}>
             <Plus size={18} />
-            <span>새 노트</span>
+            <span>새 노트 작성</span>
           </button>
 
           <nav className="sidebar-nav">
             <div className="nav-group">
-              <label>보기</label>
-              <button className="nav-item active">
+              <label>필터링</label>
+              <button
+                className={`nav-item ${filterType === 'all' ? 'active' : ''}`}
+                onClick={() => setFilterType('all')}
+              >
                 <FileText size={18} />
                 <span>모든 노트</span>
               </button>
-              <button className="nav-item">
-                <Clock size={18} />
-                <span>최근 항목</span>
-              </button>
-              <button className="nav-item">
+              <button
+                className={`nav-item ${filterType === 'journal' ? 'active' : ''}`}
+                onClick={() => setFilterType('journal')}
+              >
                 <Star size={18} />
-                <span>즐겨찾기</span>
+                <span>저널</span>
               </button>
             </div>
 
             <div className="nav-group">
-              <label>리포지토리</label>
+              <label>저장소</label>
               <button className="nav-item">
                 <Github size={18} />
-                <span>{ghConfig?.repo || '연결 안 됨'}</span>
+                <span className="truncate">{ghConfig?.repo || '연결되지 않음'}</span>
                 <span className="badge">{notes.length}</span>
               </button>
             </div>
@@ -200,6 +222,14 @@ export default function Home() {
             <Settings size={18} />
             <span>설정</span>
           </button>
+          <div className="toggle-group glass">
+            <button onClick={toggleTheme} className="icon-btn" title="테마 변경">
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button onClick={toggleViewMode} className="icon-btn" title="보기 모드 변경">
+              {viewMode === 'desktop' ? <Smartphone size={18} /> : <Monitor size={18} />}
+            </button>
+          </div>
         </div>
       </motion.aside>
 
@@ -208,12 +238,12 @@ export default function Home() {
         <header className="content-header glass">
           <div className="header-left">
             <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="icon-btn"
+              onClick={() => setIsSidebarOpen(true)}
+              className={`icon-btn ${isSidebarOpen ? 'hidden' : ''}`}
             >
               <Menu size={20} />
             </button>
-            <div className="breadcrumb">
+            <div className="breadcrumb desktop-only">
               <span>내 워크스페이스</span>
               <ChevronRight size={14} className="text-muted" />
               <span className="current">모든 노트</span>
@@ -225,7 +255,7 @@ export default function Home() {
               <Search size={16} className="text-muted" />
               <input
                 type="text"
-                placeholder="노트 검색..."
+                placeholder="검색..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -236,19 +266,20 @@ export default function Home() {
               disabled={isSyncing}
             >
               <Github size={18} className={isSyncing ? 'animate-spin' : ''} />
-              <span>{isSyncing ? '동기화 중...' : '동기화'}</span>
+              <span className="desktop-only text-nowrap">{isSyncing ? '동기화 중...' : '동기화'}</span>
             </button>
           </div>
         </header>
 
-        <section className="notes-grid">
+        <section className={`notes-container ${viewMode === 'mobile' ? 'list-view' : 'grid-view'}`}>
           <AnimatePresence>
             {filteredNotes.map((note) => (
               <motion.div
                 key={note.metadata.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
                 className="note-card glass-card"
                 onClick={() => {
                   setSelectedNote(note);
@@ -257,37 +288,45 @@ export default function Home() {
               >
                 <div className="note-card-header">
                   <div className={`type-tag type-${note.metadata.type}`}>
+                    <Hash size={10} />
                     {note.metadata.type === 'general' ? '일반' :
                       note.metadata.type === 'meeting' ? '회의' :
                         note.metadata.type === 'task' ? '할 일' :
                           note.metadata.type === 'journal' ? '저널' : '코드'}
                   </div>
-                  <span className="date">
-                    {format(new Date(note.metadata.updatedAt), 'yyyy년 MM월 dd일')}
-                  </span>
+                  <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
+                    <Trash2 size={14} />
+                  </button>
                 </div>
-                <h3 className="note-card-title">{note.metadata.title}</h3>
-                <p className="note-card-preview">{note.content}</p>
+                <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
+                <p className="note-card-preview">{note.content || '내용이 없습니다.'}</p>
                 <div className="note-card-footer">
+                  <span className="date">
+                    {format(new Date(note.metadata.updatedAt), 'MM.dd')}
+                  </span>
                   <div className="tags">
-                    {note.metadata.tags.map(tag => (
+                    {note.metadata.tags.slice(0, 2).map(tag => (
                       <span key={tag} className="tag">#{tag}</span>
                     ))}
                   </div>
-                  <button className="more-btn">
-                    <ChevronRight size={16} />
-                  </button>
                 </div>
               </motion.div>
             ))}
           </AnimatePresence>
+          {filteredNotes.length === 0 && (
+            <div className="empty-state">
+              <Type size={48} className="text-muted" />
+              <p>노트가 없습니다.</p>
+            </div>
+          )}
         </section>
 
+        {/* Modals */}
         <AnimatePresence>
           {isSettingsOpen && (
             <SettingsModal
               config={ghConfig}
-              onSave={handleSaveSettings}
+              onSave={(c) => { setGhConfig(c); localStorage.setItem('jsonote_gh_config', JSON.stringify(c)); setIsSettingsOpen(false); }}
               onClose={() => setIsSettingsOpen(false)}
             />
           )}
@@ -295,34 +334,46 @@ export default function Home() {
             <NoteEditor
               note={selectedNote}
               onSave={handleSaveNote}
-              onClose={() => {
-                setIsEditorOpen(false);
-                setSelectedNote(null);
-              }}
+              onClose={() => { setIsEditorOpen(false); setSelectedNote(null); }}
             />
           )}
         </AnimatePresence>
       </main>
 
       <style jsx>{`
-        .layout {
+        .layout-container {
           display: flex;
           height: 100vh;
           width: 100vw;
-          background: linear-gradient(135deg, #0a0a0c 0%, #1a1a1e 100%);
+          overflow: hidden;
+          background-color: var(--bg-primary);
+        }
+
+        /* Mobile View Mode Switcher */
+        .mobile-view {
+          flex-direction: column;
+        }
+        
+        .mobile-view .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100%;
+          z-index: 100;
         }
 
         .sidebar {
-          height: 100%;
           display: flex;
           flex-direction: column;
           border-right: 1px solid var(--border-glass);
-          overflow: hidden;
           z-index: 50;
         }
 
         .sidebar-header {
           padding: 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
         }
 
         .logo-container {
@@ -357,30 +408,27 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           gap: 1.5rem;
+          overflow-y: auto;
         }
 
         .new-note-btn {
           width: 100%;
-          padding: 0.75rem;
+          padding: 0.85rem;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 0.5rem;
           font-weight: 600;
-          color: var(--text-primary);
-          background: rgba(255, 255, 255, 0.05);
-        }
-
-        .sidebar-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
+          color: white;
+          background: var(--accent-gradient);
+          border-radius: var(--radius-md);
         }
 
         .nav-group {
           display: flex;
           flex-direction: column;
           gap: 0.25rem;
+          margin-bottom: 1.5rem;
         }
 
         .nav-group label {
@@ -390,23 +438,24 @@ export default function Home() {
           padding: 0 0.75rem;
           margin-bottom: 0.5rem;
           letter-spacing: 0.05em;
+          text-transform: uppercase;
         }
 
         .nav-item {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 0.6rem 0.75rem;
+          padding: 0.75rem;
           border-radius: var(--radius-md);
           color: var(--text-secondary);
-          transition: all 0.2s;
           font-size: 0.9rem;
           font-weight: 500;
+          text-align: left;
         }
 
         .nav-item:hover, .nav-item.active {
           color: var(--text-primary);
-          background: rgba(255, 255, 255, 0.05);
+          background: var(--bg-tertiary);
         }
 
         .nav-item.active {
@@ -418,14 +467,24 @@ export default function Home() {
           margin-left: auto;
           font-size: 0.75rem;
           background: var(--border-glass);
-          padding: 0.1rem 0.5rem;
+          padding: 0.1rem 0.6rem;
           border-radius: var(--radius-full);
           color: var(--text-muted);
         }
 
         .sidebar-footer {
-          padding: 1rem;
+          padding: 1.5rem;
           border-top: 1px solid var(--border-glass);
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .toggle-group {
+          display: flex;
+          padding: 0.25rem;
+          border-radius: var(--radius-md);
+          justify-content: space-around;
         }
 
         .main-content {
@@ -437,12 +496,11 @@ export default function Home() {
         }
 
         .content-header {
-          height: 64px;
+          height: 72px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           padding: 0 1.5rem;
-          border-bottom: 1px solid var(--border-glass);
           z-index: 40;
         }
 
@@ -452,27 +510,13 @@ export default function Home() {
           gap: 1rem;
         }
 
-        .breadcrumb {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.85rem;
-          font-weight: 500;
-          color: var(--text-secondary);
-        }
-
-        .breadcrumb .current {
-          color: var(--text-primary);
-          font-weight: 600;
-        }
-
         .search-bar {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0.4rem 0.75rem;
-          border-radius: var(--radius-md);
-          width: 300px;
+          padding: 0.5rem 1rem;
+          border-radius: var(--radius-full);
+          width: clamp(150px, 30vw, 400px);
         }
 
         .search-bar input {
@@ -480,38 +524,50 @@ export default function Home() {
           border: none;
           outline: none;
           color: var(--text-primary);
-          font-size: 0.85rem;
+          font-size: 0.9rem;
           width: 100%;
         }
 
         .sync-btn {
-          padding: 0.4rem 1rem;
+          padding: 0.5rem 1.25rem;
           display: flex;
           align-items: center;
           gap: 0.5rem;
           font-weight: 600;
-          font-size: 0.85rem;
+          font-size: 0.9rem;
           color: var(--text-primary);
-          background: var(--accent-gradient);
+          border-radius: var(--radius-full);
         }
 
-        .notes-grid {
+        .notes-container {
           flex: 1;
           padding: 2rem;
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 1.5rem;
           overflow-y: auto;
           align-content: start;
+        }
+
+        .grid-view {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 1.5rem;
+        }
+
+        .list-view {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          max-width: 800px;
+          margin: 0 auto;
+          width: 100%;
         }
 
         .note-card {
           padding: 1.5rem;
           display: flex;
           flex-direction: column;
-          gap: 1rem;
-          position: relative;
+          gap: 0.75rem;
           cursor: pointer;
+          position: relative;
         }
 
         .note-card-header {
@@ -521,33 +577,47 @@ export default function Home() {
         }
 
         .type-tag {
-          font-size: 0.7rem;
+          font-size: 0.65rem;
           text-transform: uppercase;
-          font-weight: 700;
-          padding: 0.2rem 0.5rem;
+          font-weight: 800;
+          padding: 0.25rem 0.65rem;
           border-radius: var(--radius-sm);
           letter-spacing: 0.05em;
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
         }
 
         .type-general { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
         .type-meeting { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+        .type-journal { background: rgba(236, 72, 153, 0.1); color: #ec4899; }
 
-        .date {
-          font-size: 0.75rem;
+        .del-btn {
           color: var(--text-muted);
+          opacity: 0;
+          transition: opacity 0.2s;
         }
 
+        .note-card:hover .del-btn {
+          opacity: 1;
+        }
+
+        .del-btn:hover { color: #f43f5e; }
+
         .note-card-title {
-          font-size: 1.1rem;
+          font-size: 1.15rem;
           color: var(--text-primary);
-          line-height: 1.4;
+          line-height: 1.3;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .note-card-preview {
-          font-size: 0.85rem;
+          font-size: 0.9rem;
           color: var(--text-secondary);
           display: -webkit-box;
-          -webkit-line-clamp: 3;
+          -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
           line-height: 1.6;
@@ -562,54 +632,42 @@ export default function Home() {
           border-top: 1px solid var(--border-glass);
         }
 
-        .tags {
+        .date { font-size: 0.75rem; color: var(--text-muted); }
+        .tags { display: flex; gap: 0.5rem; }
+        .tag { font-size: 0.7rem; color: var(--accent-primary); font-weight: 600; }
+
+        .empty-state {
+          height: 100%;
           display: flex;
-          gap: 0.5rem;
-          flex-wrap: wrap;
-        }
-
-        .tag {
-          font-size: 0.75rem;
-          color: var(--accent-primary);
-          font-weight: 500;
-        }
-
-        .more-btn {
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
           color: var(--text-muted);
         }
 
         .icon-btn {
-          color: var(--text-secondary);
+          width: 36px;
+          height: 36px;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 0.5rem;
           border-radius: var(--radius-md);
-          transition: all 0.2s;
+          color: var(--text-secondary);
         }
 
         .icon-btn:hover {
-          background: rgba(255, 255, 255, 0.05);
+          background: var(--bg-tertiary);
           color: var(--text-primary);
         }
 
-        .text-muted { color: var(--text-muted); }
+        .hidden { display: none; }
+        .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
 
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .animate-spin {
-          animation: spin 1s linear infinite;
-        }
-        
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
-        }
-        .animate-pulse {
-          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
       `}</style>
     </div>
   );

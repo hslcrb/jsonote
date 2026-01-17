@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, Save, Github, Key, Info } from 'lucide-react';
+import { X, Save, Github, Key, Info, ChevronLeft, ShieldCheck } from 'lucide-react';
 import { GitHubConfig } from '@/types/note';
 
 interface SettingsModalProps {
@@ -27,77 +27,84 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
       className="modal-overlay"
     >
       <motion.div
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
         className="modal-container glass"
       >
         <header className="modal-header">
           <div className="title-section">
-            <Github size={20} className="text-accent" />
-            <h3>GitHub 연결 설정</h3>
+            <button className="icon-btn mobile-only" onClick={onClose}>
+              <ChevronLeft size={20} />
+            </button>
+            <Github size={22} className="text-accent" />
+            <h3>GitHub 동기화 설정</h3>
           </div>
-          <button className="close-btn" onClick={onClose}>
-            <X size={20} />
-          </button>
         </header>
 
-        <div className="modal-body">
+        <div className="modal-body scroll-area">
           <p className="description">
-            GitHub 리포지토리를 연결하여 원격 저장소, 버전 관리 및 기기 간 동기화를 활성화합니다.
+            노트를 GitHub에 안전하게 저장하고 모든 기기에서 동기화하세요.
           </p>
 
-          <div className="input-group">
+          <div className="input-field">
             <label><Key size={14} /> 개인 액세스 토큰 (PAT)</label>
             <input
               type="password"
-              placeholder="ghp_xxxxxxxxxxxx"
+              placeholder="ghp_..."
               value={editedConfig.token}
               onChange={(e) => setEditedConfig({ ...editedConfig, token: e.target.value })}
+              className="glass"
             />
-            <span className="hint">'repo' 권한이 필요합니다.</span>
+            <span className="hint">'repo' 권한이 체크된 토큰이 필요합니다.</span>
           </div>
 
-          <div className="row">
-            <div className="input-group">
-              <label>소유자 (사용자명)</label>
+          <div className="grid-row">
+            <div className="input-field">
+              <label>사용자명 (Owner)</label>
               <input
                 type="text"
-                placeholder="예: jdoe"
+                placeholder="GitHub ID"
                 value={editedConfig.owner}
                 onChange={(e) => setEditedConfig({ ...editedConfig, owner: e.target.value })}
+                className="glass"
               />
             </div>
-            <div className="input-group">
-              <label>리포지토리 명</label>
+            <div className="input-field">
+              <label>저장소 (Repo)</label>
               <input
                 type="text"
-                placeholder="예: my-notes"
+                placeholder="my-notes"
                 value={editedConfig.repo}
                 onChange={(e) => setEditedConfig({ ...editedConfig, repo: e.target.value })}
+                className="glass"
               />
             </div>
           </div>
 
-          <div className="input-group">
-            <label>브랜치</label>
+          <div className="input-field">
+            <label>브랜치 (Branch)</label>
             <input
               type="text"
               placeholder="main"
               value={editedConfig.branch}
               onChange={(e) => setEditedConfig({ ...editedConfig, branch: e.target.value })}
+              className="glass"
             />
           </div>
 
-          <div className="info-box glass">
-            <Info size={16} />
-            <p>토큰은 브라우저에 로컬로 안전하게 저장되며 GitHub API 통신에만 사용됩니다.</p>
+          <div className="security-notice glass">
+            <ShieldCheck size={18} className="text-success" />
+            <div>
+              <strong>보안 안내</strong>
+              <p>토큰은 브라우저 로컬 저장소에만 보관되며 외부 서버로 전송되지 않습니다.</p>
+            </div>
           </div>
         </div>
 
         <footer className="modal-footer">
-          <button className="cancel-btn" onClick={onClose}>취소</button>
+          <button className="secondary-btn" onClick={onClose}>취소</button>
           <button
-            className="save-btn glass-card"
+            className="primary-btn glass-card"
             onClick={() => onSave(editedConfig)}
           >
             <Save size={18} />
@@ -107,159 +114,154 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
       </motion.div>
 
       <style jsx>{`
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.6);
-          backdrop-filter: blur(8px);
-          z-index: 100;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 1.5rem;
-        }
+                .modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    background: rgba(0, 0, 0, 0.5);
+                    backdrop-filter: blur(8px);
+                    z-index: 2000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 1.5rem;
+                }
 
-        .modal-container {
-          width: 100%;
-          max-width: 500px;
-          border-radius: var(--radius-lg);
-          overflow: hidden;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
+                .modal-container {
+                    width: 100%;
+                    max-width: 500px;
+                    border-radius: var(--radius-lg);
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                    box-shadow: var(--shadow-lg);
+                }
 
-        .modal-header {
-          padding: 1.25rem 1.5rem;
-          border-bottom: 1px solid var(--border-glass);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          background: rgba(255, 255, 255, 0.03);
-        }
+                .modal-header {
+                    padding: 1.5rem;
+                    border-bottom: 1px solid var(--border-glass);
+                    background: rgba(255, 255, 255, 0.02);
+                }
 
-        .title-section {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
+                .title-section {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                }
 
-        .title-section h3 {
-          font-family: 'Outfit';
-          font-size: 1.1rem;
-          margin: 0;
-        }
+                .title-section h3 {
+                    font-size: 1.25rem;
+                    margin: 0;
+                    font-family: 'Outfit', sans-serif;
+                }
 
-        .text-accent { color: var(--accent-primary); }
+                .modal-body {
+                    padding: 2rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1.5rem;
+                    max-height: 70vh;
+                    overflow-y: auto;
+                }
 
-        .modal-body {
-          padding: 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1.25rem;
-        }
+                .description {
+                    font-size: 0.95rem;
+                    color: var(--text-secondary);
+                    line-height: 1.6;
+                }
 
-        .description {
-          font-size: 0.9rem;
-          color: var(--text-secondary);
-          line-height: 1.5;
-        }
+                .input-field {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.6rem;
+                }
 
-        .input-group {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
+                .input-field label {
+                    font-size: 0.75rem;
+                    font-weight: 700;
+                    color: var(--text-muted);
+                    text-transform: uppercase;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                }
 
-        .input-group label {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-        }
+                .input-field input {
+                    padding: 0.8rem 1rem;
+                    border-radius: var(--radius-md);
+                    font-size: 0.95rem;
+                    color: var(--text-primary);
+                    outline: none;
+                    border: 1px solid var(--border-glass);
+                    transition: border-color 0.2s;
+                }
 
-        .input-group input {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid var(--border-glass);
-          border-radius: var(--radius-sm);
-          padding: 0.6rem 0.75rem;
-          color: var(--text-primary);
-          font-size: 0.9rem;
-          outline: none;
-          transition: border-color 0.2s;
-        }
+                .input-field input:focus {
+                    border-color: var(--accent-primary);
+                }
 
-        .input-group input:focus {
-          border-color: var(--accent-primary);
-        }
+                .hint { font-size: 0.75rem; color: var(--text-muted); }
 
-        .hint {
-          font-size: 0.7rem;
-          color: var(--text-muted);
-        }
+                .grid-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
+                }
 
-        .row {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
-        }
+                .security-notice {
+                    padding: 1rem;
+                    border-radius: var(--radius-md);
+                    display: flex;
+                    gap: 1rem;
+                    background: rgba(16, 185, 129, 0.05);
+                    border: 1px solid rgba(16, 185, 129, 0.2);
+                }
 
-        .info-box {
-          padding: 0.75rem;
-          border-radius: var(--radius-md);
-          display: flex;
-          gap: 0.75rem;
-          background: rgba(59, 130, 246, 0.05);
-          border-color: rgba(59, 130, 246, 0.2);
-        }
+                .security-notice strong { display: block; font-size: 0.85rem; margin-bottom: 0.25rem; }
+                .security-notice p { font-size: 0.8rem; color: var(--text-secondary); margin: 0; }
+                .text-success { color: #10b981; }
 
-        .info-box p {
-          font-size: 0.8rem;
-          color: var(--text-secondary);
-          line-height: 1.4;
-        }
+                .modal-footer {
+                    padding: 1.5rem 2rem;
+                    background: rgba(0, 0, 0, 0.05);
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 1rem;
+                    border-top: 1px solid var(--border-glass);
+                }
 
-        .modal-footer {
-          padding: 1.25rem 1.5rem;
-          background: rgba(0, 0, 0, 0.1);
-          display: flex;
-          justify-content: flex-end;
-          gap: 1rem;
-          border-top: 1px solid var(--border-glass);
-        }
+                .primary-btn {
+                    padding: 0.75rem 1.5rem;
+                    background: var(--accent-gradient);
+                    color: white;
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    border-radius: var(--radius-full);
+                }
 
-        .cancel-btn {
-          padding: 0.5rem 1rem;
-          color: var(--text-secondary);
-          font-weight: 600;
-          font-size: 0.9rem;
-        }
+                .secondary-btn {
+                    padding: 0.75rem 1.25rem;
+                    color: var(--text-secondary);
+                    font-weight: 600;
+                }
 
-        .save-btn {
-          padding: 0.5rem 1.25rem;
-          background: var(--accent-gradient);
-          color: white;
-          font-weight: 600;
-          font-size: 0.9rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
+                .icon-btn {
+                    padding: 0.5rem;
+                    border-radius: var(--radius-md);
+                    color: var(--text-secondary);
+                }
 
-        .close-btn {
-          color: var(--text-muted);
-          transition: color 0.2s;
-        }
+                .text-accent { color: var(--accent-primary); }
 
-        .close-btn:hover {
-          color: var(--text-primary);
-        }
-      `}</style>
+                @media (max-width: 768px) {
+                    .modal-container { height: 100vh; max-width: 100%; border-radius: 0; }
+                    .grid-row { grid-template-columns: 1fr; }
+                }
+            `}</style>
     </motion.div>
   );
 }

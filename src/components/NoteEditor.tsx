@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, Save, Eye, Code, Tag, Trash2 } from 'lucide-react';
+import { X, Save, Eye, Code, Tag, Trash2, Maximize2, ChevronLeft } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
 
 interface NoteEditorProps {
@@ -13,7 +13,8 @@ interface NoteEditorProps {
 
 export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
   const [editedNote, setEditedNote] = useState<Note>({ ...note });
-  const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
+  const [view, setView] = useState<'edit' | 'json'>('edit');
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const handleSave = () => {
     const updatedNote = {
@@ -34,12 +35,21 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
       className="editor-overlay"
     >
       <motion.div
+        layout
         initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
+        animate={{
+          scale: 1,
+          y: 0,
+          width: isFullScreen ? '100%' : '90%',
+          height: isFullScreen ? '100%' : '85%'
+        }}
         className="editor-container glass"
       >
         <header className="editor-header">
-          <div className="title-section">
+          <div className="header-left-actions">
+            <button className="icon-btn" onClick={onClose}>
+              <ChevronLeft size={20} />
+            </button>
             <input
               type="text"
               className="title-input"
@@ -48,32 +58,26 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
                 ...editedNote,
                 metadata: { ...editedNote.metadata, title: e.target.value }
               })}
-              placeholder="Note Title"
+              placeholder="제목 없는 노트"
             />
           </div>
           <div className="header-actions">
-            <div className="tab-switcher glass">
-              <button
-                className={view === 'edit' ? 'active' : ''}
-                onClick={() => setView('edit')}
-              ><Eye size={16} /> 편집</button>
-              <button
-                className={view === 'json' ? 'active' : ''}
-                onClick={() => setView('json')}
-              ><Code size={16} /> JSON</button>
+            <div className="tab-switcher glass desktop-only">
+              <button className={view === 'edit' ? 'active' : ''} onClick={() => setView('edit')}>편집</button>
+              <button className={view === 'json' ? 'active' : ''} onClick={() => setView('json')}>JSON</button>
             </div>
+            <button className="icon-btn desktop-only" onClick={() => setIsFullScreen(!isFullScreen)}>
+              <Maximize2 size={18} />
+            </button>
             <button className="save-btn glass-card" onClick={handleSave}>
               <Save size={18} />
-              <span>저장</span>
-            </button>
-            <button className="close-btn" onClick={onClose}>
-              <X size={20} />
+              <span className="desktop-only text-nowrap">저장</span>
             </button>
           </div>
         </header>
 
         <div className="editor-body">
-          <aside className="editor-meta">
+          <aside className="editor-meta desktop-only">
             <div className="meta-item">
               <label>유형</label>
               <select
@@ -82,6 +86,7 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
                   ...editedNote,
                   metadata: { ...editedNote.metadata, type: e.target.value as NoteType }
                 })}
+                className="glass"
               >
                 <option value="general">일반</option>
                 <option value="task">할 일</option>
@@ -92,12 +97,12 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
             </div>
 
             <div className="meta-item">
-              <label>태그</label>
-              <div className="tags-input">
+              <label>태그 (쉼표로 구분)</label>
+              <div className="tags-input-wrapper glass">
                 <Tag size={14} className="text-muted" />
                 <input
                   type="text"
-                  placeholder="태그 추가 (쉼표로 구분)..."
+                  placeholder="태그..."
                   value={editedNote.metadata.tags.join(', ')}
                   onChange={(e) => setEditedNote({
                     ...editedNote,
@@ -112,16 +117,16 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
           </aside>
 
           <main className="editor-content">
-            {view === 'edit' && (
+            {view === 'edit' ? (
               <textarea
                 className="content-textarea"
                 value={editedNote.content}
                 onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
-                placeholder="내용을 입력하세요..."
+                placeholder="생각을 기록하세요..."
+                autoFocus
               />
-            )}
-            {view === 'json' && (
-              <pre className="json-viewer">
+            ) : (
+              <pre className="json-viewer scroll-area">
                 {JSON.stringify(editedNote, null, 2)}
               </pre>
             )}
@@ -130,189 +135,204 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
       </motion.div>
 
       <style jsx>{`
-        .editor-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
-          backdrop-filter: blur(4px);
-          z-index: 100;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 2rem;
-        }
+                .editor-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.4);
+                    backdrop-filter: blur(8px);
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
 
-        .editor-container {
-          width: 100%;
-          max-width: 1000px;
-          height: 100%;
-          max-height: 800px;
-          display: flex;
-          flex-direction: column;
-          border-radius: var(--radius-lg);
-          overflow: hidden;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
+                .editor-container {
+                    max-width: 1200px;
+                    display: flex;
+                    flex-direction: column;
+                    border-radius: var(--radius-lg);
+                    overflow: hidden;
+                    box-shadow: var(--shadow-lg);
+                    transition: width 0.3s ease, height 0.3s ease;
+                }
 
-        .editor-header {
-          padding: 1rem 1.5rem;
-          border-bottom: 1px solid var(--border-glass);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          background: rgba(255, 255, 255, 0.03);
-        }
+                .editor-header {
+                    padding: 0.75rem 1.5rem;
+                    border-bottom: 1px solid var(--border-glass);
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 1rem;
+                    background: rgba(var(--bg-secondary), 0.5);
+                }
 
-        .title-input {
-          background: transparent;
-          border: none;
-          outline: none;
-          font-size: 1.5rem;
-          font-weight: 700;
-          font-family: 'Outfit';
-          color: var(--text-primary);
-          width: 400px;
-        }
+                .header-left-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    flex: 1;
+                }
 
-        .header-actions {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
+                .title-input {
+                    background: transparent;
+                    border: none;
+                    outline: none;
+                    font-size: 1.25rem;
+                    font-weight: 700;
+                    font-family: 'Outfit', sans-serif;
+                    color: var(--text-primary);
+                    width: 100%;
+                }
 
-        .tab-switcher {
-          display: flex;
-          padding: 2px;
-          border-radius: var(--radius-md);
-          background: rgba(0, 0, 0, 0.2);
-        }
+                .header-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                }
 
-        .tab-switcher button {
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
-          padding: 0.4rem 0.8rem;
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: var(--text-secondary);
-          border-radius: var(--radius-sm);
-          transition: all 0.2s;
-        }
+                .tab-switcher {
+                    display: flex;
+                    padding: 0.2rem;
+                    border-radius: var(--radius-md);
+                }
 
-        .tab-switcher button.active {
-          background: rgba(255, 255, 255, 0.1);
-          color: var(--text-primary);
-        }
+                .tab-switcher button {
+                    padding: 0.35rem 0.75rem;
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    border-radius: var(--radius-sm);
+                    color: var(--text-secondary);
+                }
 
-        .save-btn {
-          padding: 0.5rem 1.25rem;
-          background: var(--accent-gradient);
-          color: white;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
+                .tab-switcher button.active {
+                    background: var(--bg-tertiary);
+                    color: var(--text-primary);
+                }
 
-        .close-btn {
-          color: var(--text-muted);
-          transition: color 0.2s;
-        }
+                .save-btn {
+                    padding: 0.6rem 1.25rem;
+                    background: var(--accent-gradient);
+                    color: white;
+                    font-weight: 700;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    border-radius: var(--radius-full);
+                }
 
-        .close-btn:hover {
-          color: var(--text-primary);
-        }
+                .editor-body {
+                    flex: 1;
+                    display: flex;
+                    overflow: hidden;
+                }
 
-        .editor-body {
-          flex: 1;
-          display: flex;
-          overflow: hidden;
-        }
+                .editor-meta {
+                    width: 260px;
+                    border-right: 1px solid var(--border-glass);
+                    padding: 2rem;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2rem;
+                    background: rgba(0, 0, 0, 0.02);
+                }
 
-        .editor-meta {
-          width: 240px;
-          border-right: 1px solid var(--border-glass);
-          padding: 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          background: rgba(0, 0, 0, 0.05);
-        }
+                .meta-item {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                }
 
-        .meta-item {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
+                .meta-item label {
+                    font-size: 0.7rem;
+                    font-weight: 800;
+                    color: var(--text-muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
 
-        .meta-item label {
-          font-size: 0.75rem;
-          font-weight: 700;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-        }
+                .meta-item select, .tags-input-wrapper {
+                    padding: 0.6rem 0.85rem;
+                    border-radius: var(--radius-md);
+                    font-size: 0.9rem;
+                    color: var(--text-primary);
+                }
 
-        .meta-item select, .tags-input input {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid var(--border-glass);
-          border-radius: var(--radius-sm);
-          padding: 0.5rem;
-          color: var(--text-primary);
-          font-size: 0.85rem;
-          outline: none;
-        }
+                .tags-input-wrapper {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
 
-        .tags-input {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid var(--border-glass);
-          border-radius: var(--radius-sm);
-          padding: 0 0.5rem;
-        }
+                .tags-input-wrapper input {
+                    background: transparent;
+                    border: none;
+                    outline: none;
+                    color: inherit;
+                    width: 100%;
+                }
 
-        .tags-input input {
-          border: none;
-          background: transparent;
-          padding: 0.5rem 0;
-          flex: 1;
-        }
+                .editor-content {
+                    flex: 1;
+                    padding: 2rem;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                }
 
-        .editor-content {
-          flex: 1;
-          padding: 1.5rem;
-          overflow: hidden;
-        }
+                .content-textarea {
+                    flex: 1;
+                    background: transparent;
+                    border: none;
+                    outline: none;
+                    resize: none;
+                    color: var(--text-primary);
+                    font-size: 1.15rem;
+                    line-height: 1.8;
+                    font-family: inherit;
+                }
 
-        .content-textarea {
-          width: 100%;
-          height: 100%;
-          background: transparent;
-          border: none;
-          outline: none;
-          resize: none;
-          color: var(--text-primary);
-          font-size: 1.1rem;
-          line-height: 1.6;
-          font-family: inherit;
-        }
+                .json-viewer {
+                    flex: 1;
+                    margin: 0;
+                    padding: 1.5rem;
+                    border-radius: var(--radius-md);
+                    background: var(--bg-tertiary);
+                    color: #10b981;
+                    font-family: 'JetBrains Mono', monospace;
+                    font-size: 0.9rem;
+                    overflow: auto;
+                }
 
-        .json-viewer {
-          height: 100%;
-          overflow: auto;
-          background: rgba(0, 0, 0, 0.3);
-          padding: 1rem;
-          border-radius: var(--radius-md);
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 0.9rem;
-          color: #10b981;
-        }
-      `}</style>
+                .icon-btn {
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: var(--radius-md);
+                    color: var(--text-secondary);
+                }
+
+                .icon-btn:hover {
+                    background: rgba(255, 255, 255, 0.05);
+                    color: var(--text-primary);
+                }
+
+                @media (max-width: 768px) {
+                    .editor-container {
+                        width: 100% !important;
+                        height: 100% !important;
+                        border-radius: 0;
+                    }
+                    .editor-meta { display: none; }
+                    .editor-content { padding: 1.5rem; }
+                }
+
+                .text-nowrap { white-space: nowrap; }
+            `}</style>
     </motion.div>
   );
 }
