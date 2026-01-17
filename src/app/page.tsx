@@ -21,12 +21,14 @@ import {
   Hash,
   Trash2,
   Type,
-  Cloud
+  Cloud,
+  Info
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Note, NoteType, StorageConfig } from '@/types/note';
 import NoteEditor from '@/components/NoteEditor';
 import SettingsModal from '@/components/SettingsModal';
+import GuideView from '@/components/GuideView';
 import { getStorage } from '@/lib/storage';
 
 export default function Home() {
@@ -39,10 +41,11 @@ export default function Home() {
   const [storageConfig, setStorageConfig] = useState<StorageConfig | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // States: Theme & Device View
+  // States: Theme & Device View & Main content tab
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
+  const [activeTab, setActiveTab] = useState<'notes' | 'guide'>('notes');
 
   // Load persistence
   useEffect(() => {
@@ -207,17 +210,49 @@ export default function Home() {
 
             <nav className="sidebar-nav">
               <div className="nav-group">
-                <label>필터링</label>
+                <label>메뉴</label>
                 <button
-                  className={`nav-item ${filterType === 'all' ? 'active' : ''}`}
-                  onClick={() => setFilterType('all')}
+                  className={`nav-item ${activeTab === 'notes' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('notes');
+                    if (viewMode === 'mobile') setIsSidebarOpen(false);
+                  }}
                 >
                   <FileText size={18} />
+                  <span>노트 목록</span>
+                </button>
+                <button
+                  className={`nav-item ${activeTab === 'guide' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('guide');
+                    if (viewMode === 'mobile') setIsSidebarOpen(false);
+                  }}
+                >
+                  <Info size={18} />
+                  <span>소개 및 가이드</span>
+                </button>
+              </div>
+
+              <div className="nav-group">
+                <label>필터링</label>
+                <button
+                  className={`nav-item ${activeTab === 'notes' && filterType === 'all' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('notes');
+                    setFilterType('all');
+                    if (viewMode === 'mobile') setIsSidebarOpen(false);
+                  }}
+                >
+                  <Folder size={18} />
                   <span>모든 노트</span>
                 </button>
                 <button
-                  className={`nav-item ${filterType === 'journal' ? 'active' : ''}`}
-                  onClick={() => setFilterType('journal')}
+                  className={`nav-item ${activeTab === 'notes' && filterType === 'journal' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('notes');
+                    setFilterType('journal');
+                    if (viewMode === 'mobile') setIsSidebarOpen(false);
+                  }}
                 >
                   <Star size={18} />
                   <span>저널</span>
@@ -264,20 +299,22 @@ export default function Home() {
               <div className="breadcrumb desktop-only">
                 <span>내 워크스페이스</span>
                 <ChevronRight size={14} className="text-muted" />
-                <span className="current">모두 보기</span>
+                <span className="current">{activeTab === 'notes' ? '모든 노트' : '사용자 가이드'}</span>
               </div>
             </div>
 
             <div className="header-right">
-              <div className="search-bar glass">
-                <Search size={16} className="text-muted" />
-                <input
-                  type="text"
-                  placeholder="검색..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+              {activeTab === 'notes' && (
+                <div className="search-bar glass">
+                  <Search size={16} className="text-muted" />
+                  <input
+                    type="text"
+                    placeholder="검색..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              )}
               <button
                 className={`sync-btn glass-card ${isSyncing ? 'animate-pulse' : ''}`}
                 onClick={() => handleSync()}
@@ -289,55 +326,61 @@ export default function Home() {
             </div>
           </header>
 
-          <section className={`notes-container ${viewMode === 'mobile' ? 'list-view' : 'grid-view'}`}>
-            <AnimatePresence>
-              {filteredNotes.map((note) => (
-                <motion.div
-                  key={note.metadata.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="note-card glass-card"
-                  onClick={() => {
-                    setSelectedNote(note);
-                    setIsEditorOpen(true);
-                  }}
-                >
-                  <div className="note-card-header">
-                    <div className={`type-tag type-${note.metadata.type}`}>
-                      <Hash size={10} />
-                      {note.metadata.type === 'general' ? '일반' :
-                        note.metadata.type === 'meeting' ? '회의' :
-                          note.metadata.type === 'task' ? '할 일' :
-                            note.metadata.type === 'journal' ? '저널' : '코드'}
-                    </div>
-                    <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
-                      <Trash2 size={14} />
-                    </button>
+          <div className="main-scroll-area">
+            {activeTab === 'notes' ? (
+              <section className={`notes-container ${viewMode === 'mobile' ? 'list-view' : 'grid-view'}`}>
+                <AnimatePresence>
+                  {filteredNotes.map((note) => (
+                    <motion.div
+                      key={note.metadata.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="note-card glass-card"
+                      onClick={() => {
+                        setSelectedNote(note);
+                        setIsEditorOpen(true);
+                      }}
+                    >
+                      <div className="note-card-header">
+                        <div className={`type-tag type-${note.metadata.type}`}>
+                          <Hash size={10} />
+                          {note.metadata.type === 'general' ? '일반' :
+                            note.metadata.type === 'meeting' ? '회의' :
+                              note.metadata.type === 'task' ? '할 일' :
+                                note.metadata.type === 'journal' ? '저널' : '코드'}
+                        </div>
+                        <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                      <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
+                      <p className="note-card-preview">{note.content || '내용이 없습니다.'}</p>
+                      <div className="note-card-footer">
+                        <span className="date">
+                          {format(new Date(note.metadata.updatedAt), 'MM.dd')}
+                        </span>
+                        <div className="tags">
+                          {note.metadata.tags.slice(0, 2).map(tag => (
+                            <span key={tag} className="tag">#{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                {filteredNotes.length === 0 && (
+                  <div className="empty-state">
+                    <Type size={48} className="text-muted" />
+                    <p>노트가 존재하지 않습니다.</p>
                   </div>
-                  <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
-                  <p className="note-card-preview">{note.content || '내용이 없습니다.'}</p>
-                  <div className="note-card-footer">
-                    <span className="date">
-                      {format(new Date(note.metadata.updatedAt), 'MM.dd')}
-                    </span>
-                    <div className="tags">
-                      {note.metadata.tags.slice(0, 2).map(tag => (
-                        <span key={tag} className="tag">#{tag}</span>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            {filteredNotes.length === 0 && (
-              <div className="empty-state">
-                <Type size={48} className="text-muted" />
-                <p>노트가 존재하지 않습니다.</p>
-              </div>
+                )}
+              </section>
+            ) : (
+              <GuideView />
             )}
-          </section>
+          </div>
         </main>
       </div>
 
@@ -476,6 +519,12 @@ export default function Home() {
           overflow: hidden; 
           position: relative; 
           background: var(--bg-primary);
+        }
+
+        .main-scroll-area {
+          flex: 1;
+          overflow-y: auto;
+          width: 100%;
         }
         
         .content-header { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; z-index: 40; border-bottom: 1px solid var(--border-glass); }
