@@ -94,29 +94,54 @@ export class GitHubStorage implements IJsonoteStorage {
             }
         }
 
-        let sha: string | undefined;
-        try {
-            const { data }: any = await this.octokit.rest.repos.getContent({
-                owner: this.config.owner!,
-                repo: this.config.repo!,
-                path: encodedPath,
-                ref: this.config.branch
-            });
-            sha = data.sha;
-        } catch (e) { }
+        // SHA 충돌 시 재시도 로직 (최대 3회)
+        let retries = 0;
+        const maxRetries = 3;
 
-        await this.octokit.rest.repos.createOrUpdateFileContents({
-            owner: this.config.owner!,
-            repo: this.config.repo!,
-            path: encodedPath,
-            message: `Update note: ${note.metadata.title}`,
-            content: Buffer.from(content).toString('base64'),
-            branch: this.config.branch,
-            sha
-        });
+        while (retries < maxRetries) {
+            try {
+                let sha: string | undefined;
+                try {
+                    const { data }: any = await this.octokit.rest.repos.getContent({
+                        owner: this.config.owner!,
+                        repo: this.config.repo!,
+                        path: encodedPath,
+                        ref: this.config.branch
+                    });
+                    sha = data.sha;
+                } catch (e) {
+                    // 파일이 없으면 sha는 undefined (새 파일 생성)
+                }
 
-        // 저장이 성공하면 현재 파일명을 previousFilename으로 업데이트
-        note.metadata.previousFilename = baseName;
+                await this.octokit.rest.repos.createOrUpdateFileContents({
+                    owner: this.config.owner!,
+                    repo: this.config.repo!,
+                    path: encodedPath,
+                    message: `Update note: ${note.metadata.title}`,
+                    content: Buffer.from(content).toString('base64'),
+                    branch: this.config.branch,
+                    sha
+                });
+
+                // 저장이 성공하면 previousFilename 업데이트 후 리턴
+                note.metadata.previousFilename = baseName;
+                return;
+            } catch (error: any) {
+                // SHA 불일치 에러인 경우 재시도
+                if (error.message && error.message.includes('does not match')) {
+                    retries++;
+                    console.warn(`SHA conflict, retrying... (${retries}/${maxRetries})`);
+                    // 잠시 대기 후 재시도
+                    await new Promise(resolve => setTimeout(resolve, 200 * retries));
+                    continue;
+                }
+                // 다른 에러는 바로 throw
+                throw error;
+            }
+        }
+
+        // 최대 재시도 횟수 초과
+        throw new Error('Failed to save note after multiple retries due to SHA conflicts');
     }
 
     async deleteNote(note: Note): Promise<void> {
