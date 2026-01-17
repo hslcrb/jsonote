@@ -364,62 +364,39 @@ export default function Home() {
           width: 100vw;
           overflow: hidden;
           background-color: var(--bg-primary);
-          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: background-color 0.3s ease;
+          position: relative;
         }
 
-        /* Mobile View Simulator (Desktop) */
+        /* Mobile Layout Mode (Full screen but narrow patterns) */
         .mobile-view {
-          background-color: #000; /* External background when in mobile mode */
-          align-items: center;
-          justify-content: center;
+          flex-direction: column;
         }
 
-        .mobile-view .sidebar,
+        .mobile-view .sidebar {
+          position: fixed !important;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 280px !important;
+          max-width: 80%;
+          z-index: 1000;
+          box-shadow: 20px 0 50px rgba(0,0,0,0.4);
+          background: var(--bg-secondary);
+        }
+
         .mobile-view .main-content {
-          border-radius: 0;
-        }
-
-        .mobile-view > .sidebar,
-        .mobile-view > .main-content {
           width: 100%;
           height: 100%;
         }
 
-        /* The narrow frame to simulate a mobile device */
-        @media (min-width: 769px) {
-          .mobile-view {
-            background: radial-gradient(circle at center, #1a1a1f 0%, #000 100%);
-          }
-          .mobile-view::after {
-            content: "";
-            position: absolute;
-            width: 400px;
-            height: 820px;
-            border: 12px solid #222;
-            border-radius: 60px;
-            pointer-events: none;
-            z-index: 2000;
-            box-shadow: 0 0 100px rgba(0,0,0,0.5);
-          }
-          
-          .mobile-view > .sidebar,
-          .mobile-view > .main-content {
-            width: 375px !important;
-            height: 812px !important;
-            border-radius: 48px !important;
-            position: relative;
-            margin: 0 auto;
-            overflow: hidden;
-            background: var(--bg-primary);
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-          }
+        .mobile-view .content-header {
+          padding: 0 1rem;
+          height: 64px;
+        }
 
-          .mobile-view .sidebar {
-            position: absolute !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            z-index: 1500 !important;
-          }
+        .mobile-view .notes-container {
+          padding: 1rem;
         }
 
         .sidebar { 
@@ -428,6 +405,7 @@ export default function Home() {
           border-right: 1px solid var(--border-glass); 
           z-index: 50; 
           background: var(--bg-secondary);
+          flex-shrink: 0;
         }
         
         .sidebar-header { padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
