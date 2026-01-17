@@ -434,7 +434,10 @@ export default function Home() {
           className="sidebar"
         >
           <div className="sidebar-header">
-            <span className="logo-text">JSONOTE</span>
+            <div className="logo-wrapper">
+              <img src="/logo.png" alt="JSONOTE" className="sidebar-logo" />
+              <span className="logo-text">JSONOTE</span>
+            </div>
             <button onClick={() => setIsSidebarOpen(false)} className="icon-btn mobile-only">
               <X size={20} />
             </button>
@@ -872,16 +875,28 @@ export default function Home() {
         }
 
         .sidebar-header {
-          padding: 2.5rem 1.5rem 1.5rem;
+          padding: 2rem 1.5rem 1rem;
           display: flex;
           justify-content: space-between;
           align-items: center;
         }
 
+        .logo-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .sidebar-logo {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
+        }
+
         .logo-text {
-          font-family: 'Outfit';
+          font-family: 'Nanum Gothic', 'Outfit';
           font-weight: 900;
-          font-size: 1.5rem;
+          font-size: 1.25rem;
           letter-spacing: -0.05em;
         }
 

@@ -19,6 +19,7 @@ const GuideView: React.FC<GuideViewProps> = () => {
   return (
     <div className="guide-container">
       <header className="guide-header">
+        <img src="/logo.png" alt="Logo" className="mini-logo" />
         <h1>제이소노트 가이드</h1>
         <p>데이터 주권과 영구적인 기록을 위한 시작</p>
       </header>
@@ -120,6 +121,16 @@ const GuideView: React.FC<GuideViewProps> = () => {
 
         .guide-header {
           margin-bottom: 4rem;
+          position: relative;
+        }
+
+        .mini-logo {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 48px;
+          height: 48px;
+          opacity: 0.5;
         }
 
         .guide-header h1 {
