@@ -22,7 +22,8 @@ import {
   Trash2,
   Type,
   Cloud,
-  Info
+  Info,
+  HardDrive
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Note, NoteType, StorageConfig } from '@/types/note';
@@ -181,7 +182,7 @@ export default function Home() {
 
   return (
     <div className={`layout-container ${viewMode}-view`}>
-      <div className="app-shell">
+      <div className="app-shell shadow-2xl">
         {/* Sidebar */}
         <motion.aside
           initial={false}
@@ -190,7 +191,8 @@ export default function Home() {
             x: isSidebarOpen ? 0 : (viewMode === 'mobile' ? '-100%' : -280),
             opacity: isSidebarOpen ? 1 : 0
           }}
-          className="sidebar glass"
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="sidebar"
         >
           <div className="sidebar-header">
             <div className="logo-container">
@@ -202,24 +204,25 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="sidebar-content">
-            <button className="new-note-btn glass-card" onClick={createNewNote}>
-              <Plus size={18} />
+          <div className="sidebar-content scroll-area">
+            <button className="new-note-btn" onClick={createNewNote}>
+              <Plus size={20} />
               <span>새 노트 작성</span>
             </button>
 
             <nav className="sidebar-nav">
               <div className="nav-group">
-                <label>메뉴</label>
+                <label>Main</label>
                 <button
-                  className={`nav-item ${activeTab === 'notes' ? 'active' : ''}`}
+                  className={`nav-item ${activeTab === 'notes' && filterType === 'all' ? 'active' : ''}`}
                   onClick={() => {
                     setActiveTab('notes');
+                    setFilterType('all');
                     if (viewMode === 'mobile') setIsSidebarOpen(false);
                   }}
                 >
                   <FileText size={18} />
-                  <span>노트 목록</span>
+                  <span>모든 노트</span>
                 </button>
                 <button
                   className={`nav-item ${activeTab === 'guide' ? 'active' : ''}`}
@@ -234,18 +237,7 @@ export default function Home() {
               </div>
 
               <div className="nav-group">
-                <label>필터링</label>
-                <button
-                  className={`nav-item ${activeTab === 'notes' && filterType === 'all' ? 'active' : ''}`}
-                  onClick={() => {
-                    setActiveTab('notes');
-                    setFilterType('all');
-                    if (viewMode === 'mobile') setIsSidebarOpen(false);
-                  }}
-                >
-                  <Folder size={18} />
-                  <span>모든 노트</span>
-                </button>
+                <label>Favorites</label>
                 <button
                   className={`nav-item ${activeTab === 'notes' && filterType === 'journal' ? 'active' : ''}`}
                   onClick={() => {
@@ -260,12 +252,13 @@ export default function Home() {
               </div>
 
               <div className="nav-group">
-                <label>저장소 유형</label>
-                <button className="nav-item">
-                  {storageConfig?.provider === 's3' ? <Cloud size={18} /> : <Github size={18} />}
-                  <span className="truncate">{storageConfig?.provider?.toUpperCase() || '로컬 저장소'}</span>
+                <label>Storage</label>
+                <div className="nav-item-static">
+                  {storageConfig?.provider === 's3' ? <Cloud size={18} /> :
+                    storageConfig?.provider === 'github' ? <Github size={18} /> : <HardDrive size={18} />}
+                  <span className="truncate">{storageConfig?.provider?.toUpperCase() || 'Local'}</span>
                   <span className="badge">{notes.length}</span>
-                </button>
+                </div>
               </div>
             </nav>
           </div>
@@ -275,11 +268,19 @@ export default function Home() {
               <Settings size={18} />
               <span>설정</span>
             </button>
-            <div className="toggle-group glass">
-              <button onClick={toggleTheme} className="icon-btn" title="테마 변경">
+            <div className="toggle-group">
+              <button
+                onClick={toggleTheme}
+                className="icon-btn"
+                title={theme === 'dark' ? '라이트 모드로 변경' : '다크 모드로 변경'}
+              >
                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
               </button>
-              <button onClick={toggleViewMode} className="icon-btn" title="보기 모드 변경">
+              <button
+                onClick={toggleViewMode}
+                className="icon-btn"
+                title={viewMode === 'desktop' ? '모바일 뷰 시뮬레이션' : '데스크탑 뷰'}
+              >
                 {viewMode === 'desktop' ? <Smartphone size={18} /> : <Monitor size={18} />}
               </button>
             </div>
@@ -288,7 +289,7 @@ export default function Home() {
 
         {/* Main Content */}
         <main className="main-content">
-          <header className="content-header glass">
+          <header className="content-header">
             <div className="header-left">
               <button
                 onClick={() => setIsSidebarOpen(true)}
@@ -297,89 +298,115 @@ export default function Home() {
                 <Menu size={20} />
               </button>
               <div className="breadcrumb desktop-only">
-                <span>내 워크스페이스</span>
+                <span className="text-muted">Workspace</span>
                 <ChevronRight size={14} className="text-muted" />
-                <span className="current">{activeTab === 'notes' ? '모든 노트' : '사용자 가이드'}</span>
+                <span className="current">{activeTab === 'notes' ? 'Notes' : 'User Guide'}</span>
               </div>
             </div>
 
-            <div className="header-right">
+            <div className="header-center desktop-only">
               {activeTab === 'notes' && (
-                <div className="search-bar glass">
-                  <Search size={16} className="text-muted" />
+                <div className="search-bar">
+                  <Search size={18} className="text-muted" />
                   <input
                     type="text"
-                    placeholder="검색..."
+                    placeholder="Search notes, tags..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
               )}
+            </div>
+
+            <div className="header-right">
               <button
-                className={`sync-btn glass-card ${isSyncing ? 'animate-pulse' : ''}`}
+                className={`sync-btn ${isSyncing ? 'animate-pulse' : ''}`}
                 onClick={() => handleSync()}
                 disabled={isSyncing}
+                title="데이터 동기화"
               >
                 <Cloud size={18} className={isSyncing ? 'animate-spin' : ''} />
-                <span className="desktop-only text-nowrap">{isSyncing ? '동기화 중...' : '클라우드 동기화'}</span>
+                <span className="desktop-only">{isSyncing ? 'Syncing...' : 'Sync Now'}</span>
               </button>
             </div>
           </header>
 
-          <div className="main-scroll-area">
-            {activeTab === 'notes' ? (
-              <section className={`notes-container ${viewMode === 'mobile' ? 'list-view' : 'grid-view'}`}>
-                <AnimatePresence>
-                  {filteredNotes.map((note) => (
-                    <motion.div
-                      key={note.metadata.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      className="note-card glass-card"
-                      onClick={() => {
-                        setSelectedNote(note);
-                        setIsEditorOpen(true);
-                      }}
-                    >
-                      <div className="note-card-header">
-                        <div className={`type-tag type-${note.metadata.type}`}>
-                          <Hash size={10} />
-                          {note.metadata.type === 'general' ? '일반' :
-                            note.metadata.type === 'meeting' ? '회의' :
-                              note.metadata.type === 'task' ? '할 일' :
-                                note.metadata.type === 'journal' ? '저널' : '코드'}
+          <div className="main-scroll-area scroll-area">
+            <AnimatePresence mode="wait">
+              {activeTab === 'notes' ? (
+                <motion.section
+                  key="notes"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className={`notes-container ${viewMode === 'mobile' ? 'list-view' : 'grid-view'}`}
+                >
+                  <AnimatePresence initial={false}>
+                    {filteredNotes.map((note) => (
+                      <motion.div
+                        key={note.metadata.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="note-card"
+                        onClick={() => {
+                          setSelectedNote(note);
+                          setIsEditorOpen(true);
+                        }}
+                      >
+                        <div className="note-card-header">
+                          <div className={`type-tag type-${note.metadata.type}`}>
+                            <Hash size={10} />
+                            {note.metadata.type === 'general' ? 'General' :
+                              note.metadata.type === 'meeting' ? 'Meeting' :
+                                note.metadata.type === 'task' ? 'To-do' :
+                                  note.metadata.type === 'journal' ? 'Journal' : 'Code'}
+                          </div>
+                          <button className="del-btn-minimal" onClick={(e) => deleteNote(note.metadata.id, e)}>
+                            <Trash2 size={16} />
+                          </button>
                         </div>
-                        <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                      <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
-                      <p className="note-card-preview">{note.content || '내용이 없습니다.'}</p>
-                      <div className="note-card-footer">
-                        <span className="date">
-                          {format(new Date(note.metadata.updatedAt), 'MM.dd')}
-                        </span>
-                        <div className="tags">
-                          {note.metadata.tags.slice(0, 2).map(tag => (
-                            <span key={tag} className="tag">#{tag}</span>
-                          ))}
+                        <h3 className="note-card-title">{note.metadata.title || 'Untitled Note'}</h3>
+                        <p className="note-card-preview">{note.content || 'No content yet...'}</p>
+                        <div className="note-card-footer">
+                          <span className="date">
+                            {format(new Date(note.metadata.updatedAt), 'MMM dd')}
+                          </span>
+                          <div className="tags">
+                            {note.metadata.tags.slice(0, 2).map(tag => (
+                              <span key={tag} className="tag">#{tag}</span>
+                            ))}
+                          </div>
                         </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  {filteredNotes.length === 0 && (
+                    <div className="empty-state">
+                      <div className="empty-icon-box">
+                        <FileText size={48} />
                       </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                {filteredNotes.length === 0 && (
-                  <div className="empty-state">
-                    <Type size={48} className="text-muted" />
-                    <p>노트가 존재하지 않습니다.</p>
-                  </div>
-                )}
-              </section>
-            ) : (
-              <GuideView />
-            )}
+                      <p>No notes found matching your search.</p>
+                      <button className="new-note-btn-minimal" onClick={createNewNote}>
+                        Create your first note
+                      </button>
+                    </div>
+                  )}
+                </motion.section>
+              ) : (
+                <motion.div
+                  key="guide"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <GuideView />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </main>
       </div>
@@ -404,178 +431,490 @@ export default function Home() {
 
       <style jsx>{`
         .layout-container {
-          display: flex;
           height: 100vh;
           width: 100vw;
           overflow: hidden;
           background-color: var(--bg-primary);
-          transition: background-color 0.3s ease;
-        }
-
-        /* Shell for the entire active app */
-        .app-shell {
+          transition: background-color 0.4s ease;
           display: flex;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          position: relative;
-        }
-
-        /* Centered Mobile View Simulation */
-        .mobile-view {
           justify-content: center;
           align-items: center;
-          background-color: #0c0c0e; /* Neutral outer background */
+        }
+
+        /* App Shell - The core container */
+        .app-shell {
+          display: flex;
+          position: relative;
+          overflow: hidden;
+          background: var(--bg-primary);
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Desktop Mode: Full Screen */
+        .desktop-view .app-shell {
+          width: 100%;
+          height: 100%;
+        }
+
+        /* Mobile Simulation Mode: Phone Frame */
+        .mobile-view {
+          background-color: #08080a;
+          background-image: 
+            radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
         }
 
         .mobile-view .app-shell {
-          width: 100%;
-          max-width: 420px;
+          width: 420px;
+          height: 880px;
+          max-height: 90vh;
+          border-radius: 48px;
+          border: 8px solid #1a1a1c;
+          box-shadow: 
+            0 50px 100px -20px rgba(0, 0, 0, 0.7),
+            0 0 0 1px rgba(255, 255, 255, 0.05);
+          margin: auto;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
           height: 100%;
-          max-height: 850px;
-          border-radius: 40px;
-          box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-          border: 1px solid var(--border-glass);
+          display: flex;
+          flex-direction: column;
+          background: var(--bg-secondary);
+          border-right: 1px solid var(--border-glass);
+          z-index: 100;
           overflow: hidden;
-          background: var(--bg-primary);
         }
 
         .mobile-view .sidebar {
-          position: absolute !important;
-          z-index: 1000;
-          height: 100%;
-          background: var(--bg-secondary);
+          position: absolute;
+          left: 0;
+          top: 0;
+          z-index: 200;
+          border-right: none;
+          box-shadow: 20px 0 50px rgba(0,0,0,0.5);
         }
 
-        .mobile-view .main-content {
-          width: 100%;
-          height: 100%;
+        .sidebar-header {
+          padding: 2rem 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
         }
 
-        /* Desktop Layout Mode */
-        .desktop-view .sidebar {
-          width: 280px;
-          border-right: 1px solid var(--border-glass);
-          flex-shrink: 0;
+        .logo-container {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
         }
 
-        .desktop-view .main-content {
-          flex: 1;
-        }
-
-        .sidebar { 
-          display: flex; 
-          flex-direction: column; 
-          background: var(--bg-secondary);
-          z-index: 50; 
-        }
-        
-        .sidebar-header { padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
-        .logo-container { display: flex; align-items: center; gap: 0.75rem; }
-        .logo-icon { width: 32px; height: 32px; background: var(--accent-gradient); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-family: 'Outfit'; }
-        .logo-text { font-size: 1.25rem; font-weight: 700; font-family: 'Outfit'; letter-spacing: -0.02em; }
-        .sidebar-content { flex: 1; padding: 0 1rem; display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; }
-        
-        .new-note-btn { 
-          width: 100%; 
-          padding: 1rem; 
-          display: flex; 
-          align-items: center; 
-          justify-content: center; 
-          gap: 0.5rem; 
-          font-weight: 700; 
-          color: white; 
-          background: var(--accent-gradient); 
-          border-radius: var(--radius-md);
+        .logo-icon {
+          width: 36px;
+          height: 36px;
+          background: var(--accent-gradient);
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 800;
+          font-family: 'Outfit';
           box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
-        
-        .nav-group { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 1.5rem; }
-        .nav-group label { font-size: 0.7rem; font-weight: 800; color: var(--text-muted); padding: 0 0.85rem; margin-bottom: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; }
-        
-        .nav-item { 
-          display: flex; 
-          align-items: center; 
-          gap: 0.75rem; 
-          padding: 0.85rem 1rem; 
-          border-radius: var(--radius-md); 
-          color: var(--text-secondary); 
-          font-size: 0.95rem; 
-          font-weight: 600; 
-          text-align: left; 
+
+        .logo-text {
+          font-size: 1.4rem;
+          font-weight: 800;
+          font-family: 'Outfit';
+          letter-spacing: -0.01em;
+          background: linear-gradient(to bottom, #fff, #94a3b8);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
-        
-        .nav-item:hover, .nav-item.active { color: var(--text-primary); background: rgba(255,255,255,0.05); }
-        .nav-item.active { background: rgba(59, 130, 246, 0.1); color: var(--accent-primary); }
-        
-        .badge { margin-left: auto; font-size: 0.75rem; background: var(--border-glass); padding: 0.15rem 0.6rem; border-radius: var(--radius-full); color: var(--text-muted); }
-        .sidebar-footer { padding: 1.5rem; border-top: 1px solid var(--border-glass); display: flex; flex-direction: column; gap: 1rem; }
-        .toggle-group { display: flex; padding: 0.35rem; border-radius: var(--radius-lg); justify-content: space-around; background: rgba(0,0,0,0.2); }
-        
-        .main-content { 
-          flex: 1; 
-          display: flex; 
-          flex-direction: column; 
-          overflow: hidden; 
-          position: relative; 
+
+        .sidebar-content {
+          flex: 1;
+          padding: 0 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+          overflow-y: auto;
+        }
+
+        .new-note-btn {
+          width: 100%;
+          padding: 1.1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.75rem;
+          font-weight: 700;
+          color: white;
+          background: var(--accent-gradient);
+          border-radius: 14px;
+          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .new-note-btn:hover {
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .nav-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.4rem;
+        }
+
+        .nav-group label {
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: var(--text-muted);
+          padding-left: 1rem;
+          margin-bottom: 0.5rem;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .nav-item {
+          display: flex;
+          align-items: center;
+          gap: 0.85rem;
+          padding: 0.9rem 1.1rem;
+          border-radius: 12px;
+          color: var(--text-secondary);
+          font-weight: 600;
+          font-size: 0.95rem;
+          transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+          background: rgba(255,255,255,0.03);
+          color: var(--text-primary);
+        }
+
+        .nav-item.active {
+          background: rgba(59, 130, 246, 0.1);
+          color: var(--accent-primary);
+          box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+        }
+
+        .badge {
+          margin-left: auto;
+          font-size: 0.75rem;
+          background: rgba(255,255,255,0.05);
+          padding: 0.2rem 0.6rem;
+          border-radius: 20px;
+          color: var(--text-muted);
+        }
+
+        .sidebar-footer {
+          padding: 1.5rem;
+          border-top: 1px solid var(--border-glass);
+          background: rgba(0,0,0,0.1);
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .toggle-group {
+          display: flex;
+          padding: 0.3rem;
+          background: rgba(0,0,0,0.3);
+          border-radius: 12px;
+          gap: 0.3rem;
+        }
+
+        .toggle-group button {
+          flex: 1;
+          height: 36px;
+          border-radius: 9px;
+        }
+
+        /* Main Content Styling */
+        .main-content {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          min-width: 0;
           background: var(--bg-primary);
+          position: relative;
+        }
+
+        .content-header {
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 2rem;
+          border-bottom: 1px solid var(--border-glass);
+          background: rgba(10, 10, 12, 0.8);
+          backdrop-filter: blur(20px);
+          z-index: 50;
+        }
+
+        .header-left, .header-right {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+        }
+
+        .breadcrumb {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+
+        .breadcrumb span {
+          color: var(--text-muted);
+        }
+
+        .breadcrumb span.current {
+          color: var(--text-primary);
+          font-weight: 700;
+        }
+
+        .search-bar {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.7rem 1.25rem;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid var(--border-glass);
+          border-radius: 12px;
+          width: 320px;
+          transition: all 0.3s;
+        }
+
+        .search-bar:focus-within {
+          background: rgba(255,255,255,0.06);
+          border-color: var(--accent-primary);
+          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-bar input {
+          background: transparent;
+          border: none;
+          outline: none;
+          color: var(--text-primary);
+          font-size: 0.9rem;
+          width: 100%;
+        }
+
+        .sync-btn {
+          padding: 0.7rem 1.2rem;
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          font-weight: 700;
+          font-size: 0.9rem;
+          border-radius: 12px;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-glass);
         }
 
         .main-scroll-area {
           flex: 1;
           overflow-y: auto;
+          padding: 2rem;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .mobile-view .main-scroll-area {
+          padding: 1.25rem;
+        }
+
+        .notes-container {
+          display: grid;
+          gap: 1.5rem;
           width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
         }
-        
-        .content-header { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; z-index: 40; border-bottom: 1px solid var(--border-glass); }
-        .header-left, .header-right { display: flex; align-items: center; gap: 1rem; }
-        
-        .search-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1.25rem; border-radius: var(--radius-full); width: clamp(160px, 30vw, 400px); background: rgba(0,0,0,0.1); }
-        .search-bar input { background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 0.95rem; width: 100%; }
-        
-        .sync-btn { 
-          padding: 0.6rem 1.25rem; 
-          display: flex; 
-          align-items: center; 
-          gap: 0.5rem; 
-          font-weight: 700; 
-          font-size: 0.9rem; 
-          color: var(--text-primary); 
-          border-radius: var(--radius-full);
-          background: var(--bg-tertiary);
+
+        .grid-view {
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         }
-        
-        .notes-container { flex: 1; padding: 1.5rem; overflow-y: auto; align-content: start; }
-        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-        .list-view { display: flex; flex-direction: column; gap: 0.85rem; max-width: 600px; margin: 0 auto; width: 100%; }
-        
-        .note-card { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; cursor: pointer; position: relative; border-radius: var(--radius-lg); border: 1px solid var(--border-glass); }
-        .note-card-header { display: flex; justify-content: space-between; align-items: center; }
-        
-        .type-tag { font-size: 0.6rem; text-transform: uppercase; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: var(--radius-sm); letter-spacing: 0.08em; display: flex; align-items: center; gap: 0.3rem; }
+
+        .list-view {
+          grid-template-columns: 1fr;
+          max-width: 800px;
+        }
+
+        /* Note Cards */
+        .note-card {
+          padding: 1.75rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          border-radius: 20px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+          position: relative;
+        }
+
+        .note-card:hover {
+          transform: translateY(-4px);
+          border-color: var(--accent-primary);
+          box-shadow: 0 20px 40px -15px rgba(0,0,0,0.4);
+        }
+
+        .note-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .type-tag {
+          font-size: 0.65rem;
+          font-weight: 800;
+          padding: 0.35rem 0.75rem;
+          border-radius: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+
         .type-general { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-        .type-meeting { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+        .type-meeting { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
         .type-journal { background: rgba(236, 72, 153, 0.1); color: #ec4899; }
-        
-        .del-btn { color: var(--text-muted); opacity: 0; transition: opacity 0.2s; }
-        .note-card:hover .del-btn { opacity: 1; }
-        .del-btn:hover { color: #f43f5e; }
-        
-        .note-card-title { font-size: 1.1rem; color: var(--text-primary); line-height: 1.3; font-weight: 700; }
-        .note-card-preview { font-size: 0.9rem; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6; }
-        .note-card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border-glass); }
-        
-        .date { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-        .tags { display: flex; gap: 0.4rem; }
-        .tag { font-size: 0.7rem; color: var(--accent-primary); font-weight: 700; }
-        
-        .empty-state { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: var(--text-muted); }
-        .icon-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--text-secondary); transition: all 0.2s; }
-        .icon-btn:hover { background: rgba(255,255,255,0.05); color: var(--accent-primary); }
-        
+        .type-task { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+
+        .note-card-title {
+          font-size: 1.2rem;
+          font-family: 'Outfit';
+          font-weight: 700;
+          color: var(--text-primary);
+          line-height: 1.3;
+        }
+
+        .note-card-preview {
+          font-size: 0.95rem;
+          color: var(--text-secondary);
+          line-height: 1.6;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .note-card-footer {
+          margin-top: auto;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding-top: 1.25rem;
+          border-top: 1px solid var(--border-glass);
+        }
+
+        .date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+        .tag { font-size: 0.75rem; color: var(--accent-primary); font-weight: 700; }
+
+        /* Icon Buttons */
+        .icon-btn {
+          width: 44px;
+          height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 12px;
+          color: var(--text-secondary);
+          transition: all 0.2s;
+        }
+
+        .header-center {
+          flex: 1;
+          display: flex;
+          justify-content: center;
+          padding: 0 2rem;
+        }
+
+        .nav-item-static {
+          display: flex;
+          align-items: center;
+          gap: 0.85rem;
+          padding: 0.9rem 1.1rem;
+          color: var(--text-muted);
+          font-weight: 600;
+          font-size: 0.95rem;
+        }
+
+        .del-btn-minimal {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 8px;
+          color: var(--text-muted);
+          transition: all 0.2s;
+        }
+
+        .del-btn-minimal:hover {
+          background: rgba(244, 63, 94, 0.1);
+          color: #f43f5e;
+          transform: scale(1.1);
+        }
+
+        .empty-icon-box {
+          width: 80px;
+          height: 80px;
+          background: var(--bg-tertiary);
+          border-radius: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-muted);
+          margin-bottom: 1rem;
+        }
+
+        .new-note-btn-minimal {
+          margin-top: 1rem;
+          padding: 0.75rem 1.5rem;
+          background: rgba(59, 130, 246, 0.1);
+          color: var(--accent-primary);
+          border-radius: 99px;
+          font-weight: 700;
+          font-size: 0.9rem;
+        }
+
+        .new-note-btn-minimal:hover {
+          background: var(--accent-gradient);
+          color: white;
+          transform: translateY(-2px);
+        }
+
+        /* Custom Scrollbar for premium feel */
+        .scroll-area::-webkit-scrollbar {
+          width: 5px;
+        }
+        .scroll-area::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+        }
+        .scroll-area::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 640px) {
+          .search-bar { width: 100%; }
+        }
+
+        /* Utils */
         .hidden { display: none; }
-        .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+        .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .text-muted { color: var(--text-muted); }
         .text-nowrap { white-space: nowrap; }
+
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }

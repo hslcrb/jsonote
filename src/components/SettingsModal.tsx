@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, Save, Github, Key, Info, ChevronLeft, ShieldCheck,
-  Database, Cloud, Globe, HardDrive, Link as LinkIcon
+  Database, Cloud, Globe, HardDrive, Settings, Link as LinkIcon
 } from 'lucide-react';
 import { StorageConfig, StorageProvider } from '@/types/note';
 
@@ -439,5 +439,3 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
     </motion.div>
   );
 }
-
-import { Settings } from 'lucide-react';
