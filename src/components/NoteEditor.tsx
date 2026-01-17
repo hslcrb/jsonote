@@ -570,7 +570,7 @@ export default function NoteEditor({
           outline: none;
           font-size: 1.5rem;
           font-weight: 900;
-          font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+          font-family: 'Nanum Gothic', sans-serif;
           color: var(--text-primary);
           width: 100%;
           text-transform: uppercase;
