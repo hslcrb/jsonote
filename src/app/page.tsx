@@ -11,6 +11,7 @@ import GuideView from '@/components/GuideView';
 import { getStorage } from '@/lib/storage';
 import Toast, { ToastType } from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import { mcpClientManager } from '@/lib/mcp/client';
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
