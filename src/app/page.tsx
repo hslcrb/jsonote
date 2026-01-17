@@ -136,8 +136,9 @@ export default function Home() {
       : [...notes, updatedNote];
     setNotes(newNotes);
     localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
-    setIsEditorOpen(false);
-    setSelectedNote(null);
+
+    // We update selectedNote to keep the editor in sync with saved state
+    setSelectedNote(updatedNote);
 
     if (storageConfig?.enabled) {
       await handleSync(true);

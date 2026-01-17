@@ -22,6 +22,7 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [availableTools, setAvailableTools] = useState<{ serverId: string, serverName: string, tools: any[] }[]>([]);
   const [isToolLoading, setIsToolLoading] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(true);
 
   // 로드 시 MCP 서버들에서 도구 목록 가져오기
   React.useEffect(() => {
@@ -118,17 +119,17 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
     handleInsertMarkdown(prefix, suffix, defaultText);
   };
 
-  // 실시간 자동 저장 (컴포넌트 내부에 적용)
-  // 내용이나 파일명이 변경되면 1.5초 후 자동으로 onSave 호출
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      // 초기 상태와 다르다면 자동 저장 실행
-      if (JSON.stringify(editedNote) !== JSON.stringify(note)) {
+    const isDifferent = JSON.stringify(editedNote) !== JSON.stringify(note);
+    if (isDifferent) {
+      setIsSaved(false);
+      const timer = setTimeout(() => {
         handleSave();
-      }
-    }, 1500);
-
-    return () => clearTimeout(timer);
+      }, 1500);
+      return () => clearTimeout(timer);
+    } else {
+      setIsSaved(true);
+    }
   }, [editedNote.content, editedNote.metadata.title, editedNote.metadata.customFilename]);
 
   const handleSave = () => {
@@ -140,6 +141,7 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
       }
     };
     onSave(updatedNote);
+    setIsSaved(true);
   };
 
   return (
@@ -151,16 +153,21 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
               <ChevronLeft size={20} />
             </button>
             <div className="title-area">
-              <input
-                type="text"
-                className="title-input"
-                value={editedNote.metadata.title}
-                onChange={(e) => setEditedNote({
-                  ...editedNote,
-                  metadata: { ...editedNote.metadata, title: e.target.value }
-                })}
-                placeholder="제목"
-              />
+              <div className="title-row">
+                <input
+                  type="text"
+                  className="title-input"
+                  value={editedNote.metadata.title}
+                  onChange={(e) => setEditedNote({
+                    ...editedNote,
+                    metadata: { ...editedNote.metadata, title: e.target.value }
+                  })}
+                  placeholder="제목"
+                />
+                <span className={`save-status ${isSaved ? 'saved' : 'saving'}`}>
+                  {isSaved ? '저장됨' : '저장 중...'}
+                </span>
+              </div>
               <div className="filename-wrapper">
                 <span className="label">파일명:</span>
                 <input
@@ -418,6 +425,31 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
           flex: 1;
           display: flex;
           flex-direction: column;
+        }
+
+        .title-row {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .save-status {
+          font-size: 0.65rem;
+          font-weight: 800;
+          padding: 0.2rem 0.5rem;
+          border-radius: 4px;
+          text-transform: uppercase;
+          transition: all 0.3s;
+        }
+
+        .save-status.saved {
+          color: var(--text-muted);
+          background: transparent;
+        }
+
+        .save-status.saving {
+          color: var(--bg-primary);
+          background: #eab308; /* Yellow */
         }
 
         .title-input {
