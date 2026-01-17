@@ -61,7 +61,10 @@ const GuideView: React.FC<GuideViewProps> = () => {
             <div className="steps-list">
               <div className="step-item">
                 <span className="step-label">가입</span>
-                <p>GitHub 계정을 생성하고 <strong>2단계 인증(2FA)</strong>을 활성화하세요.</p>
+                <div className="step-detail">
+                  <p>GitHub 계정을 생성하고 <strong>2단계 인증(2FA)</strong>을 활성화하세요.</p>
+                  <p className="sub-text">* 설정 시 필요한 <strong>소유자(Owner)</strong>명은 본인의 GitHub <strong>사용자 아이디(ID)</strong>입니다.</p>
+                </div>
               </div>
               <div className="step-item">
                 <span className="step-label">저장소</span>
