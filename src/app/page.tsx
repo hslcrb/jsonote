@@ -450,6 +450,7 @@ export default function Home() {
           <NoteEditor
             note={selectedNote}
             onSave={handleSaveNote}
+            onDelete={deleteNote}
             onClose={() => { setIsEditorOpen(false); setSelectedNote(null); }}
           />
         )}

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode } from 'lucide-react';
+import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2 } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -10,10 +10,11 @@ import remarkGfm from 'remark-gfm';
 interface NoteEditorProps {
   note: Note;
   onSave: (note: Note) => void;
+  onDelete: (id: string) => void;
   onClose: () => void;
 }
 
-export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
+export default function NoteEditor({ note, onSave, onDelete, onClose }: NoteEditorProps) {
   const [editedNote, setEditedNote] = useState<Note>({ ...note });
   const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -105,11 +106,16 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
               </button>
             </div>
             <button
-              className="icon-btn desktop-only"
-              onClick={() => setIsFullScreen(!isFullScreen)}
-              aria-label="전체화면"
+              className="icon-btn"
+              onClick={() => {
+                if (confirm('이 노트를 삭제하시겠습니까?')) {
+                  onDelete(note.metadata.id);
+                  onClose();
+                }
+              }}
+              title="삭제"
             >
-              <Maximize2 size={18} />
+              <Trash2 size={18} />
             </button>
             <button className="save-btn" onClick={handleSave}>
               <Save size={18} />
@@ -422,12 +428,12 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
           border: 1px solid var(--border-glass);
         }
 
-        .icon-btn {
-          color: var(--text-muted);
-        }
-
         .icon-btn:hover {
           color: var(--text-primary);
+        }
+
+        .icon-btn[title="삭제"]:hover {
+          color: #ff4444;
         }
 
         @media (max-width: 768px) {
