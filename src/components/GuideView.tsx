@@ -70,10 +70,12 @@ const GuideView: React.FC<GuideViewProps> = () => {
               <div className="step-item">
                 <span className="step-label">토큰</span>
                 <div className="step-detail">
-                  <p>1. Settings - Developer settings - Personal access tokens 메뉴로 이동</p>
-                  <p>2. <strong>Tokens (classic)</strong> 탭을 클릭</p>
-                  <p>3. <strong>Generate new token</strong> 버튼 클릭 후 나타나는 드롭다운 메뉴에서 <strong>Generate new token (classic)</strong>을 반드시 선택하세요.</p>
-                  <p className="sub-text">* Fine-grained tokens가 아닌 <strong>classic</strong> 버전을 발급해야 정상 연동됩니다.</p>
+                  <p>1. <strong>Tokens (classic)</strong> 메뉴에서 <strong>Generate new token (classic)</strong> 클릭</p>
+                  <p>2. <strong>Note</strong>: <code>jsonote</code> 등 자유롭게 입력</p>
+                  <p>3. <strong>Expiration</strong>: <code>No expiration</code> 또는 90일 이상 설정 권장</p>
+                  <p>4. <strong>Select scopes</strong>: 최상단의 <strong>[repo]</strong> 항목을 반드시 체크하세요.</p>
+                  <p className="sub-text">* [repo] 권한이 있어야 노트를 저장하고 불러올 수 있습니다.</p>
+                  <p>5. 최하단의 <strong>Generate token</strong> 버튼 클릭</p>
                 </div>
               </div>
             </div>
