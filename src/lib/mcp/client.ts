@@ -6,10 +6,11 @@ export interface McpServerConfig {
 }
 
 export class McpClientManager {
+    // Communication with MCP servers via Next.js API proxy in the browser 
     // 브라우저에서는 Next.js API 프록시를 통해 MCP 서버와 통신
 
     async connect(config: McpServerConfig): Promise<void> {
-        // 연결 테스트 (도구 목록 가져오기)
+        // Connection test (fetching tool list) / 연결 테스트 (도구 목록 가져오기)
         try {
             await this.listTools(config.url);
         } catch (error) {
@@ -55,7 +56,7 @@ export class McpClientManager {
     }
 
     disconnect(serverId: string) {
-        // 브라우저 기반이므로 별도 연결 해제 불필요
+        // No manual disconnection needed for browser-based fetch / 브라우저 기반이므로 별도 연결 해제 불필요
     }
 }
 

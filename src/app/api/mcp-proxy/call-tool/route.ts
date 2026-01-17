@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // MCP 클라이언트 생성 (서버 사이드)
+        // Create MCP Client (Server-side) / MCP 클라이언트 생성 (서버 사이드)
         const transport = new SSEClientTransport(new URL(serverUrl));
         const client = new Client(
             {
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
             arguments: toolArgs || {},
         });
 
-        // 연결 종료
+        // Close connection / 연결 종료
         await client.close();
 
         return NextResponse.json({ result });

@@ -32,7 +32,7 @@ export default function Home() {
   const [customMcpName, setCustomMcpName] = useState('');
   const [customMcpUrl, setCustomMcpUrl] = useState('');
 
-  // MCP 서버 예시 (로컬에서 실행 시 사용할 URL들)
+  // MCP Server Examples (Local URLs) / MCP 서버 예시 (로컬에서 실행 시 사용할 URL들)
   const POPULAR_MCP_SERVERS = [
     {
       id: 'notion',
@@ -146,7 +146,7 @@ export default function Home() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
-  // 계층 구조 렌더링 함수
+  // Recursive Tree Rendering Function / 계층 구조 렌더링 함수
   const renderNoteTree = (parentId: string | null = null, level: number = 0) => {
     const children = notes.filter(n => (n.metadata.parentId || null) === parentId);
 
@@ -205,7 +205,7 @@ export default function Home() {
     setToast({ message, type });
   };
 
-  // MCP 탭 진입 시 안내 토스트
+  // Guidance toast upon entering MCP tab / MCP 탭 진입 시 안내 토스트
   useEffect(() => {
     if (activeTab === 'mcp') {
       showToast('현재 MCP 기능은 지속적으로 개발 중입니다. (브라우저 환경 최적화 중)', 'info');
@@ -380,7 +380,7 @@ export default function Home() {
 
     if (!silent) setIsSyncing(true);
     try {
-      // 1. 원격 저장소에서 최신 데이터 가져오기 (리모트 삭제 반영을 위함)
+      // 1. Fetch latest data from remote repository / 1. 원격 저장소에서 최신 데이터 가져오기 (리모트 삭제 반영을 위함)
       const remoteNotes = await storage.fetchNotes();
 
       // 2. 로컬 데이터와 병합 및 동기화

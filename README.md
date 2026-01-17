@@ -5,7 +5,8 @@
 
 > **The Ultimate JSON-based Note-taking Application with GitHub Integration & MCP Support.**
 
-JSONOTE is a high-performance, developer-centric note-taking app that treats your notes as first-class JSON data. Synchronize seamlessly with GitHub, manage complex hierarchies like Notion, and leverage AI through MCP (Model Context Protocol).
+⚠️ **Status: Under Active Development**  
+This project is currently in the early stages of development. The first official release has not yet been published. Expect frequent updates and potential breaking changes.
 
 ---
 
@@ -51,9 +52,13 @@ npm run dev
 
 ## 📝 Documentations
 
-- [Getting Started Guide](./docs/GUIDE.md) | [한국어](./docs/GUIDE_ko.md)
-- [MCP Setup Guide](./docs/MCP_SETUP.md) | [한국어](./docs/MCP_SETUP_ko.md)
-- [Security & Privacy](./docs/SECURITY.md) | [한국어](./docs/SECURITY_ko.md)
+Explore more about JSONOTE through our detailed documentation:
+
+- 🎨 **[Logo Design](./public/logo.png)**: The visual identity of JSONOTE.
+- 📘 **[Getting Started Guide](./docs/GUIDE.md)** ([Korean](./docs/GUIDE_ko.md)): Learn the basics.
+- ⚙️ **[MCP Setup Guide](./docs/MCP_SETUP.md)** ([Korean](./docs/MCP_SETUP_ko.md)): Configure AI tools.
+- 🛡️ **[Security & Privacy](./docs/SECURITY.md)** ([Korean](./docs/SECURITY_ko.md)): How we handle your data.
+- 🤝 **[Contributing Guide](./CONTRIBUTING.md)** ([Korean](./CONTRIBUTING_ko.md)): Help us improve JSONOTE.
 
 ---
 

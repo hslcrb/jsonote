@@ -5,7 +5,8 @@
 
 > **GitHub 연동 및 MCP 지원을 갖춘 궁극의 JSON 기반 노트 애플리케이션.**
 
-JSONOTE는 노트를 1급 JSON 데이터로 다루는 개발자 중심의 고성능 노트 앱입니다. GitHub와 매끄럽게 동기화하고, 노션(Notion)처럼 복잡한 계층 구조를 관리하며, MCP(Model Context Protocol)를 통해 AI의 힘을 빌려보세요.
+⚠️ **상태: 활발히 개발 중**  
+이 프로젝트는 현재 초기 개발 단계에 있습니다. 아직 첫 번째 공식 릴리즈가 출시되지 않았습니다. 잦은 업데이트와 호환성 변화가 있을 수 있으니 참고하시기 바랍니다.
 
 ---
 
@@ -51,9 +52,13 @@ npm run dev
 
 ## 📝 문서
 
-- [시작 가이드](./docs/GUIDE.md) | [English](./docs/GUIDE.md)
-- [MCP 설정 가이드](./docs/MCP_SETUP.md) | [English](./docs/MCP_SETUP.md)
-- [보안 및 개인정보](./docs/SECURITY.md) | [English](./docs/SECURITY.md)
+JSONOTE에 대한 더 깊은 내용은 아래 문서들을 확인하세요:
+
+- 🎨 **[로고 디자인](./public/logo.png)**: JSONOTE의 시각적 정체성.
+- 📘 **[시작 가이드](./docs/GUIDE_ko.md)** ([English](./docs/GUIDE.md)): 기본적인 사용법.
+- ⚙️ **[MCP 설정 가이드](./docs/MCP_SETUP_ko.md)** ([English](./docs/MCP_SETUP.md)): AI 도구 설정법.
+- 🛡️ **[보안 및 개인정보](./docs/SECURITY_ko.md)** ([English](./docs/SECURITY.md)): 데이터 처리 방식.
+- 🤝 **[기여 가이드](./CONTRIBUTING_ko.md)** ([English](./CONTRIBUTING.md)): JSONOTE의 성장에 참여하는 법.
 
 ---
 
