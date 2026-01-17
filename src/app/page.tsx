@@ -2,27 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Plus,
-  Search,
-  Github,
-  Settings,
-  FileText,
-  Star,
-  ChevronRight,
-  Menu,
-  X,
-  Moon,
-  Sun,
-  Monitor,
-  Smartphone,
-  Hash,
-  Trash2,
-  Cloud,
-  Info,
-  HardDrive,
-  CheckSquare
-} from 'lucide-react';
+import { FileText, Plus, Settings, Search, Trash2, Menu, Info, Star, Cloud, Github, HardDrive, Sun, Moon, Monitor, Smartphone, LinkIcon, Zap } from 'lucide-react';
 import { format } from 'date-fns';
 import { Note, NoteType, StorageConfig } from '@/types/note';
 import NoteEditor from '@/components/NoteEditor';
@@ -45,7 +25,46 @@ export default function Home() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
-  const [activeTab, setActiveTab] = useState<'notes' | 'guide'>('notes');
+  const [activeTab, setActiveTab] = useState<'notes' | 'guide' | 'mcp'>('notes');
+
+  // 유명한 MCP 서버 프리셋
+  const POPULAR_MCP_SERVERS = [
+    { id: 'filesystem', name: 'FileSystem', url: 'http://localhost:3001/sse', description: '파일 시스템 접근' },
+    { id: 'fetch', name: 'Fetch', url: 'http://localhost:3002/sse', description: 'HTTP 요청' },
+    { id: 'puppeteer', name: 'Puppeteer', url: 'http://localhost:3003/sse', description: '브라우저 제어' },
+    { id: 'sqlite', name: 'SQLite', url: 'http://localhost:3004/sse', description: '데이터베이스' },
+    { id: 'github', name: 'GitHub', url: 'http://localhost:3005/sse', description: 'GitHub API' },
+  ];
+
+  const addMcpServer = (preset: typeof POPULAR_MCP_SERVERS[0]) => {
+    const existing = storageConfig?.mcpServers?.find(s => s.id === preset.id);
+    if (existing) {
+      const updated = {
+        ...storageConfig!,
+        mcpServers: storageConfig!.mcpServers!.map(s =>
+          s.id === preset.id ? { ...s, enabled: true } : s
+        )
+      };
+      handleSaveSettings(updated);
+    } else {
+      const newServer = { ...preset, enabled: true };
+      const updated = {
+        ...storageConfig!,
+        mcpServers: [...(storageConfig?.mcpServers || []), newServer]
+      };
+      handleSaveSettings(updated);
+    }
+  };
+
+  const toggleMcpServer = (id: string) => {
+    const updated = {
+      ...storageConfig!,
+      mcpServers: storageConfig!.mcpServers!.map(s =>
+        s.id === id ? { ...s, enabled: !s.enabled } : s
+      )
+    };
+    handleSaveSettings(updated);
+  };
 
   useEffect(() => {
     const savedNotes = localStorage.getItem('jsonote_notes');
@@ -359,6 +378,13 @@ export default function Home() {
                   <Info size={16} />
                   <span>사용 가이드</span>
                 </button>
+                <button
+                  className={`nav-item ${activeTab === 'mcp' ? 'active' : ''}`}
+                  onClick={() => { setActiveTab('mcp'); if (viewMode === 'mobile') setIsSidebarOpen(false); }}
+                >
+                  <Zap size={16} />
+                  <span>MCP 도구</span>
+                </button>
               </div>
 
               <div className="nav-group">
@@ -496,6 +522,11 @@ export default function Home() {
                             <span className="date">{format(new Date(note.metadata.updatedAt), 'yyyy-MM-dd')}</span>
                           </div>
                         </div>
+                        {selectedIds.length === 0 && (
+                          <button className="del-btn-card" onClick={(e) => deleteNote(note.metadata.id, e)}>
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </motion.div>
                     ))}
                   </AnimatePresence>
@@ -509,7 +540,53 @@ export default function Home() {
                 <motion.div key="guide" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <GuideView />
                 </motion.div>
-              )}
+              ) : activeTab === 'mcp' ? (
+              <motion.div key="mcp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mcp-panel">
+                <div className="mcp-section">
+                  <h2>인기 MCP 도구</h2>
+                  <div className="mcp-presets">
+                    {POPULAR_MCP_SERVERS.map(server => {
+                      const isActive = storageConfig?.mcpServers?.some(s => s.id === server.id && s.enabled);
+                      const isAdded = storageConfig?.mcpServers?.some(s => s.id === server.id);
+                      return (
+                        <div key={server.id} className="mcp-preset-card">
+                          <div className="mcp-preset-header">
+                            <Zap size={20} />
+                            <h3>{server.name}</h3>
+                          </div>
+                          <p>{server.description}</p>
+                          <button
+                            className={`mcp-add-btn ${isActive ? 'active' : ''}`}
+                            onClick={() => isAdded ? toggleMcpServer(server.id) : addMcpServer(server)}
+                          >
+                            {isActive ? '활성화됨' : isAdded ? '비활성화됨' : '추가'}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {storageConfig?.mcpServers && storageConfig.mcpServers.length > 0 && (
+                  <div className="mcp-section">
+                    <h2>내 MCP 도구</h2>
+                    <div className="mcp-list">
+                      {storageConfig.mcpServers.map(server => (
+                        <div key={server.id} className={`mcp-item ${server.enabled ? 'enabled' : ''}`}>
+                          <div className="mcp-info">
+                            <strong>{server.name}</strong>
+                            <small>{server.url}</small>
+                          </div>
+                          <button onClick={() => toggleMcpServer(server.id)}>
+                            {server.enabled ? '비활성화' : '활성화'}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+              ) : null)}
             </AnimatePresence>
           </div>
         </main>
@@ -976,6 +1053,145 @@ export default function Home() {
         .del-btn:hover {
           color: #ff4444;
           background: rgba(255, 68, 68, 0.1);
+        }
+
+        .del-btn-card {
+          width: 60px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-muted);
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+
+        .del-btn-card:hover {
+          color: #ff4444;
+          background: rgba(255, 68, 68, 0.1);
+        }
+
+        /* MCP Panel Styles */
+        .mcp-panel {
+          padding: 2rem;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .mcp-section {
+          margin-bottom: 3rem;
+        }
+
+        .mcp-section h2 {
+          font-size: 1.5rem;
+          margin-bottom: 1.5rem;
+          color: var(--text-primary);
+        }
+
+        .mcp-presets {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 1rem;
+        }
+
+        .mcp-preset-card {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          border-radius: var(--radius-md);
+          padding: 1.5rem;
+          transition: all 0.2s;
+        }
+
+        .mcp-preset-card:hover {
+          border-color: var(--text-primary);
+        }
+
+        .mcp-preset-header {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .mcp-preset-header h3 {
+          font-size: 1.1rem;
+          margin: 0;
+        }
+
+        .mcp-preset-card p {
+          color: var(--text-secondary);
+          font-size: 0.9rem;
+          margin-bottom: 1rem;
+        }
+
+        .mcp-add-btn {
+          width: 100%;
+          padding: 0.75rem;
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-glass);
+          border-radius: var(--radius-sm);
+          font-weight: 700;
+          transition: all 0.2s;
+        }
+
+        .mcp-add-btn:hover {
+          background: var(--text-primary);
+          color: var(--bg-primary);
+        }
+
+        .mcp-add-btn.active {
+          background: #22c55e;
+          color: white;
+          border-color: #22c55e;
+        }
+
+        .mcp-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .mcp-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          border-radius: var(--radius-sm);
+        }
+
+        .mcp-item.enabled {
+          border-color: #22c55e;
+        }
+
+        .mcp-info {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .mcp-info strong {
+          font-size: 1rem;
+        }
+
+        .mcp-info small {
+          font-size: 0.8rem;
+          color: var(--text-muted);
+        }
+
+        .mcp-item button {
+          padding: 0.5rem 1rem;
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-glass);
+          font-weight: 700;
+          transition: all 0.2s;
+        }
+
+        .mcp-item button:hover {
+          background: var(--text-primary);
+          color: var(--bg-primary);
         }
 
         .type-label {
