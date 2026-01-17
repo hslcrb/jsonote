@@ -21,7 +21,7 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
   const [editedNote, setEditedNote] = useState<Note>({ ...note });
   const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [availableTools, setAvailableTools] = useState<{ serverId: string, serverName: string, tools: any[] }[]>([]);
+  const [availableTools, setAvailableTools] = useState<{ serverId: string, serverName: string, serverUrl: string, tools: any[] }[]>([]);
   const [isToolLoading, setIsToolLoading] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success'>('idle');
@@ -33,11 +33,12 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
       for (const server of mcpServers.filter(s => s.enabled)) {
         try {
           await mcpClientManager.connect(server);
-          const response = await mcpClientManager.listTools(server.id);
+          const tools = await mcpClientManager.listTools(server.url);
           toolLists.push({
             serverId: server.id,
             serverName: server.name,
-            tools: (response as any).tools || []
+            serverUrl: server.url,
+            tools: tools || []
           });
         } catch (e) {
           console.error(`Failed to load tools from ${server.name}:`, e);
@@ -51,10 +52,10 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
     }
   }, [JSON.stringify(mcpServers)]);
 
-  const handleCallTool = async (serverId: string, toolName: string) => {
+  const handleCallTool = async (serverUrl: string, toolName: string) => {
     setIsToolLoading(toolName);
     try {
-      const result: any = await mcpClientManager.callTool(serverId, toolName, {
+      const result: any = await mcpClientManager.callTool(serverUrl, toolName, {
         context: editedNote.content,
         title: editedNote.metadata.title
       });
@@ -68,7 +69,7 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
       }
     } catch (e) {
       console.error('Tool call failed:', e);
-      alert('도구 호출에 실패했습니다.');
+      alert(`도구 실행 실패: ${(e as Error).message}`);
     } finally {
       setIsToolLoading(null);
     }
@@ -320,7 +321,7 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
                           key={tool.name}
                           className="tool-btn"
                           disabled={!!isToolLoading}
-                          onClick={() => handleCallTool(group.serverId, tool.name)}
+                          onClick={() => handleCallTool(group.serverUrl, tool.name)}
                         >
                           {isToolLoading === tool.name ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                           <span className="truncate">{tool.name}</span>
