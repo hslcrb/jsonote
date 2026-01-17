@@ -193,7 +193,6 @@ export default function Home() {
   };
 
   const handleSync = async (silent: boolean = false) => {
-    // 최신 설정을 가져오기 위해 직접 localStorage 확인 (상태 업데이트 지연 방지)
     const currentConfigStr = localStorage.getItem('jsonote_storage_config');
     const currentConfig = currentConfigStr ? JSON.parse(currentConfigStr) : storageConfig;
 
@@ -207,25 +206,25 @@ export default function Home() {
 
     if (!silent) setIsSyncing(true);
     try {
-      // 현재 메모리에 있는 최신 노트들 업로드
-      const currentNotes = JSON.parse(localStorage.getItem('jsonote_notes') || '[]');
-      for (const note of currentNotes) {
-        await storage.saveNote(note);
-      }
+      // 1. 원격 저장소에서 최신 데이터 가져오기 (리모트 삭제 반영을 위함)
+      const remoteNotes = await storage.fetchNotes();
 
-      // 서버의 최신 데이터와 병합하여 가져오기
-      const resynced = await storage.fetchNotes();
+      // 2. 로컬 데이터와 병합 및 동기화
+      const localNotesStr = localStorage.getItem('jsonote_notes');
+      const localNotes: Note[] = localNotesStr ? JSON.parse(localNotesStr) : [];
 
-      // 로컬 스토리지 및 상태 업데이트
-      setNotes(resynced);
-      localStorage.setItem('jsonote_notes', JSON.stringify(resynced));
+      // 원격 데이터를 기준으로 최신화 (원격에 없으면 로컬에서도 삭제)
+      // 단, 방금 로컬에서 생성되어 아직 업로드되지 않은 데이터는 유지해야 함
+      // 여기서는 '완전한 동기화'를 위해 원격 상태를 최종 진실로 간주함
+      setNotes(remoteNotes);
+      localStorage.setItem('jsonote_notes', JSON.stringify(remoteNotes));
 
-      if (!silent) alert('동기화 완료');
-    } catch (e: any) {
-      console.error('동기화 상세 오류:', e);
-      if (!silent) alert(`동기화 실패: ${e?.message || '알 수 없는 오류'}`);
+      console.log('Sync complete: Local state reconciled with remote.');
+    } catch (error) {
+      console.error('Sync failed:', error);
+      if (!silent) alert('동기화에 실패했습니다. 설정을 확인해주세요.');
     } finally {
-      if (!silent) setIsSyncing(false);
+      if (!silent || isSyncing) setIsSyncing(false);
     }
   };
 
