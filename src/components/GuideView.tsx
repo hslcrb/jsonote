@@ -78,6 +78,15 @@ const GuideView: React.FC<GuideViewProps> = () => {
                   <p>5. 최하단의 <strong>Generate token</strong> 버튼 클릭</p>
                 </div>
               </div>
+
+              <div className="step-item">
+                <span className="step-label">참고</span>
+                <div className="step-detail">
+                  <p><strong>API URL이 필요한가요?</strong></p>
+                  <p>일반적인 GitHub 사용자(github.com)는 <strong>API URL을 입력할 필요가 없습니다</strong>. 기본값(`https://api.github.com`)이 자동으로 사용됩니다.</p>
+                  <p className="sub-text">* 사내망 GitHub Enterprise나 GitLab, Gitea 등을 사용하는 경우에만 해당 서비스의 API 주소를 입력하세요.</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
