@@ -12,13 +12,30 @@ export interface NoteMetadata {
 
 export interface Note {
     metadata: NoteMetadata;
-    content: string; // Free text area
-    data?: Record<string, any>; // Structured data specific to type
+    content: string;
+    data?: any;
 }
 
-export interface GitHubConfig {
-    token: string;
-    owner: string;
-    repo: string;
-    branch: string;
+// Storage Provider Types
+export type StorageProvider = 'github' | 'gitlab' | 'gitea' | 's3' | 'webdav' | 'local';
+
+export interface StorageConfig {
+    provider: StorageProvider;
+    enabled: boolean;
+    // Common fields
+    url?: string;
+    token?: string;
+    owner?: string;
+    repo?: string;
+    branch?: string;
+    // S3 specific
+    accessKey?: string;
+    secretKey?: string;
+    bucket?: string;
+    region?: string;
+    endpoint?: string;
+    // WebDAV / Custom specific
+    username?: string;
+    password?: string;
+    path?: string;
 }

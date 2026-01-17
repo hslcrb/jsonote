@@ -18,17 +18,16 @@ import {
   Sun,
   Monitor,
   Smartphone,
-  Check,
   Hash,
   Trash2,
-  MoreVertical,
-  Type
+  Type,
+  Cloud
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { Note, NoteType, GitHubConfig } from '@/types/note';
+import { Note, NoteType, StorageConfig } from '@/types/note';
 import NoteEditor from '@/components/NoteEditor';
 import SettingsModal from '@/components/SettingsModal';
-import { GitHubStorage } from '@/lib/github';
+import { getStorage } from '@/lib/storage';
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -37,10 +36,10 @@ export default function Home() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [ghConfig, setGhConfig] = useState<GitHubConfig | null>(null);
+  const [storageConfig, setStorageConfig] = useState<StorageConfig | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // New States: Theme & Device View
+  // States: Theme & Device View
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
@@ -48,12 +47,12 @@ export default function Home() {
   // Load persistence
   useEffect(() => {
     const savedNotes = localStorage.getItem('jsonote_notes');
-    const savedConfig = localStorage.getItem('jsonote_gh_config');
+    const savedConfig = localStorage.getItem('jsonote_storage_config');
     const savedTheme = localStorage.getItem('jsonote_theme') as 'dark' | 'light';
     const savedView = localStorage.getItem('jsonote_view') as 'desktop' | 'mobile';
 
     if (savedNotes) setNotes(JSON.parse(savedNotes));
-    if (savedConfig) setGhConfig(JSON.parse(savedConfig));
+    if (savedConfig) setStorageConfig(JSON.parse(savedConfig));
     if (savedTheme) setTheme(savedTheme);
     if (savedView) setViewMode(savedView);
 
@@ -68,7 +67,7 @@ export default function Home() {
             type: 'general',
             tags: ['비전', 'jsonote'],
           },
-          content: 'GitHub 연동과 JSON 기반의 궁극적인 노트 앱을 구축합니다.',
+          content: 'GitHub, GitLab, S3 등을 지원하는 궁극적인 노트 앱을 구축합니다.',
         }
       ];
       setNotes(mockNotes);
@@ -76,23 +75,22 @@ export default function Home() {
     }
   }, []);
 
-  // Theme effect
+  // Theme & View effects
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('jsonote_theme', theme);
   }, [theme]);
 
-  // View mode effect
   useEffect(() => {
     localStorage.setItem('jsonote_view', viewMode);
   }, [viewMode]);
 
   // Auto-sync
   useEffect(() => {
-    if (!ghConfig || !ghConfig.token) return;
-    const interval = setInterval(() => handleSync(true), 60000);
+    if (!storageConfig || !storageConfig.enabled) return;
+    const interval = setInterval(() => handleSync(true), 120000); // Poll every 2 mins
     return () => clearInterval(interval);
-  }, [ghConfig, notes]);
+  }, [storageConfig, notes]);
 
   const handleSaveNote = (updatedNote: Note) => {
     const newNotes = notes.find(n => n.metadata.id === updatedNote.metadata.id)
@@ -130,23 +128,42 @@ export default function Home() {
   };
 
   const handleSync = async (silent: boolean = false) => {
-    if (!ghConfig || !ghConfig.token) {
+    if (!storageConfig || !storageConfig.enabled) {
       if (!silent) setIsSettingsOpen(true);
       return;
     }
+
+    const storage = getStorage(storageConfig);
+    if (!storage) {
+      if (!silent) alert('지원되지 않는 저장소 방식입니다.');
+      return;
+    }
+
     if (!silent) setIsSyncing(true);
     try {
-      const storage = new GitHubStorage(ghConfig);
-      for (const note of notes) await storage.saveNote(note);
+      // Step 1: Push local updates to remote
+      for (const note of notes) {
+        await storage.saveNote(note);
+      }
+
+      // Step 2: Fetch latest from remote
       const resynced = await storage.fetchNotes();
       setNotes(resynced);
       localStorage.setItem('jsonote_notes', JSON.stringify(resynced));
-      if (!silent) alert('동기화 완료!');
+
+      if (!silent) alert('동기화가 성공적으로 완료되었습니다!');
     } catch (e) {
-      if (!silent) alert('동기화 실패!');
+      console.error('Sync error:', e);
+      if (!silent) alert('동기화 중 오류가 발생했습니다.');
     } finally {
       if (!silent) setIsSyncing(false);
     }
+  };
+
+  const handleSaveSettings = (config: StorageConfig) => {
+    setStorageConfig(config);
+    localStorage.setItem('jsonote_storage_config', JSON.stringify(config));
+    setIsSettingsOpen(false);
   };
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -207,10 +224,10 @@ export default function Home() {
             </div>
 
             <div className="nav-group">
-              <label>저장소</label>
+              <label>저장소 유형</label>
               <button className="nav-item">
-                <Github size={18} />
-                <span className="truncate">{ghConfig?.repo || '연결되지 않음'}</span>
+                {storageConfig?.provider === 's3' ? <Cloud size={18} /> : <Github size={18} />}
+                <span className="truncate">{storageConfig?.provider?.toUpperCase() || '로컬 저장소'}</span>
                 <span className="badge">{notes.length}</span>
               </button>
             </div>
@@ -246,7 +263,7 @@ export default function Home() {
             <div className="breadcrumb desktop-only">
               <span>내 워크스페이스</span>
               <ChevronRight size={14} className="text-muted" />
-              <span className="current">모든 노트</span>
+              <span className="current">모두 보기</span>
             </div>
           </div>
 
@@ -265,8 +282,8 @@ export default function Home() {
               onClick={() => handleSync()}
               disabled={isSyncing}
             >
-              <Github size={18} className={isSyncing ? 'animate-spin' : ''} />
-              <span className="desktop-only text-nowrap">{isSyncing ? '동기화 중...' : '동기화'}</span>
+              <Cloud size={18} className={isSyncing ? 'animate-spin' : ''} />
+              <span className="desktop-only text-nowrap">{isSyncing ? '동기화 중...' : '클라우드 동기화'}</span>
             </button>
           </div>
         </header>
@@ -316,7 +333,7 @@ export default function Home() {
           {filteredNotes.length === 0 && (
             <div className="empty-state">
               <Type size={48} className="text-muted" />
-              <p>노트가 없습니다.</p>
+              <p>노트가 존재하지 않습니다.</p>
             </div>
           )}
         </section>
@@ -325,8 +342,8 @@ export default function Home() {
         <AnimatePresence>
           {isSettingsOpen && (
             <SettingsModal
-              config={ghConfig}
-              onSave={(c) => { setGhConfig(c); localStorage.setItem('jsonote_gh_config', JSON.stringify(c)); setIsSettingsOpen(false); }}
+              config={storageConfig}
+              onSave={handleSaveSettings}
               onClose={() => setIsSettingsOpen(false)}
             />
           )}
@@ -348,322 +365,53 @@ export default function Home() {
           overflow: hidden;
           background-color: var(--bg-primary);
         }
-
-        /* Mobile View Mode Switcher */
-        .mobile-view {
-          flex-direction: column;
-        }
-        
-        .mobile-view .sidebar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          height: 100%;
-          z-index: 100;
-        }
-
-        .sidebar {
-          display: flex;
-          flex-direction: column;
-          border-right: 1px solid var(--border-glass);
-          z-index: 50;
-        }
-
-        .sidebar-header {
-          padding: 1.5rem;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .logo-container {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-
-        .logo-icon {
-          width: 32px;
-          height: 32px;
-          background: var(--accent-gradient);
-          border-radius: var(--radius-sm);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          color: white;
-          font-family: 'Outfit';
-        }
-
-        .logo-text {
-          font-size: 1.25rem;
-          font-weight: 700;
-          font-family: 'Outfit';
-          letter-spacing: -0.02em;
-        }
-
-        .sidebar-content {
-          flex: 1;
-          padding: 0 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          overflow-y: auto;
-        }
-
-        .new-note-btn {
-          width: 100%;
-          padding: 0.85rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          font-weight: 600;
-          color: white;
-          background: var(--accent-gradient);
-          border-radius: var(--radius-md);
-        }
-
-        .nav-group {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .nav-group label {
-          font-size: 0.7rem;
-          font-weight: 700;
-          color: var(--text-muted);
-          padding: 0 0.75rem;
-          margin-bottom: 0.5rem;
-          letter-spacing: 0.05em;
-          text-transform: uppercase;
-        }
-
-        .nav-item {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          padding: 0.75rem;
-          border-radius: var(--radius-md);
-          color: var(--text-secondary);
-          font-size: 0.9rem;
-          font-weight: 500;
-          text-align: left;
-        }
-
-        .nav-item:hover, .nav-item.active {
-          color: var(--text-primary);
-          background: var(--bg-tertiary);
-        }
-
-        .nav-item.active {
-          background: rgba(59, 130, 246, 0.1);
-          color: var(--accent-primary);
-        }
-
-        .badge {
-          margin-left: auto;
-          font-size: 0.75rem;
-          background: var(--border-glass);
-          padding: 0.1rem 0.6rem;
-          border-radius: var(--radius-full);
-          color: var(--text-muted);
-        }
-
-        .sidebar-footer {
-          padding: 1.5rem;
-          border-top: 1px solid var(--border-glass);
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .toggle-group {
-          display: flex;
-          padding: 0.25rem;
-          border-radius: var(--radius-md);
-          justify-content: space-around;
-        }
-
-        .main-content {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-          position: relative;
-        }
-
-        .content-header {
-          height: 72px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 1.5rem;
-          z-index: 40;
-        }
-
-        .header-left, .header-right {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .search-bar {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem 1rem;
-          border-radius: var(--radius-full);
-          width: clamp(150px, 30vw, 400px);
-        }
-
-        .search-bar input {
-          background: transparent;
-          border: none;
-          outline: none;
-          color: var(--text-primary);
-          font-size: 0.9rem;
-          width: 100%;
-        }
-
-        .sync-btn {
-          padding: 0.5rem 1.25rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-weight: 600;
-          font-size: 0.9rem;
-          color: var(--text-primary);
-          border-radius: var(--radius-full);
-        }
-
-        .notes-container {
-          flex: 1;
-          padding: 2rem;
-          overflow-y: auto;
-          align-content: start;
-        }
-
-        .grid-view {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 1.5rem;
-        }
-
-        .list-view {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          max-width: 800px;
-          margin: 0 auto;
-          width: 100%;
-        }
-
-        .note-card {
-          padding: 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-          cursor: pointer;
-          position: relative;
-        }
-
-        .note-card-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .type-tag {
-          font-size: 0.65rem;
-          text-transform: uppercase;
-          font-weight: 800;
-          padding: 0.25rem 0.65rem;
-          border-radius: var(--radius-sm);
-          letter-spacing: 0.05em;
-          display: flex;
-          align-items: center;
-          gap: 0.35rem;
-        }
-
+        .mobile-view { flex-direction: column; }
+        .mobile-view .sidebar { position: fixed; top: 0; left: 0; height: 100%; z-index: 100; }
+        .sidebar { display: flex; flex-direction: column; border-right: 1px solid var(--border-glass); z-index: 50; }
+        .sidebar-header { padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+        .logo-container { display: flex; align-items: center; gap: 0.75rem; }
+        .logo-icon { width: 32px; height: 32px; background: var(--accent-gradient); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-family: 'Outfit'; }
+        .logo-text { font-size: 1.25rem; font-weight: 700; font-family: 'Outfit'; letter-spacing: -0.02em; }
+        .sidebar-content { flex: 1; padding: 0 1rem; display: flex; flex-direction: column; gap: 1.5rem; overflow-y: auto; }
+        .new-note-btn { width: 100%; padding: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-weight: 600; color: white; background: var(--accent-gradient); border-radius: var(--radius-md); }
+        .nav-group { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 1.5rem; }
+        .nav-group label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); padding: 0 0.75rem; margin-bottom: 0.5rem; letter-spacing: 0.05em; text-transform: uppercase; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: var(--radius-md); color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; text-align: left; }
+        .nav-item:hover, .nav-item.active { color: var(--text-primary); background: var(--bg-tertiary); }
+        .nav-item.active { background: rgba(59, 130, 246, 0.1); color: var(--accent-primary); }
+        .badge { margin-left: auto; font-size: 0.75rem; background: var(--border-glass); padding: 0.1rem 0.6rem; border-radius: var(--radius-full); color: var(--text-muted); }
+        .sidebar-footer { padding: 1.5rem; border-top: 1px solid var(--border-glass); display: flex; flex-direction: column; gap: 1rem; }
+        .toggle-group { display: flex; padding: 0.25rem; border-radius: var(--radius-md); justify-content: space-around; }
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .content-header { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; z-index: 40; }
+        .header-left, .header-right { display: flex; align-items: center; gap: 1rem; }
+        .search-bar { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: var(--radius-full); width: clamp(150px, 30vw, 400px); }
+        .search-bar input { background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 0.9rem; width: 100%; }
+        .sync-btn { padding: 0.5rem 1.25rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.9rem; color: var(--text-primary); border-radius: var(--radius-full); }
+        .notes-container { flex: 1; padding: 2rem; overflow-y: auto; align-content: start; }
+        .grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        .list-view { display: flex; flex-direction: column; gap: 1rem; max-width: 800px; margin: 0 auto; width: 100%; }
+        .note-card { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; cursor: pointer; position: relative; }
+        .note-card-header { display: flex; justify-content: space-between; align-items: center; }
+        .type-tag { font-size: 0.65rem; text-transform: uppercase; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: var(--radius-sm); letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.35rem; }
         .type-general { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
         .type-meeting { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
         .type-journal { background: rgba(236, 72, 153, 0.1); color: #ec4899; }
-
-        .del-btn {
-          color: var(--text-muted);
-          opacity: 0;
-          transition: opacity 0.2s;
-        }
-
-        .note-card:hover .del-btn {
-          opacity: 1;
-        }
-
+        .del-btn { color: var(--text-muted); opacity: 0; transition: opacity 0.2s; }
+        .note-card:hover .del-btn { opacity: 1; }
         .del-btn:hover { color: #f43f5e; }
-
-        .note-card-title {
-          font-size: 1.15rem;
-          color: var(--text-primary);
-          line-height: 1.3;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .note-card-preview {
-          font-size: 0.9rem;
-          color: var(--text-secondary);
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-          line-height: 1.6;
-        }
-
-        .note-card-footer {
-          margin-top: auto;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-top: 1rem;
-          border-top: 1px solid var(--border-glass);
-        }
-
+        .note-card-title { font-size: 1.15rem; color: var(--text-primary); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .note-card-preview { font-size: 0.9rem; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6; }
+        .note-card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border-glass); }
         .date { font-size: 0.75rem; color: var(--text-muted); }
         .tags { display: flex; gap: 0.5rem; }
         .tag { font-size: 0.7rem; color: var(--accent-primary); font-weight: 600; }
-
-        .empty-state {
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 1rem;
-          color: var(--text-muted);
-        }
-
-        .icon-btn {
-          width: 36px;
-          height: 36px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: var(--radius-md);
-          color: var(--text-secondary);
-        }
-
-        .icon-btn:hover {
-          background: var(--bg-tertiary);
-          color: var(--text-primary);
-        }
-
+        .empty-state { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: var(--text-muted); }
+        .icon-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-md); color: var(--text-secondary); }
+        .icon-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
         .hidden { display: none; }
         .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
-
+        .text-nowrap { white-space: nowrap; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
