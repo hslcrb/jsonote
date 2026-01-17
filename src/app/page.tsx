@@ -796,11 +796,12 @@ export default function Home() {
         }
 
         .checkbox-container {
-          padding: 0 0 0 1.5rem; /* 왼쪽만 패딩 */
+          padding: 1.5rem; /* 모든 방향 균등 패딩 */
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          align-self: center; /* 세로 중앙 정렬 */
         }
 
         .custom-checkbox {
