@@ -29,14 +29,26 @@ export default function Home() {
   const [customMcpName, setCustomMcpName] = useState('');
   const [customMcpUrl, setCustomMcpUrl] = useState('');
 
-  // 실제 작동하는 MCP 서버 (사용자가 직접 설정 필요)
+  // MCP 서버 예시 (로컬에서 실행 시 사용할 URL들)
   const POPULAR_MCP_SERVERS = [
     {
       id: 'notion',
-      name: 'Notion MCP',
-      url: 'https://mcp.notion.com/mcp',
-      description: 'Notion 워크스페이스 연결 (공식)'
+      name: 'Notion',
+      url: 'http://localhost:3000/notion/sse',
+      description: 'npx @modelcontextprotocol/server-notion 을 통해 로컬에서 실행 후 연결하세요.'
     },
+    {
+      id: 'github',
+      name: 'GitHub',
+      url: 'http://localhost:3000/github/sse',
+      description: 'npx @modelcontextprotocol/server-github 을 통해 로컬에서 실행 후 연결하세요.'
+    },
+    {
+      id: 'google-maps',
+      name: 'Google Maps',
+      url: 'http://localhost:3000/google-maps/sse',
+      description: '장소 검색 및 지도 데이터 연동'
+    }
   ];
 
   const addCustomMcpServer = () => {
@@ -604,10 +616,22 @@ export default function Home() {
                         추가
                       </button>
                     </div>
-                    <p className="mcp-hint">
-                      팁: MCP 서버는 로컬에서 실행 중이어야 합니다.
-                      공식 MCP 서버는 <a href="https://github.com/modelcontextprotocol/servers" target="_blank">GitHub</a>에서 확인하세요.
-                    </p>
+                    <div className="mcp-setup-guide">
+                      <h3>💡 MCP 서버를 어떻게 실행하나요?</h3>
+                      <p>
+                        대부분의 MCP 서버(Notion, GitHub 등)는 기본적으로 <code>StdIO</code> 방식으로 작동합니다.
+                        웹 앱인 JSONOTE에서 사용하려면 이를 <code>SSE</code>(HTTP) 방식으로 호스팅해야 합니다.
+                      </p>
+                      <div className="command-box">
+                        <code>npx @modelcontextprotocol/inspector &lt;command&gt;</code>
+                      </div>
+                      <p className="mcp-hint">
+                        <strong>Notion 예시:</strong><br />
+                        1. Notion API 토큰을 발급받습니다.<br />
+                        2. 터미널에서 실행: <code>NOTION_API_KEY=xxx npx @modelcontextprotocol/server-notion</code><br />
+                        3. SSE 브리지(프록시)를 통해 URL을 얻은 후 위 '커스텀 MCP'에 등록하세요.
+                      </p>
+                    </div>
                   </div>
                   {storageConfig?.mcpServers && storageConfig.mcpServers.length > 0 && (
                     <div className="mcp-section">
@@ -619,9 +643,24 @@ export default function Home() {
                               <strong>{server.name}</strong>
                               <small>{server.url}</small>
                             </div>
-                            <button onClick={() => toggleMcpServer(server.id)}>
-                              {server.enabled ? '비활성화' : '활성화'}
-                            </button>
+                            <div className="mcp-actions">
+                              <button
+                                className="mcp-test-btn"
+                                onClick={async () => {
+                                  try {
+                                    const tools = await mcpClientManager.listTools(server.url);
+                                    showToast(`${server.name}: 연결 성공! (${tools.length}개의 도구 발견)`, 'success');
+                                  } catch (e) {
+                                    showToast(`${server.name}: 연결 실패 - ${(e as Error).message}`, 'error');
+                                  }
+                                }}
+                              >
+                                테스트
+                              </button>
+                              <button onClick={() => toggleMcpServer(server.id)}>
+                                {server.enabled ? '비활성화' : '활성화'}
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1222,18 +1261,34 @@ export default function Home() {
           color: var(--text-muted);
         }
 
+        .mcp-actions {
+          display: flex;
+          gap: 0.5rem;
+        }
+
         .mcp-item button {
           padding: 0.5rem 1rem;
           background: var(--bg-tertiary);
           color: var(--text-primary);
           border: 1px solid var(--border-glass);
+          border-radius: var(--radius-sm);
           font-weight: 700;
           transition: all 0.2s;
+          font-size: 0.85rem;
         }
 
         .mcp-item button:hover {
           background: var(--text-primary);
           color: var(--bg-primary);
+        }
+
+        .mcp-test-btn {
+          background: transparent !important;
+          color: var(--text-muted) !important;
+        }
+
+        .mcp-test-btn:hover {
+          color: var(--text-primary) !important;
         }
 
         .mcp-custom-form {
@@ -1280,6 +1335,46 @@ export default function Home() {
         .mcp-hint a {
           color: var(--text-primary);
           text-decoration: underline;
+        }
+
+        .mcp-setup-guide {
+          margin-top: 2rem;
+          padding: 1.5rem;
+          background: rgba(var(--accent-rgb), 0.05);
+          border-radius: var(--radius-md);
+          border: 1px dashed var(--border-glass);
+        }
+
+        .mcp-setup-guide h3 {
+          font-size: 1rem;
+          margin-bottom: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .mcp-setup-guide p {
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+          margin-bottom: 1rem;
+          line-height: 1.6;
+        }
+
+        .command-box {
+          background: #000;
+          color: #0f0;
+          padding: 1rem;
+          border-radius: var(--radius-sm);
+          font-family: 'Fira Code', monospace;
+          font-size: 0.85rem;
+          margin-bottom: 1rem;
+          overflow-x: auto;
+        }
+
+        .command-box code {
+          background: transparent;
+          color: inherit;
+          padding: 0;
         }
 
         .type-label {
