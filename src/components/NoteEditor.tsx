@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1, CheckCircle } from 'lucide-react';
+import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1, CheckCircle, ExternalLink } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
 import { mcpClientManager } from '@/lib/mcp/client';
 import ReactMarkdown from 'react-markdown';
@@ -14,9 +14,10 @@ interface NoteEditorProps {
   onDelete: (id: string) => void;
   onClose: () => void;
   mcpServers?: { id: string, name: string, url: string, enabled: boolean }[];
+  storageConfig?: { provider: string; owner?: string; repo?: string; branch?: string };
 }
 
-export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers = [] }: NoteEditorProps) {
+export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers = [], storageConfig }: NoteEditorProps) {
   const [editedNote, setEditedNote] = useState<Note>({ ...note });
   const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -136,6 +137,7 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
     }
   }, [editedNote.content, editedNote.metadata.title, editedNote.metadata.customFilename]);
 
+
   const handleSave = async (isManual: boolean = false) => {
     if (isManual) setSaveStatus('saving');
 
@@ -148,19 +150,15 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
     };
 
     try {
-      // GitHub API로 직접 저장 (await 완료 = GitHub에 저장 완료)
+      // GitHub API로 직접 저장
       await onSave(updatedNote);
       setIsSaved(true);
 
       if (isManual) {
-        // 저장 성공 후 약간의 시각적 지연을 주고 성공 표시
+        // 저장 성공 - GitHub 확인 링크 표시
         await new Promise(resolve => setTimeout(resolve, 300));
         setSaveStatus('success');
-
-        // 1초 후 편집기 닫기
-        setTimeout(() => {
-          onClose();
-        }, 1000);
+        // 자동으로 닫지 않음 - 사용자가 GitHub 링크를 클릭하거나 직접 닫을 때까지 유지
       }
     } catch (error) {
       console.error('Save failed:', error);
@@ -169,6 +167,14 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
         alert('저장에 실패했습니다. 네트워크 또는 GitHub 설정을 확인해주세요.');
       }
     }
+  };
+
+  const openGitHub = () => {
+    if (!storageConfig?.owner || !storageConfig?.repo) return;
+    const filename = editedNote.metadata.customFilename || editedNote.metadata.id;
+    const branch = storageConfig.branch || 'main';
+    const url = `https://github.com/${storageConfig.owner}/${storageConfig.repo}/blob/${branch}/notes/${encodeURIComponent(filename)}.json`;
+    window.open(url, '_blank');
   };
 
   return (
@@ -254,15 +260,15 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
             </button>
             <button
               className={`save-btn ${saveStatus}`}
-              onClick={() => handleSave(true)}
-              disabled={saveStatus !== 'idle'}
+              onClick={saveStatus === 'success' ? openGitHub : () => handleSave(true)}
+              disabled={saveStatus === 'saving'}
             >
               {saveStatus === 'saving' ? <Loader2 size={18} className="animate-spin" /> :
-                saveStatus === 'success' ? <CheckCircle size={18} /> :
+                saveStatus === 'success' ? <ExternalLink size={18} /> :
                   <Save size={18} />}
               <span className="desktop-only">
                 {saveStatus === 'saving' ? '저장 중' :
-                  saveStatus === 'success' ? '저장 완료' : '저장'}
+                  saveStatus === 'success' ? 'GitHub에서 확인' : '저장'}
               </span>
             </button>
           </div>
