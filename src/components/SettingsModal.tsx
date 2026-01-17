@@ -6,107 +6,107 @@ import { X, Save, Github, Key, Info } from 'lucide-react';
 import { GitHubConfig } from '@/types/note';
 
 interface SettingsModalProps {
-    config: GitHubConfig | null;
-    onSave: (config: GitHubConfig) => void;
-    onClose: () => void;
+  config: GitHubConfig | null;
+  onSave: (config: GitHubConfig) => void;
+  onClose: () => void;
 }
 
 export default function SettingsModal({ config, onSave, onClose }: SettingsModalProps) {
-    const [editedConfig, setEditedConfig] = useState<GitHubConfig>(config || {
-        token: '',
-        owner: '',
-        repo: '',
-        branch: 'main'
-    });
+  const [editedConfig, setEditedConfig] = useState<GitHubConfig>(config || {
+    token: '',
+    owner: '',
+    repo: '',
+    branch: 'main'
+  });
 
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="modal-overlay"
-        >
-            <motion.div
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                className="modal-container glass"
-            >
-                <header className="modal-header">
-                    <div className="title-section">
-                        <Github size={20} className="text-accent" />
-                        <h3>GitHub Connection</h3>
-                    </div>
-                    <button className="close-btn" onClick={onClose}>
-                        <X size={20} />
-                    </button>
-                </header>
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="modal-overlay"
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        className="modal-container glass"
+      >
+        <header className="modal-header">
+          <div className="title-section">
+            <Github size={20} className="text-accent" />
+            <h3>GitHub 연결 설정</h3>
+          </div>
+          <button className="close-btn" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </header>
 
-                <div className="modal-body">
-                    <p className="description">
-                        Connect your GitHub repository to enable remote storage, versioning, and cross-device sync.
-                    </p>
+        <div className="modal-body">
+          <p className="description">
+            GitHub 리포지토리를 연결하여 원격 저장소, 버전 관리 및 기기 간 동기화를 활성화합니다.
+          </p>
 
-                    <div className="input-group">
-                        <label><Key size={14} /> Personal Access Token</label>
-                        <input
-                            type="password"
-                            placeholder="ghp_xxxxxxxxxxxx"
-                            value={editedConfig.token}
-                            onChange={(e) => setEditedConfig({ ...editedConfig, token: e.target.value })}
-                        />
-                        <span className="hint">Requires 'repo' scope.</span>
-                    </div>
+          <div className="input-group">
+            <label><Key size={14} /> 개인 액세스 토큰 (PAT)</label>
+            <input
+              type="password"
+              placeholder="ghp_xxxxxxxxxxxx"
+              value={editedConfig.token}
+              onChange={(e) => setEditedConfig({ ...editedConfig, token: e.target.value })}
+            />
+            <span className="hint">'repo' 권한이 필요합니다.</span>
+          </div>
 
-                    <div className="row">
-                        <div className="input-group">
-                            <label>Owner (Username)</label>
-                            <input
-                                type="text"
-                                placeholder="e.g. jdoe"
-                                value={editedConfig.owner}
-                                onChange={(e) => setEditedConfig({ ...editedConfig, owner: e.target.value })}
-                            />
-                        </div>
-                        <div className="input-group">
-                            <label>Repository Name</label>
-                            <input
-                                type="text"
-                                placeholder="e.g. my-notes"
-                                value={editedConfig.repo}
-                                onChange={(e) => setEditedConfig({ ...editedConfig, repo: e.target.value })}
-                            />
-                        </div>
-                    </div>
+          <div className="row">
+            <div className="input-group">
+              <label>소유자 (사용자명)</label>
+              <input
+                type="text"
+                placeholder="예: jdoe"
+                value={editedConfig.owner}
+                onChange={(e) => setEditedConfig({ ...editedConfig, owner: e.target.value })}
+              />
+            </div>
+            <div className="input-group">
+              <label>리포지토리 명</label>
+              <input
+                type="text"
+                placeholder="예: my-notes"
+                value={editedConfig.repo}
+                onChange={(e) => setEditedConfig({ ...editedConfig, repo: e.target.value })}
+              />
+            </div>
+          </div>
 
-                    <div className="input-group">
-                        <label>Branch</label>
-                        <input
-                            type="text"
-                            placeholder="main"
-                            value={editedConfig.branch}
-                            onChange={(e) => setEditedConfig({ ...editedConfig, branch: e.target.value })}
-                        />
-                    </div>
+          <div className="input-group">
+            <label>브랜치</label>
+            <input
+              type="text"
+              placeholder="main"
+              value={editedConfig.branch}
+              onChange={(e) => setEditedConfig({ ...editedConfig, branch: e.target.value })}
+            />
+          </div>
 
-                    <div className="info-box glass">
-                        <Info size={16} />
-                        <p>Your token is stored locally in your browser and used only to communicate with GitHub API.</p>
-                    </div>
-                </div>
+          <div className="info-box glass">
+            <Info size={16} />
+            <p>토큰은 브라우저에 로컬로 안전하게 저장되며 GitHub API 통신에만 사용됩니다.</p>
+          </div>
+        </div>
 
-                <footer className="modal-footer">
-                    <button className="cancel-btn" onClick={onClose}>Cancel</button>
-                    <button
-                        className="save-btn glass-card"
-                        onClick={() => onSave(editedConfig)}
-                    >
-                        <Save size={18} />
-                        <span>Save Configuration</span>
-                    </button>
-                </footer>
-            </motion.div>
+        <footer className="modal-footer">
+          <button className="cancel-btn" onClick={onClose}>취소</button>
+          <button
+            className="save-btn glass-card"
+            onClick={() => onSave(editedConfig)}
+          >
+            <Save size={18} />
+            <span>설정 저장</span>
+          </button>
+        </footer>
+      </motion.div>
 
-            <style jsx>{`
+      <style jsx>{`
         .modal-overlay {
           position: fixed;
           top: 0;
@@ -260,6 +260,6 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           color: var(--text-primary);
         }
       `}</style>
-        </motion.div>
-    );
+    </motion.div>
+  );
 }

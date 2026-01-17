@@ -43,13 +43,13 @@ export default function Home() {
         {
           metadata: {
             id: '1',
-            title: 'Project jsonote Vision',
+            title: 'jsonote 프로젝트 비전',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             type: 'general',
-            tags: ['vision', 'jsonote'],
+            tags: ['비전', 'jsonote'],
           },
-          content: 'Building the ultimate JSON-based note taking app with GitHub integration.',
+          content: 'GitHub 연동과 JSON 기반의 궁극적인 노트 앱을 구축합니다.',
         }
       ];
       setNotes(mockNotes);
@@ -60,6 +60,18 @@ export default function Home() {
       setGhConfig(JSON.parse(savedConfig));
     }
   }, []);
+
+  // Auto-sync effect: Poll GitHub every 60 seconds if configured
+  useEffect(() => {
+    if (!ghConfig || !ghConfig.token) return;
+
+    const interval = setInterval(() => {
+      console.log('Background Sync Initialized...');
+      handleSync(true); // silent sync
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [ghConfig, notes]);
 
   const handleSaveNote = (updatedNote: Note) => {
     let newNotes;
@@ -79,7 +91,7 @@ export default function Home() {
     const newNote: Note = {
       metadata: {
         id: Math.random().toString(36).substr(2, 9),
-        title: 'Untitled Note',
+        title: '제목 없는 노트',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         type: 'general',
@@ -91,20 +103,21 @@ export default function Home() {
     setIsEditorOpen(true);
   };
 
-  const handleSync = async () => {
+  const handleSync = async (silent: boolean = false) => {
     if (!ghConfig || !ghConfig.token || !ghConfig.owner || !ghConfig.repo) {
-      setIsSettingsOpen(true);
+      if (!silent) setIsSettingsOpen(true);
       return;
     }
 
-    setIsSyncing(true);
+    if (!silent) setIsSyncing(true);
     try {
       const storage = new GitHubStorage(ghConfig);
 
-      // Pull latest
       const remoteNotes = await storage.fetchNotes();
 
-      // Merge logic: for now, push local and then pull remote
+      // Basic merge: push local notes to remote
+      // To prevent бесконечные (endless) push/pull, we'd need more logic, 
+      // but for this version, we ensure remote has all local edits.
       for (const note of notes) {
         await storage.saveNote(note);
       }
@@ -112,12 +125,12 @@ export default function Home() {
       const finalNotes = await storage.fetchNotes();
       setNotes(finalNotes);
       localStorage.setItem('jsonote_notes', JSON.stringify(finalNotes));
-      alert('Sync completed successfully!');
+      if (!silent) alert('동기화가 성공적으로 완료되었습니다!');
     } catch (error) {
       console.error('Sync failed:', error);
-      alert('Sync failed. Please check your GitHub configuration and permissions.');
+      if (!silent) alert('동기화 실패: GitHub 설정과 권한을 확인해주세요.');
     } finally {
-      setIsSyncing(false);
+      if (!silent) setIsSyncing(false);
     }
   };
 
@@ -151,31 +164,31 @@ export default function Home() {
         <div className="sidebar-content">
           <button className="new-note-btn glass-card" onClick={createNewNote}>
             <Plus size={18} />
-            <span>New Note</span>
+            <span>새 노트</span>
           </button>
 
           <nav className="sidebar-nav">
             <div className="nav-group">
-              <label>VIEWS</label>
+              <label>보기</label>
               <button className="nav-item active">
                 <FileText size={18} />
-                <span>All Notes</span>
+                <span>모든 노트</span>
               </button>
               <button className="nav-item">
                 <Clock size={18} />
-                <span>Recent</span>
+                <span>최근 항목</span>
               </button>
               <button className="nav-item">
                 <Star size={18} />
-                <span>Favorites</span>
+                <span>즐겨찾기</span>
               </button>
             </div>
 
             <div className="nav-group">
-              <label>REPOSITORIES</label>
+              <label>리포지토리</label>
               <button className="nav-item">
                 <Github size={18} />
-                <span>{ghConfig?.repo || 'No repository'}</span>
+                <span>{ghConfig?.repo || '연결 안 됨'}</span>
                 <span className="badge">{notes.length}</span>
               </button>
             </div>
@@ -185,7 +198,7 @@ export default function Home() {
         <div className="sidebar-footer">
           <button className="nav-item" onClick={() => setIsSettingsOpen(true)}>
             <Settings size={18} />
-            <span>Settings</span>
+            <span>설정</span>
           </button>
         </div>
       </motion.aside>
@@ -201,9 +214,9 @@ export default function Home() {
               <Menu size={20} />
             </button>
             <div className="breadcrumb">
-              <span>My Workspace</span>
+              <span>내 워크스페이스</span>
               <ChevronRight size={14} className="text-muted" />
-              <span className="current">All Notes</span>
+              <span className="current">모든 노트</span>
             </div>
           </div>
 
@@ -212,18 +225,18 @@ export default function Home() {
               <Search size={16} className="text-muted" />
               <input
                 type="text"
-                placeholder="Search notes..."
+                placeholder="노트 검색..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <button
               className={`sync-btn glass-card ${isSyncing ? 'animate-pulse' : ''}`}
-              onClick={handleSync}
+              onClick={() => handleSync()}
               disabled={isSyncing}
             >
               <Github size={18} className={isSyncing ? 'animate-spin' : ''} />
-              <span>{isSyncing ? 'Syncing...' : 'Sync'}</span>
+              <span>{isSyncing ? '동기화 중...' : '동기화'}</span>
             </button>
           </div>
         </header>
@@ -244,10 +257,13 @@ export default function Home() {
               >
                 <div className="note-card-header">
                   <div className={`type-tag type-${note.metadata.type}`}>
-                    {note.metadata.type}
+                    {note.metadata.type === 'general' ? '일반' :
+                      note.metadata.type === 'meeting' ? '회의' :
+                        note.metadata.type === 'task' ? '할 일' :
+                          note.metadata.type === 'journal' ? '저널' : '코드'}
                   </div>
                   <span className="date">
-                    {format(new Date(note.metadata.updatedAt), 'MMM d, yyyy')}
+                    {format(new Date(note.metadata.updatedAt), 'yyyy년 MM월 dd일')}
                   </span>
                 </div>
                 <h3 className="note-card-title">{note.metadata.title}</h3>

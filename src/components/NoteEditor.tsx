@@ -6,130 +6,130 @@ import { X, Save, Eye, Code, Tag, Trash2 } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
 
 interface NoteEditorProps {
-    note: Note;
-    onSave: (note: Note) => void;
-    onClose: () => void;
+  note: Note;
+  onSave: (note: Note) => void;
+  onClose: () => void;
 }
 
 export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
-    const [editedNote, setEditedNote] = useState<Note>({ ...note });
-    const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
+  const [editedNote, setEditedNote] = useState<Note>({ ...note });
+  const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
 
-    const handleSave = () => {
-        const updatedNote = {
-            ...editedNote,
-            metadata: {
-                ...editedNote.metadata,
-                updatedAt: new Date().toISOString()
-            }
-        };
-        onSave(updatedNote);
+  const handleSave = () => {
+    const updatedNote = {
+      ...editedNote,
+      metadata: {
+        ...editedNote.metadata,
+        updatedAt: new Date().toISOString()
+      }
     };
+    onSave(updatedNote);
+  };
 
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="editor-overlay"
-        >
-            <motion.div
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                className="editor-container glass"
-            >
-                <header className="editor-header">
-                    <div className="title-section">
-                        <input
-                            type="text"
-                            className="title-input"
-                            value={editedNote.metadata.title}
-                            onChange={(e) => setEditedNote({
-                                ...editedNote,
-                                metadata: { ...editedNote.metadata, title: e.target.value }
-                            })}
-                            placeholder="Note Title"
-                        />
-                    </div>
-                    <div className="header-actions">
-                        <div className="tab-switcher glass">
-                            <button
-                                className={view === 'edit' ? 'active' : ''}
-                                onClick={() => setView('edit')}
-                            ><Eye size={16} /> Edit</button>
-                            <button
-                                className={view === 'json' ? 'active' : ''}
-                                onClick={() => setView('json')}
-                            ><Code size={16} /> JSON</button>
-                        </div>
-                        <button className="save-btn glass-card" onClick={handleSave}>
-                            <Save size={18} />
-                            <span>Save</span>
-                        </button>
-                        <button className="close-btn" onClick={onClose}>
-                            <X size={20} />
-                        </button>
-                    </div>
-                </header>
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="editor-overlay"
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        className="editor-container glass"
+      >
+        <header className="editor-header">
+          <div className="title-section">
+            <input
+              type="text"
+              className="title-input"
+              value={editedNote.metadata.title}
+              onChange={(e) => setEditedNote({
+                ...editedNote,
+                metadata: { ...editedNote.metadata, title: e.target.value }
+              })}
+              placeholder="Note Title"
+            />
+          </div>
+          <div className="header-actions">
+            <div className="tab-switcher glass">
+              <button
+                className={view === 'edit' ? 'active' : ''}
+                onClick={() => setView('edit')}
+              ><Eye size={16} /> 편집</button>
+              <button
+                className={view === 'json' ? 'active' : ''}
+                onClick={() => setView('json')}
+              ><Code size={16} /> JSON</button>
+            </div>
+            <button className="save-btn glass-card" onClick={handleSave}>
+              <Save size={18} />
+              <span>저장</span>
+            </button>
+            <button className="close-btn" onClick={onClose}>
+              <X size={20} />
+            </button>
+          </div>
+        </header>
 
-                <div className="editor-body">
-                    <aside className="editor-meta">
-                        <div className="meta-item">
-                            <label>Type</label>
-                            <select
-                                value={editedNote.metadata.type}
-                                onChange={(e) => setEditedNote({
-                                    ...editedNote,
-                                    metadata: { ...editedNote.metadata, type: e.target.value as NoteType }
-                                })}
-                            >
-                                <option value="general">General</option>
-                                <option value="task">Task</option>
-                                <option value="meeting">Meeting</option>
-                                <option value="journal">Journal</option>
-                                <option value="code">Code</option>
-                            </select>
-                        </div>
+        <div className="editor-body">
+          <aside className="editor-meta">
+            <div className="meta-item">
+              <label>유형</label>
+              <select
+                value={editedNote.metadata.type}
+                onChange={(e) => setEditedNote({
+                  ...editedNote,
+                  metadata: { ...editedNote.metadata, type: e.target.value as NoteType }
+                })}
+              >
+                <option value="general">일반</option>
+                <option value="task">할 일</option>
+                <option value="meeting">회의</option>
+                <option value="journal">저널</option>
+                <option value="code">코드</option>
+              </select>
+            </div>
 
-                        <div className="meta-item">
-                            <label>Tags</label>
-                            <div className="tags-input">
-                                <Tag size={14} className="text-muted" />
-                                <input
-                                    type="text"
-                                    placeholder="Add tags..."
-                                    value={editedNote.metadata.tags.join(', ')}
-                                    onChange={(e) => setEditedNote({
-                                        ...editedNote,
-                                        metadata: {
-                                            ...editedNote.metadata,
-                                            tags: e.target.value.split(',').map(t => t.trim()).filter(t => t)
-                                        }
-                                    })}
-                                />
-                            </div>
-                        </div>
-                    </aside>
+            <div className="meta-item">
+              <label>태그</label>
+              <div className="tags-input">
+                <Tag size={14} className="text-muted" />
+                <input
+                  type="text"
+                  placeholder="태그 추가 (쉼표로 구분)..."
+                  value={editedNote.metadata.tags.join(', ')}
+                  onChange={(e) => setEditedNote({
+                    ...editedNote,
+                    metadata: {
+                      ...editedNote.metadata,
+                      tags: e.target.value.split(',').map(t => t.trim()).filter(t => t)
+                    }
+                  })}
+                />
+              </div>
+            </div>
+          </aside>
 
-                    <main className="editor-content">
-                        {view === 'edit' && (
-                            <textarea
-                                className="content-textarea"
-                                value={editedNote.content}
-                                onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
-                                placeholder="Start typing..."
-                            />
-                        )}
-                        {view === 'json' && (
-                            <pre className="json-viewer">
-                                {JSON.stringify(editedNote, null, 2)}
-                            </pre>
-                        )}
-                    </main>
-                </div>
-            </motion.div>
+          <main className="editor-content">
+            {view === 'edit' && (
+              <textarea
+                className="content-textarea"
+                value={editedNote.content}
+                onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
+                placeholder="내용을 입력하세요..."
+              />
+            )}
+            {view === 'json' && (
+              <pre className="json-viewer">
+                {JSON.stringify(editedNote, null, 2)}
+              </pre>
+            )}
+          </main>
+        </div>
+      </motion.div>
 
-            <style jsx>{`
+      <style jsx>{`
         .editor-overlay {
           position: fixed;
           top: 0;
@@ -313,6 +313,6 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
           color: #10b981;
         }
       `}</style>
-        </motion.div>
-    );
+    </motion.div>
+  );
 }
