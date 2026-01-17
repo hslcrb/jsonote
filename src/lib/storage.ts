@@ -4,6 +4,7 @@ import { Note, StorageConfig } from '@/types/note';
 export interface IJsonoteStorage {
     fetchNotes(): Promise<Note[]>;
     saveNote(note: Note): Promise<void>;
+    deleteNote(note: Note): Promise<void>;
 }
 
 export class GitHubStorage implements IJsonoteStorage {
@@ -117,6 +118,32 @@ export class GitHubStorage implements IJsonoteStorage {
         // 저장이 성공하면 현재 파일명을 previousFilename으로 업데이트
         note.metadata.previousFilename = baseName;
     }
+
+    async deleteNote(note: Note): Promise<void> {
+        const baseName = note.metadata.customFilename || note.metadata.id;
+        const encodedPath = `notes/${encodeURIComponent(baseName)}.json`;
+
+        try {
+            const { data }: any = await this.octokit.rest.repos.getContent({
+                owner: this.config.owner!,
+                repo: this.config.repo!,
+                path: encodedPath,
+                ref: this.config.branch
+            });
+
+            await this.octokit.rest.repos.deleteFile({
+                owner: this.config.owner!,
+                repo: this.config.repo!,
+                path: encodedPath,
+                message: `Delete note: ${note.metadata.title}`,
+                sha: data.sha,
+                branch: this.config.branch
+            });
+        } catch (e: any) {
+            console.error('GitHub delete failed:', e);
+            throw e;
+        }
+    }
 }
 
 // Placeholder for GitLab (using fetch matches similar pattern)
@@ -129,6 +156,9 @@ export class GitLabStorage implements IJsonoteStorage {
     async saveNote(note: Note): Promise<void> {
         console.warn('GitLab Storage not fully implemented yet');
     }
+    async deleteNote(note: Note): Promise<void> {
+        console.warn('GitLab Storage not fully implemented yet');
+    }
 }
 
 // Placeholder for S3 / Cloud Storage
@@ -139,6 +169,9 @@ export class S3Storage implements IJsonoteStorage {
         return [];
     }
     async saveNote(note: Note): Promise<void> {
+        console.warn('S3 Storage not fully implemented yet');
+    }
+    async deleteNote(note: Note): Promise<void> {
         console.warn('S3 Storage not fully implemented yet');
     }
 }

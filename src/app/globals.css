@@ -20,10 +20,10 @@
   --shadow-md: 0 4px 6px -1px rgba(255, 255, 255, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(255, 255, 255, 0.1);
 
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-full: 0px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
 
   --transition-fast: 0.15s ease;
   --transition-slow: 0.3s ease;

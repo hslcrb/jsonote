@@ -83,18 +83,17 @@ export default function Home() {
     localStorage.setItem('jsonote_view', viewMode);
   }, [viewMode]);
 
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+
   useEffect(() => {
     if (!storageConfig || !storageConfig.enabled) return;
-
-    // 즉시 동기화 실행
     handleSync(true);
-
-    // 1분마다 자동 동기화
     const interval = setInterval(() => handleSync(true), 60000);
     return () => clearInterval(interval);
   }, [storageConfig]);
 
-  const handleSaveNote = (updatedNote: Note) => {
+  const handleSaveNote = async (updatedNote: Note) => {
     const newNotes = notes.find(n => n.metadata.id === updatedNote.metadata.id)
       ? notes.map(n => n.metadata.id === updatedNote.metadata.id ? updatedNote : n)
       : [...notes, updatedNote];
@@ -103,24 +102,69 @@ export default function Home() {
     setIsEditorOpen(false);
     setSelectedNote(null);
 
-    // 저장 즉시 동기화 시도
     if (storageConfig?.enabled) {
-      setTimeout(() => handleSync(true), 500);
+      await handleSync(true);
     }
   };
 
-  const deleteNote = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const deleteNote = async (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const noteToDelete = notes.find(n => n.metadata.id === id);
+    if (!noteToDelete) return;
+
     if (confirm('이 노트를 삭제하시겠습니까?')) {
       const newNotes = notes.filter(n => n.metadata.id !== id);
       setNotes(newNotes);
       localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
 
-      // 삭제 즉시 동기화 시도
       if (storageConfig?.enabled) {
-        setTimeout(() => handleSync(true), 500);
+        const storage = getStorage(storageConfig);
+        if (storage) {
+          setIsSyncing(true);
+          try {
+            await storage.deleteNote(noteToDelete);
+          } catch (e) {
+            console.error('Delete failed:', e);
+          } finally {
+            setIsSyncing(false);
+          }
+        }
       }
     }
+  };
+
+  const deleteSelectedNotes = async () => {
+    if (selectedIds.length === 0) return;
+    if (confirm(`${selectedIds.length}개의 노트를 삭제하시겠습니까?`)) {
+      setIsSyncing(true);
+      try {
+        const storage = storageConfig?.enabled ? getStorage(storageConfig) : null;
+
+        if (storage) {
+          for (const id of selectedIds) {
+            const noteToDelete = notes.find(n => n.metadata.id === id);
+            if (noteToDelete) await storage.deleteNote(noteToDelete);
+          }
+        }
+
+        const remainingNotes = notes.filter(n => !selectedIds.includes(n.metadata.id));
+        setNotes(remainingNotes);
+        localStorage.setItem('jsonote_notes', JSON.stringify(remainingNotes));
+        setSelectedIds([]);
+        setIsSelectionMode(false);
+      } catch (e) {
+        console.error('Bulk delete failed:', e);
+      } finally {
+        setIsSyncing(false);
+      }
+    }
+  };
+
+  const toggleSelection = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
   };
 
   const createNewNote = () => {
@@ -302,10 +346,21 @@ export default function Home() {
             </div>
 
             <div className="header-right">
+              {isSelectionMode ? (
+                <div className="selection-actions">
+                  <span className="selection-count">{selectedIds.length}개 선택됨</span>
+                  <button className="text-btn danger" onClick={deleteSelectedNotes}>삭제</button>
+                  <button className="text-btn" onClick={() => { setIsSelectionMode(false); setSelectedIds([]); }}>취소</button>
+                </div>
+              ) : (
+                <button className="icon-btn-minimal" onClick={() => setIsSelectionMode(true)} title="선택 삭제">
+                  <CheckSquare size={18} />
+                </button>
+              )}
               {isSyncing && (
                 <div className="sync-indicator">
                   <Cloud size={14} className="animate-spin" />
-                  <span className="desktop-only">저장 중...</span>
+                  <span className="desktop-only">동기화 중...</span>
                 </div>
               )}
             </div>
@@ -328,14 +383,18 @@ export default function Home() {
                         layout
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="note-card"
-                        onClick={() => { setSelectedNote(note); setIsEditorOpen(true); }}
+                        className={`note-card ${selectedIds.includes(note.metadata.id) ? 'selected' : ''}`}
+                        onClick={() => isSelectionMode ? toggleSelection(note.metadata.id, {} as any) : (setSelectedNote(note), setIsEditorOpen(true))}
                       >
                         <div className="note-card-header">
                           <span className="type-label">{note.metadata.type.toUpperCase()}</span>
-                          <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
-                            <Trash2 size={14} />
-                          </button>
+                          {isSelectionMode ? (
+                            <div className={`checkbox ${selectedIds.includes(note.metadata.id) ? 'checked' : ''}`} />
+                          ) : (
+                            <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
+                              <Trash2 size={14} />
+                            </button>
+                          )}
                         </div>
                         <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
                         <p className="note-card-preview">{note.content || '내용 없음'}</p>
@@ -577,6 +636,49 @@ export default function Home() {
           width: 100%;
           font-size: 0.9rem;
           font-weight: 500;
+        }
+
+        .selection-actions {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-right: 1rem;
+        }
+
+        .selection-count {
+          font-size: 0.75rem;
+          font-weight: 800;
+          color: var(--text-muted);
+        }
+
+        .text-btn {
+          font-size: 0.75rem;
+          font-weight: 900;
+          padding: 0.3rem 0.6rem;
+          border-radius: var(--radius-sm);
+        }
+
+        .text-btn.danger {
+          background: #ff4444;
+          color: white;
+        }
+
+        .checkbox {
+          width: 18px;
+          height: 18px;
+          border: 2px solid var(--border-glass);
+          border-radius: var(--radius-sm);
+          transition: all 0.2s;
+        }
+
+        .checkbox.checked {
+          background: var(--text-primary);
+          border-color: var(--text-primary);
+        }
+
+        .note-card.selected {
+          border-color: var(--text-primary);
+          background: var(--bg-tertiary);
         }
 
         .sync-indicator {
