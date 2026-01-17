@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Plus, Settings, Search, Trash2, Menu, Info, Star, Cloud, Github, HardDrive, Sun, Moon, Monitor, Smartphone, LinkIcon, Zap } from 'lucide-react';
+import { FileText, Plus, Settings, Search, Trash2, Menu, Info, Star, Cloud, Github, HardDrive, Sun, Moon, Monitor, Smartphone, LinkIcon, Zap, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { Note, NoteType, StorageConfig } from '@/types/note';
 import NoteEditor from '@/components/NoteEditor';
@@ -536,57 +536,57 @@ export default function Home() {
                     </div>
                   )}
                 </motion.section>
-              ) : (
+              ) : activeTab === 'guide' ? (
                 <motion.div key="guide" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <GuideView />
                 </motion.div>
               ) : activeTab === 'mcp' ? (
-              <motion.div key="mcp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mcp-panel">
-                <div className="mcp-section">
-                  <h2>인기 MCP 도구</h2>
-                  <div className="mcp-presets">
-                    {POPULAR_MCP_SERVERS.map(server => {
-                      const isActive = storageConfig?.mcpServers?.some(s => s.id === server.id && s.enabled);
-                      const isAdded = storageConfig?.mcpServers?.some(s => s.id === server.id);
-                      return (
-                        <div key={server.id} className="mcp-preset-card">
-                          <div className="mcp-preset-header">
-                            <Zap size={20} />
-                            <h3>{server.name}</h3>
-                          </div>
-                          <p>{server.description}</p>
-                          <button
-                            className={`mcp-add-btn ${isActive ? 'active' : ''}`}
-                            onClick={() => isAdded ? toggleMcpServer(server.id) : addMcpServer(server)}
-                          >
-                            {isActive ? '활성화됨' : isAdded ? '비활성화됨' : '추가'}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {storageConfig?.mcpServers && storageConfig.mcpServers.length > 0 && (
+                <motion.div key="mcp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mcp-panel">
                   <div className="mcp-section">
-                    <h2>내 MCP 도구</h2>
-                    <div className="mcp-list">
-                      {storageConfig.mcpServers.map(server => (
-                        <div key={server.id} className={`mcp-item ${server.enabled ? 'enabled' : ''}`}>
-                          <div className="mcp-info">
-                            <strong>{server.name}</strong>
-                            <small>{server.url}</small>
+                    <h2>인기 MCP 도구</h2>
+                    <div className="mcp-presets">
+                      {POPULAR_MCP_SERVERS.map(server => {
+                        const isActive = storageConfig?.mcpServers?.some(s => s.id === server.id && s.enabled);
+                        const isAdded = storageConfig?.mcpServers?.some(s => s.id === server.id);
+                        return (
+                          <div key={server.id} className="mcp-preset-card">
+                            <div className="mcp-preset-header">
+                              <Zap size={20} />
+                              <h3>{server.name}</h3>
+                            </div>
+                            <p>{server.description}</p>
+                            <button
+                              className={`mcp-add-btn ${isActive ? 'active' : ''}`}
+                              onClick={() => isAdded ? toggleMcpServer(server.id) : addMcpServer(server)}
+                            >
+                              {isActive ? '활성화됨' : isAdded ? '비활성화됨' : '추가'}
+                            </button>
                           </div>
-                          <button onClick={() => toggleMcpServer(server.id)}>
-                            {server.enabled ? '비활성화' : '활성화'}
-                          </button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
-                )}
-              </motion.div>
-              ) : null)}
+
+                  {storageConfig?.mcpServers && storageConfig.mcpServers.length > 0 && (
+                    <div className="mcp-section">
+                      <h2>내 MCP 도구</h2>
+                      <div className="mcp-list">
+                        {storageConfig.mcpServers.map(server => (
+                          <div key={server.id} className={`mcp-item ${server.enabled ? 'enabled' : ''}`}>
+                            <div className="mcp-info">
+                              <strong>{server.name}</strong>
+                              <small>{server.url}</small>
+                            </div>
+                            <button onClick={() => toggleMcpServer(server.id)}>
+                              {server.enabled ? '비활성화' : '활성화'}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              ) : null}
             </AnimatePresence>
           </div>
         </main>
