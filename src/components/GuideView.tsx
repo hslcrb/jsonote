@@ -93,6 +93,22 @@ const GuideView: React.FC<GuideViewProps> = () => {
             </div>
           </div>
         </section>
+        <section className="guide-section">
+          <div className="section-body">
+            <h2>05. 마이그레이션 (서비스 이전)</h2>
+            <div className="steps-list">
+              <div className="step-item">
+                <span className="step-label">이전 방법</span>
+                <div className="step-detail">
+                  <p>1. <strong>기존 서비스</strong>(예: GitLab)에서 동기화를 완료하여 모든 노트를 앱에 불러옵니다.</p>
+                  <p>2. [설정]에서 <strong>새 서비스</strong>(예: GitHub)의 정보를 입력하고 저장합니다.</p>
+                  <p>3. 상단의 <strong>클라우드 아이콘(동기화 중...)</strong>이 나타나며 로컬의 노트들이 새 저장소로 자동 복제됩니다.</p>
+                  <p className="sub-text">* 제이소노트는 로컬 스토리지를 브리지로 사용하여 서비스 간 데이터 이중화 및 이전을 매우 쉽게 지원합니다.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
       <style jsx>{`

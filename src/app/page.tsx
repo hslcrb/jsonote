@@ -20,7 +20,8 @@ import {
   Trash2,
   Cloud,
   Info,
-  HardDrive
+  HardDrive,
+  CheckSquare
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Note, NoteType, StorageConfig } from '@/types/note';

@@ -147,6 +147,14 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                 </div>
               )}
 
+              <div className="migration-banner">
+                <LinkIcon size={14} />
+                <div>
+                  <p><strong>마이그레이션 안내</strong></p>
+                  <p>서비스 간 이동(예: GitLab ➔ GitHub) 시, 기존 설정을 유지한 채 동기화를 완료한 뒤 정보를 변경하세요. 로컬의 모든 노트가 새 저장소로 자동 복제됩니다.</p>
+                </div>
+              </div>
+
               <div className="security-info">
                 <ShieldCheck size={16} />
                 <p>모든 정보는 브라우저 로컬 스토리지에만 보관됩니다.</p>
@@ -270,6 +278,25 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           border: 1px solid var(--border-glass);
           color: var(--text-primary);
           outline: none;
+        }
+
+        .migration-banner {
+          margin-top: 3rem;
+          padding: 1.5rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          display: flex;
+          gap: 1rem;
+          align-items: flex-start;
+          color: var(--text-secondary);
+          font-size: 0.85rem;
+          line-height: 1.5;
+        }
+
+        .migration-banner strong {
+          color: var(--text-primary);
+          display: block;
+          margin-bottom: 0.25rem;
         }
 
         .security-info {
