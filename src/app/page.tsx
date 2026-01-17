@@ -510,6 +510,7 @@ export default function Home() {
             onSave={handleSaveNote}
             onDelete={deleteNote}
             onClose={() => { setIsEditorOpen(false); setSelectedNote(null); }}
+            mcpServers={storageConfig?.mcpServers}
           />
         )}
       </AnimatePresence>

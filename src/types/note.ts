@@ -40,4 +40,11 @@ export interface StorageConfig {
     username?: string;
     password?: string;
     path?: string;
+    // MCP Configuration
+    mcpServers?: {
+        id: string;
+        name: string;
+        url: string;
+        enabled: boolean;
+    }[];
 }

@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2 } from 'lucide-react';
+import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2 } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
+import { mcpClientManager } from '@/lib/mcp/client';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -12,12 +13,60 @@ interface NoteEditorProps {
   onSave: (note: Note) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
+  mcpServers?: { id: string, name: string, url: string, enabled: boolean }[];
 }
 
-export default function NoteEditor({ note, onSave, onDelete, onClose }: NoteEditorProps) {
+export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers = [] }: NoteEditorProps) {
   const [editedNote, setEditedNote] = useState<Note>({ ...note });
   const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [availableTools, setAvailableTools] = useState<{ serverId: string, serverName: string, tools: any[] }[]>([]);
+  const [isToolLoading, setIsToolLoading] = useState<string | null>(null);
+
+  // 로드 시 MCP 서버들에서 도구 목록 가져오기
+  React.useEffect(() => {
+    const fetchAllTools = async () => {
+      const toolLists = [];
+      for (const server of mcpServers.filter(s => s.enabled)) {
+        try {
+          await mcpClientManager.connect(server);
+          const response = await mcpClientManager.listTools(server.id);
+          toolLists.push({
+            serverId: server.id,
+            serverName: server.name,
+            tools: (response as any).tools || []
+          });
+        } catch (e) {
+          console.error(`Failed to load tools from ${server.name}:`, e);
+        }
+      }
+      setAvailableTools(toolLists);
+    };
+    fetchAllTools();
+  }, [mcpServers]);
+
+  const handleCallTool = async (serverId: string, toolName: string) => {
+    setIsToolLoading(toolName);
+    try {
+      const result: any = await mcpClientManager.callTool(serverId, toolName, {
+        context: editedNote.content,
+        title: editedNote.metadata.title
+      });
+
+      const textResult = result.content?.map((c: any) => c.text).join('\n') || '';
+      if (textResult) {
+        setEditedNote(prev => ({
+          ...prev,
+          content: `${prev.content}\n\n--- AI 응답 (${toolName}) ---\n${textResult}`
+        }));
+      }
+    } catch (e) {
+      console.error('Tool call failed:', e);
+      alert('도구 호출에 실패했습니다.');
+    } finally {
+      setIsToolLoading(null);
+    }
+  };
 
   // 실시간 자동 저장 (컴포넌트 내부에 적용)
   // 내용이나 파일명이 변경되면 1.5초 후 자동으로 onSave 호출
@@ -161,6 +210,31 @@ export default function NoteEditor({ note, onSave, onDelete, onClose }: NoteEdit
                     }
                   })}
                 />
+              </div>
+            </div>
+            <div className="meta-item">
+              <label>AI 어시스턴트 (MCP)</label>
+              <div className="mcp-tools-list">
+                {availableTools.length > 0 ? (
+                  availableTools.map(group => (
+                    <div key={group.serverId} className="tool-group">
+                      <div className="tool-group-name">{group.serverName}</div>
+                      {group.tools.map((tool: any) => (
+                        <button
+                          key={tool.name}
+                          className="tool-btn"
+                          disabled={!!isToolLoading}
+                          onClick={() => handleCallTool(group.serverId, tool.name)}
+                        >
+                          {isToolLoading === tool.name ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                          <span className="truncate">{tool.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ))
+                ) : (
+                  <p className="empty-tools">연결된 MCP 도구가 없습니다.</p>
+                )}
               </div>
             </div>
           </aside>
@@ -428,6 +502,55 @@ export default function NoteEditor({ note, onSave, onDelete, onClose }: NoteEdit
           font-size: 0.9rem;
           overflow: auto;
           border: 1px solid var(--border-glass);
+        }
+
+        .mcp-tools-list {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .tool-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .tool-group-name {
+          font-size: 0.6rem;
+          font-weight: 900;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          margin-bottom: 0.25rem;
+        }
+
+        .tool-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          color: var(--text-secondary);
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-align: left;
+        }
+
+        .tool-btn:hover:not(:disabled) {
+          color: var(--text-primary);
+          border-color: var(--text-primary);
+        }
+
+        .tool-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .empty-tools {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          font-style: italic;
         }
 
         .icon-btn:hover {
