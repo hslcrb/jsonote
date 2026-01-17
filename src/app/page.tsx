@@ -11,6 +11,7 @@ import GuideView from '@/components/GuideView';
 import { getStorage } from '@/lib/storage';
 import Toast, { ToastType } from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import PromptDialog from '@/components/PromptDialog';
 import { mcpClientManager } from '@/lib/mcp/client';
 
 export default function Home() {
@@ -56,7 +57,7 @@ export default function Home() {
 
   const addCustomMcpServer = () => {
     if (!customMcpName || !customMcpUrl) {
-      alert('이름과 URL을 모두 입력해주세요.');
+      showToast('이름과 URL을 모두 입력해주세요.', 'error');
       return;
     }
     const newServer = {
@@ -224,6 +225,35 @@ export default function Home() {
         closeConfirm();
       },
       isDanger
+    });
+  };
+
+  const [promptState, setPromptState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    defaultValue: string;
+    onConfirm: (value: string) => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    defaultValue: '',
+    onConfirm: () => { }
+  });
+
+  const closePrompt = () => setPromptState(prev => ({ ...prev, isOpen: false }));
+
+  const showPrompt = (title: string, message: string, defaultValue: string, onConfirm: (value: string) => void) => {
+    setPromptState({
+      isOpen: true,
+      title,
+      message,
+      defaultValue,
+      onConfirm: (value: string) => {
+        onConfirm(value);
+        closePrompt();
+      }
     });
   };
 
@@ -802,6 +832,9 @@ export default function Home() {
             mcpServers={storageConfig?.mcpServers}
             storageConfig={storageConfig || undefined}
             allNotes={notes}
+            showToast={showToast}
+            showConfirm={showConfirm}
+            showPrompt={showPrompt}
           />
         )}
       </AnimatePresence>
@@ -823,6 +856,15 @@ export default function Home() {
         onConfirm={confirmState.onConfirm}
         onCancel={closeConfirm}
         isDanger={confirmState.isDanger}
+      />
+
+      <PromptDialog
+        isOpen={promptState.isOpen}
+        title={promptState.title}
+        message={promptState.message}
+        defaultValue={promptState.defaultValue}
+        onConfirm={promptState.onConfirm}
+        onCancel={closePrompt}
       />
 
       <style jsx>{`

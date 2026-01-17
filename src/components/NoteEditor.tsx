@@ -7,6 +7,7 @@ import { Note, NoteType } from '@/types/note';
 import { mcpClientManager } from '@/lib/mcp/client';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { ToastType } from './Toast';
 
 interface NoteEditorProps {
   note: Note;
@@ -16,6 +17,9 @@ interface NoteEditorProps {
   mcpServers?: { id: string, name: string, url: string, enabled: boolean }[];
   storageConfig?: { provider: string; owner?: string; repo?: string; branch?: string };
   allNotes?: Note[];
+  showToast?: (message: string, type: ToastType) => void;
+  showConfirm?: (title: string, message: string, onConfirm: () => void, isDanger?: boolean) => void;
+  showPrompt?: (title: string, message: string, defaultValue: string, onConfirm: (value: string) => void) => void;
 }
 
 export default function NoteEditor({
@@ -25,7 +29,10 @@ export default function NoteEditor({
   onClose,
   mcpServers = [],
   storageConfig,
-  allNotes = []
+  allNotes = [],
+  showToast,
+  showConfirm,
+  showPrompt
 }: NoteEditorProps) {
   const [editedNote, setEditedNote] = useState<Note>({ ...note });
   const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
@@ -78,7 +85,7 @@ export default function NoteEditor({
       }
     } catch (e) {
       console.error('Tool call failed:', e);
-      alert(`도구 실행 실패: ${(e as Error).message}`);
+      showToast?.(`도구 실행 실패: ${(e as Error).message}`, 'error');
     } finally {
       setIsToolLoading(null);
     }
@@ -171,7 +178,7 @@ export default function NoteEditor({
       console.error('Save failed:', error);
       if (isManual) {
         setSaveStatus('idle');
-        alert('저장에 실패했습니다. 네트워크 또는 GitHub 설정을 확인해주세요.');
+        showToast?.('저장에 실패했습니다. 네트워크 또는 GitHub 설정을 확인해주세요.', 'error');
       }
     }
   };
@@ -339,19 +346,20 @@ export default function NoteEditor({
               <div className="prop-header">
                 <label><Database size={12} /> 속성</label>
                 <button className="add-prop-btn" onClick={() => {
-                  const key = prompt('속성 이름을 입력하세요');
-                  if (key) {
-                    setEditedNote({
-                      ...editedNote,
-                      metadata: {
-                        ...editedNote.metadata,
-                        properties: {
-                          ...(editedNote.metadata.properties || {}),
-                          [key]: { type: 'text', value: '' }
+                  showPrompt?.('새 속성', '속성 이름을 입력하세요', '', (key) => {
+                    if (key) {
+                      setEditedNote({
+                        ...editedNote,
+                        metadata: {
+                          ...editedNote.metadata,
+                          properties: {
+                            ...(editedNote.metadata.properties || {}),
+                            [key]: { type: 'text', value: '' }
+                          }
                         }
-                      }
-                    });
-                  }
+                      });
+                    }
+                  });
                 }}><Plus size={12} /> 추가</button>
               </div>
               <div className="properties-list">
