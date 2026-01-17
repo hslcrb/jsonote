@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2 } from 'lucide-react';
+import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1 } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
 import { mcpClientManager } from '@/lib/mcp/client';
 import ReactMarkdown from 'react-markdown';
@@ -66,6 +66,56 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
     } finally {
       setIsToolLoading(null);
     }
+  };
+
+  const handleInsertMarkdown = (prefix: string, suffix: string = '', defaultText: string = '') => {
+    const textarea = document.querySelector('.content-textarea') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = editedNote.content;
+    const selection = text.substring(start, end) || defaultText;
+
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    const newContent = before + prefix + selection + suffix + after;
+
+    setEditedNote({ ...editedNote, content: newContent });
+
+    // Re-focus and set selection
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + prefix.length + selection.length + suffix.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
+  const onToolbarDragStart = (e: React.DragEvent, type: string) => {
+    e.dataTransfer.setData('markdownType', type);
+  };
+
+  const onEditorDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const type = e.dataTransfer.getData('markdownType');
+    if (!type) return;
+
+    const textarea = e.target as HTMLTextAreaElement;
+    const dropIndex = textarea.selectionStart; // Simple fallback, or use advanced position calculation if needed
+
+    const syntaxMap: Record<string, [string, string, string]> = {
+      bold: ['**', '**', '굵은 텍스트'],
+      italic: ['*', '*', '기울임'],
+      heading: ['# ', '', '제목'],
+      list: ['- ', '', '리스트 항목'],
+      code: ['```\n', '\n```', '코드 블록'],
+      quote: ['> ', '', '인용문'],
+      link: ['[', '](url)', '링크 텍스트'],
+      image: ['![', '](url)', '이미지 설명']
+    };
+
+    const [prefix, suffix, defaultText] = syntaxMap[type] || ['', '', ''];
+    handleInsertMarkdown(prefix, suffix, defaultText);
   };
 
   // 실시간 자동 저장 (컴포넌트 내부에 적용)
@@ -240,11 +290,68 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
           </aside>
 
           <main className="editor-content">
+            {view === 'edit' && (
+              <div className="markdown-toolbar">
+                <button
+                  draggable
+                  onDragStart={(e) => onToolbarDragStart(e, 'bold')}
+                  onClick={() => handleInsertMarkdown('**', '**', '굵은 텍스트')}
+                  title="굵게 (Drag 가능)"
+                ><Bold size={16} /></button>
+                <button
+                  draggable
+                  onDragStart={(e) => onToolbarDragStart(e, 'italic')}
+                  onClick={() => handleInsertMarkdown('*', '*', '기울임')}
+                  title="기울임"
+                ><Italic size={16} /></button>
+                <button
+                  draggable
+                  onDragStart={(e) => onToolbarDragStart(e, 'heading')}
+                  onClick={() => handleInsertMarkdown('# ', '', '제목')}
+                  title="제목"
+                ><Heading1 size={16} /></button>
+                <div className="toolbar-divider" />
+                <button
+                  draggable
+                  onDragStart={(e) => onToolbarDragStart(e, 'list')}
+                  onClick={() => handleInsertMarkdown('- ', '', '리스트')}
+                  title="불렛 리스트"
+                ><List size={16} /></button>
+                <button
+                  draggable
+                  onDragStart={(e) => onToolbarDragStart(e, 'quote')}
+                  onClick={() => handleInsertMarkdown('> ', '', '인용')}
+                  title="인용문"
+                ><Quote size={16} /></button>
+                <button
+                  draggable
+                  onDragStart={(e) => onToolbarDragStart(e, 'code')}
+                  onClick={() => handleInsertMarkdown('```\n', '\n```', '코드 입력')}
+                  title="코드 블록"
+                ><FileCode size={16} /></button>
+                <div className="toolbar-divider" />
+                <button
+                  draggable
+                  onDragStart={(e) => onToolbarDragStart(e, 'link')}
+                  onClick={() => handleInsertMarkdown('[', '](url)', '링크')}
+                  title="링크"
+                ><Link size={16} /></button>
+                <button
+                  draggable
+                  onDragStart={(e) => onToolbarDragStart(e, 'image')}
+                  onClick={() => handleInsertMarkdown('![', '](url)', '이미지')}
+                  title="이미지"
+                ><Image size={16} /></button>
+              </div>
+            )}
+
             {view === 'edit' ? (
               <textarea
                 className="content-textarea"
                 value={editedNote.content}
                 onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
+                onDrop={onEditorDrop}
+                onDragOver={(e) => e.preventDefault()}
                 placeholder="내용(마크다운 지원)을 입력하세요..."
                 autoFocus
               />
@@ -450,16 +557,55 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
           overflow: hidden;
         }
 
+        .markdown-toolbar {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          padding: 0.5rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          border-bottom: none;
+          border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        }
+
+        .markdown-toolbar button {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-muted);
+          border-radius: 4px;
+          cursor: grab;
+        }
+
+        .markdown-toolbar button:active {
+          cursor: grabbing;
+        }
+
+        .markdown-toolbar button:hover {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+        }
+
+        .toolbar-divider {
+          width: 1px;
+          height: 16px;
+          background: var(--border-glass);
+          margin: 0 0.5rem;
+        }
+
         .content-textarea {
           flex: 1;
           background: transparent;
-          border: none;
+          border: 1px solid var(--border-glass); /* Re-add border to align with toolbar */
           outline: none;
           resize: none;
           color: var(--text-primary);
           font-size: 1.15rem;
           line-height: 1.6;
           font-family: inherit;
+          padding: 1.5rem;
         }
 
         .markdown-preview {
