@@ -70,9 +70,10 @@ const GuideView: React.FC<GuideViewProps> = () => {
               <div className="step-item">
                 <span className="step-label">토큰</span>
                 <div className="step-detail">
-                  <p>Settings - Developer settings - Personal access tokens 메뉴로 이동합니다.</p>
-                  <p>반드시 <strong>Tokens (classic)</strong> 옵션을 선택하여 <code>repo</code> 권한 포함 토큰을 발급받으세요.</p>
-                  <p className="sub-text">* Fine-grained tokens가 아닌 <strong>classic</strong> 버전을 권장합니다.</p>
+                  <p>1. Settings - Developer settings - Personal access tokens 메뉴로 이동</p>
+                  <p>2. <strong>Tokens (classic)</strong> 탭을 클릭</p>
+                  <p>3. <strong>Generate new token</strong> 버튼 클릭 후 나타나는 드롭다운 메뉴에서 <strong>Generate new token (classic)</strong>을 반드시 선택하세요.</p>
+                  <p className="sub-text">* Fine-grained tokens가 아닌 <strong>classic</strong> 버전을 발급해야 정상 연동됩니다.</p>
                 </div>
               </div>
             </div>
