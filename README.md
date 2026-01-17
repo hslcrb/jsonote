@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# jsonote (제이쏘노트)
 
-## Getting Started
+**A JSON-based, GitHub-integrated note-taking application designed for sovereignty, scalability, and security.**
 
-First, run the development server:
+`jsonote` is a specialized note-taking tool that stores everything in JSON format, leveraging GitHub repositories as its primary storage engine while maintaining full local compatibility.
+
+## 🌟 Core Values
+
+1.  **Scalability (확장성)**: Works across multiple repositories and handles large volumes of data with a structured JSON format.
+2.  **Data Sovereignty (데이터 주권성)**: You own your data. Stored in your GitHub repos or local files, never locked into a proprietary system.
+3.  **Security (보안성)**: Leverages GitHub's robust security model and industry-standard JSON/Git workflows.
+
+## ✨ Key Features
+
+-   **JSON First**: All notes, metadata, and configurations are stored as clean, portable JSON files.
+-   **GitHub Integration**: Seamlessly sync, commit, and push notes to one or more GitHub repositories.
+-   **Hybrid Workflow**: Works both locally (with built-in Git support) and remotely via GitHub APIs.
+-   **Structured Input**: Optimized forms for common note types alongside a flexible free-text editor.
+-   **Git-Powered**: Automatic versioning through Git-like operations (commits, branches, sync).
+
+## 🚀 Getting Started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📜 License
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This project is licensed under the **Apache License 2.0**. See the [LICENSE](LICENSE) file for details.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Created with ❤️ by Rheehose (Rhee Creative)
