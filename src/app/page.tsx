@@ -401,7 +401,10 @@ export default function Home() {
                       >
                         <div
                           className={`checkbox-container ${selectedIds.includes(note.metadata.id) ? 'checked' : ''}`}
-                          onClick={(e) => toggleSelection(note.metadata.id, e)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSelection(note.metadata.id, e);
+                          }}
                         >
                           <div className="custom-checkbox" />
                         </div>
@@ -681,10 +684,11 @@ export default function Home() {
         }
 
         .checkbox-container {
-          padding: 1.5rem 0 1.5rem 1.5rem;
+          padding: 1.5rem; /* Balanced padding for left-side placement */
           display: flex;
           align-items: center;
           justify-content: center;
+          flex-shrink: 0; /* Don't allow checkbox to be squeezed */
         }
 
         .custom-checkbox {
@@ -716,7 +720,8 @@ export default function Home() {
 
         .note-card-flex {
           display: flex;
-          align-items: stretch;
+          flex-direction: row; /* Force horizontal, left-to-right */
+          align-items: center; /* Center items vertically */
           gap: 0;
           background: transparent;
           border-bottom: 1px solid var(--border-glass);
