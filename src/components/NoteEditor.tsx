@@ -18,6 +18,19 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
   const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
   const [isFullScreen, setIsFullScreen] = useState(false);
 
+  // 실시간 자동 저장 (컴포넌트 내부에 적용)
+  // 내용이나 파일명이 변경되면 1.5초 후 자동으로 onSave 호출
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      // 초기 상태와 다르다면 자동 저장 실행
+      if (JSON.stringify(editedNote) !== JSON.stringify(note)) {
+        handleSave();
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [editedNote.content, editedNote.metadata.title, editedNote.metadata.customFilename]);
+
   const handleSave = () => {
     const updatedNote = {
       ...editedNote,
