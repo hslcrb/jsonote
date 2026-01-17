@@ -61,13 +61,13 @@ export default function Home() {
         {
           metadata: {
             id: '1',
-            title: 'jsonote 프로젝트 비전',
+            title: 'Project jsonote Vision',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             type: 'general',
-            tags: ['비전', 'jsonote'],
+            tags: ['vision', 'jsonote'],
           },
-          content: 'GitHub, GitLab, S3 등을 지원하는 궁극적인 노트 앱을 구축합니다.',
+          content: 'Building the ultimate JSON-based note taking app with GitHub integration.',
         }
       ];
       setNotes(mockNotes);
@@ -178,184 +178,186 @@ export default function Home() {
 
   return (
     <div className={`layout-container ${viewMode}-view`}>
-      {/* Sidebar */}
-      <motion.aside
-        initial={false}
-        animate={{
-          width: isSidebarOpen ? (viewMode === 'mobile' ? '100%' : '280px') : '0',
-          x: isSidebarOpen ? 0 : -280,
-          opacity: isSidebarOpen ? 1 : 0
-        }}
-        className="sidebar glass"
-      >
-        <div className="sidebar-header">
-          <div className="logo-container">
-            <div className="logo-icon">J</div>
-            <span className="logo-text">jsonote</span>
+      <div className="app-shell">
+        {/* Sidebar */}
+        <motion.aside
+          initial={false}
+          animate={{
+            width: isSidebarOpen ? (viewMode === 'mobile' ? '100%' : '280px') : '0',
+            x: isSidebarOpen ? 0 : (viewMode === 'mobile' ? '-100%' : -280),
+            opacity: isSidebarOpen ? 1 : 0
+          }}
+          className="sidebar glass"
+        >
+          <div className="sidebar-header">
+            <div className="logo-container">
+              <div className="logo-icon">J</div>
+              <span className="logo-text">jsonote</span>
+            </div>
+            <button onClick={() => setIsSidebarOpen(false)} className="icon-btn mobile-only">
+              <X size={20} />
+            </button>
           </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="icon-btn mobile-only">
-            <X size={20} />
-          </button>
-        </div>
 
-        <div className="sidebar-content">
-          <button className="new-note-btn glass-card" onClick={createNewNote}>
-            <Plus size={18} />
-            <span>새 노트 작성</span>
-          </button>
+          <div className="sidebar-content">
+            <button className="new-note-btn glass-card" onClick={createNewNote}>
+              <Plus size={18} />
+              <span>새 노트 작성</span>
+            </button>
 
-          <nav className="sidebar-nav">
-            <div className="nav-group">
-              <label>필터링</label>
+            <nav className="sidebar-nav">
+              <div className="nav-group">
+                <label>필터링</label>
+                <button
+                  className={`nav-item ${filterType === 'all' ? 'active' : ''}`}
+                  onClick={() => setFilterType('all')}
+                >
+                  <FileText size={18} />
+                  <span>모든 노트</span>
+                </button>
+                <button
+                  className={`nav-item ${filterType === 'journal' ? 'active' : ''}`}
+                  onClick={() => setFilterType('journal')}
+                >
+                  <Star size={18} />
+                  <span>저널</span>
+                </button>
+              </div>
+
+              <div className="nav-group">
+                <label>저장소 유형</label>
+                <button className="nav-item">
+                  {storageConfig?.provider === 's3' ? <Cloud size={18} /> : <Github size={18} />}
+                  <span className="truncate">{storageConfig?.provider?.toUpperCase() || '로컬 저장소'}</span>
+                  <span className="badge">{notes.length}</span>
+                </button>
+              </div>
+            </nav>
+          </div>
+
+          <div className="sidebar-footer">
+            <button className="nav-item" onClick={() => setIsSettingsOpen(true)}>
+              <Settings size={18} />
+              <span>설정</span>
+            </button>
+            <div className="toggle-group glass">
+              <button onClick={toggleTheme} className="icon-btn" title="테마 변경">
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+              <button onClick={toggleViewMode} className="icon-btn" title="보기 모드 변경">
+                {viewMode === 'desktop' ? <Smartphone size={18} /> : <Monitor size={18} />}
+              </button>
+            </div>
+          </div>
+        </motion.aside>
+
+        {/* Main Content */}
+        <main className="main-content">
+          <header className="content-header glass">
+            <div className="header-left">
               <button
-                className={`nav-item ${filterType === 'all' ? 'active' : ''}`}
-                onClick={() => setFilterType('all')}
+                onClick={() => setIsSidebarOpen(true)}
+                className={`icon-btn ${isSidebarOpen ? 'hidden' : ''}`}
               >
-                <FileText size={18} />
-                <span>모든 노트</span>
+                <Menu size={20} />
               </button>
+              <div className="breadcrumb desktop-only">
+                <span>내 워크스페이스</span>
+                <ChevronRight size={14} className="text-muted" />
+                <span className="current">모두 보기</span>
+              </div>
+            </div>
+
+            <div className="header-right">
+              <div className="search-bar glass">
+                <Search size={16} className="text-muted" />
+                <input
+                  type="text"
+                  placeholder="검색..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
               <button
-                className={`nav-item ${filterType === 'journal' ? 'active' : ''}`}
-                onClick={() => setFilterType('journal')}
+                className={`sync-btn glass-card ${isSyncing ? 'animate-pulse' : ''}`}
+                onClick={() => handleSync()}
+                disabled={isSyncing}
               >
-                <Star size={18} />
-                <span>저널</span>
+                <Cloud size={18} className={isSyncing ? 'animate-spin' : ''} />
+                <span className="desktop-only text-nowrap">{isSyncing ? '동기화 중...' : '클라우드 동기화'}</span>
               </button>
             </div>
+          </header>
 
-            <div className="nav-group">
-              <label>저장소 유형</label>
-              <button className="nav-item">
-                {storageConfig?.provider === 's3' ? <Cloud size={18} /> : <Github size={18} />}
-                <span className="truncate">{storageConfig?.provider?.toUpperCase() || '로컬 저장소'}</span>
-                <span className="badge">{notes.length}</span>
-              </button>
-            </div>
-          </nav>
-        </div>
-
-        <div className="sidebar-footer">
-          <button className="nav-item" onClick={() => setIsSettingsOpen(true)}>
-            <Settings size={18} />
-            <span>설정</span>
-          </button>
-          <div className="toggle-group glass">
-            <button onClick={toggleTheme} className="icon-btn" title="테마 변경">
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <button onClick={toggleViewMode} className="icon-btn" title="보기 모드 변경">
-              {viewMode === 'desktop' ? <Smartphone size={18} /> : <Monitor size={18} />}
-            </button>
-          </div>
-        </div>
-      </motion.aside>
-
-      {/* Main Content */}
-      <main className="main-content">
-        <header className="content-header glass">
-          <div className="header-left">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className={`icon-btn ${isSidebarOpen ? 'hidden' : ''}`}
-            >
-              <Menu size={20} />
-            </button>
-            <div className="breadcrumb desktop-only">
-              <span>내 워크스페이스</span>
-              <ChevronRight size={14} className="text-muted" />
-              <span className="current">모두 보기</span>
-            </div>
-          </div>
-
-          <div className="header-right">
-            <div className="search-bar glass">
-              <Search size={16} className="text-muted" />
-              <input
-                type="text"
-                placeholder="검색..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <button
-              className={`sync-btn glass-card ${isSyncing ? 'animate-pulse' : ''}`}
-              onClick={() => handleSync()}
-              disabled={isSyncing}
-            >
-              <Cloud size={18} className={isSyncing ? 'animate-spin' : ''} />
-              <span className="desktop-only text-nowrap">{isSyncing ? '동기화 중...' : '클라우드 동기화'}</span>
-            </button>
-          </div>
-        </header>
-
-        <section className={`notes-container ${viewMode === 'mobile' ? 'list-view' : 'grid-view'}`}>
-          <AnimatePresence>
-            {filteredNotes.map((note) => (
-              <motion.div
-                key={note.metadata.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="note-card glass-card"
-                onClick={() => {
-                  setSelectedNote(note);
-                  setIsEditorOpen(true);
-                }}
-              >
-                <div className="note-card-header">
-                  <div className={`type-tag type-${note.metadata.type}`}>
-                    <Hash size={10} />
-                    {note.metadata.type === 'general' ? '일반' :
-                      note.metadata.type === 'meeting' ? '회의' :
-                        note.metadata.type === 'task' ? '할 일' :
-                          note.metadata.type === 'journal' ? '저널' : '코드'}
+          <section className={`notes-container ${viewMode === 'mobile' ? 'list-view' : 'grid-view'}`}>
+            <AnimatePresence>
+              {filteredNotes.map((note) => (
+                <motion.div
+                  key={note.metadata.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="note-card glass-card"
+                  onClick={() => {
+                    setSelectedNote(note);
+                    setIsEditorOpen(true);
+                  }}
+                >
+                  <div className="note-card-header">
+                    <div className={`type-tag type-${note.metadata.type}`}>
+                      <Hash size={10} />
+                      {note.metadata.type === 'general' ? '일반' :
+                        note.metadata.type === 'meeting' ? '회의' :
+                          note.metadata.type === 'task' ? '할 일' :
+                            note.metadata.type === 'journal' ? '저널' : '코드'}
+                    </div>
+                    <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
+                      <Trash2 size={14} />
+                    </button>
                   </div>
-                  <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-                <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
-                <p className="note-card-preview">{note.content || '내용이 없습니다.'}</p>
-                <div className="note-card-footer">
-                  <span className="date">
-                    {format(new Date(note.metadata.updatedAt), 'MM.dd')}
-                  </span>
-                  <div className="tags">
-                    {note.metadata.tags.slice(0, 2).map(tag => (
-                      <span key={tag} className="tag">#{tag}</span>
-                    ))}
+                  <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
+                  <p className="note-card-preview">{note.content || '내용이 없습니다.'}</p>
+                  <div className="note-card-footer">
+                    <span className="date">
+                      {format(new Date(note.metadata.updatedAt), 'MM.dd')}
+                    </span>
+                    <div className="tags">
+                      {note.metadata.tags.slice(0, 2).map(tag => (
+                        <span key={tag} className="tag">#{tag}</span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-          {filteredNotes.length === 0 && (
-            <div className="empty-state">
-              <Type size={48} className="text-muted" />
-              <p>노트가 존재하지 않습니다.</p>
-            </div>
-          )}
-        </section>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            {filteredNotes.length === 0 && (
+              <div className="empty-state">
+                <Type size={48} className="text-muted" />
+                <p>노트가 존재하지 않습니다.</p>
+              </div>
+            )}
+          </section>
+        </main>
+      </div>
 
-        {/* Modals */}
-        <AnimatePresence>
-          {isSettingsOpen && (
-            <SettingsModal
-              config={storageConfig}
-              onSave={handleSaveSettings}
-              onClose={() => setIsSettingsOpen(false)}
-            />
-          )}
-          {isEditorOpen && selectedNote && (
-            <NoteEditor
-              note={selectedNote}
-              onSave={handleSaveNote}
-              onClose={() => { setIsEditorOpen(false); setSelectedNote(null); }}
-            />
-          )}
-        </AnimatePresence>
-      </main>
+      {/* Modals */}
+      <AnimatePresence>
+        {isSettingsOpen && (
+          <SettingsModal
+            config={storageConfig}
+            onSave={handleSaveSettings}
+            onClose={() => setIsSettingsOpen(false)}
+          />
+        )}
+        {isEditorOpen && selectedNote && (
+          <NoteEditor
+            note={selectedNote}
+            onSave={handleSaveNote}
+            onClose={() => { setIsEditorOpen(false); setSelectedNote(null); }}
+          />
+        )}
+      </AnimatePresence>
 
       <style jsx>{`
         .layout-container {
@@ -367,60 +369,51 @@ export default function Home() {
           transition: background-color 0.3s ease;
         }
 
-        /* Mobile View Mode: Centered Phone-like Column */
-        .mobile-view {
+        /* Shell for the entire active app */
+        .app-shell {
           display: flex;
-          justify-content: center;
-          align-items: center;
-          background-color: #0c0c0e; /* Clean neutral outer background */
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          position: relative;
         }
 
-        /* Container for the mobile app simulation */
-        .mobile-view .main-content,
-        .mobile-view .sidebar {
+        /* Centered Mobile View Simulation */
+        .mobile-view {
+          justify-content: center;
+          align-items: center;
+          background-color: #0c0c0e; /* Neutral outer background */
+        }
+
+        .mobile-view .app-shell {
           width: 100%;
           max-width: 420px;
           height: 100%;
           max-height: 850px;
-          margin: 0;
-          background-color: var(--bg-primary);
-          box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-          border-radius: 32px;
-          overflow: hidden;
-          position: absolute;
-        }
-
-        .mobile-view .main-content {
+          border-radius: 40px;
+          box-shadow: 0 40px 100px rgba(0,0,0,0.6);
           border: 1px solid var(--border-glass);
-          z-index: 10;
+          overflow: hidden;
+          background: var(--bg-primary);
         }
 
         .mobile-view .sidebar {
           position: absolute !important;
-          left: 50% !important;
-          transform: translateX(-50%) !important;
-          z-index: 1000 !important;
-        }
-
-        /* Adjustments for the mobile internal elements */
-        .mobile-view .content-header {
-          height: 64px;
-          padding: 0 1.25rem;
-        }
-
-        .mobile-view .notes-container {
-          padding: 1.25rem;
-        }
-
-        .mobile-view .new-note-btn {
-          padding: 0.85rem;
-        }
-
-        /* Desktop Layout Mode: Side-by-Side */
-        .desktop-view .sidebar { 
-          width: 280px;
-          border-right: 1px solid var(--border-glass); 
+          z-index: 1000;
           height: 100%;
+          background: var(--bg-secondary);
+        }
+
+        .mobile-view .main-content {
+          width: 100%;
+          height: 100%;
+        }
+
+        /* Desktop Layout Mode */
+        .desktop-view .sidebar {
+          width: 280px;
+          border-right: 1px solid var(--border-glass);
+          flex-shrink: 0;
         }
 
         .desktop-view .main-content {
@@ -431,7 +424,6 @@ export default function Home() {
           display: flex; 
           flex-direction: column; 
           background: var(--bg-secondary);
-          flex-shrink: 0;
           z-index: 50; 
         }
         
