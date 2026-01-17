@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1, CheckCircle, ExternalLink, Plus } from 'lucide-react';
+import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1, CheckCircle, ExternalLink, Plus, Layers, GitBranch, Database, ChevronDown, ChevronRight, Search } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
 import { mcpClientManager } from '@/lib/mcp/client';
 import ReactMarkdown from 'react-markdown';
@@ -284,7 +284,7 @@ export default function NoteEditor({
         <div className="editor-body">
           <aside className="editor-meta desktop-only">
             <div className="meta-item">
-              <label>유형</label>
+              <label><Layers size={12} /> 유형</label>
               <select
                 value={editedNote.metadata.type}
                 onChange={(e) => setEditedNote({
@@ -320,7 +320,7 @@ export default function NoteEditor({
             </div>
 
             <div className="meta-item">
-              <label>상위 페이지</label>
+              <label><GitBranch size={12} /> 상위 페이지</label>
               <select
                 value={editedNote.metadata.parentId || ''}
                 onChange={(e) => setEditedNote({
@@ -337,7 +337,7 @@ export default function NoteEditor({
 
             <div className="meta-item">
               <div className="prop-header">
-                <label>속성</label>
+                <label><Database size={12} /> 속성</label>
                 <button className="add-prop-btn" onClick={() => {
                   const key = prompt('속성 이름을 입력하세요');
                   if (key) {
@@ -380,7 +380,7 @@ export default function NoteEditor({
               </div>
             </div>
             <div className="meta-item">
-              <label>AI 어시스턴트 (MCP)</label>
+              <label><Sparkles size={12} /> AI 어시스턴트 (MCP)</label>
               <div className="mcp-tools-list">
                 {availableTools.length > 0 ? (
                   availableTools.map(group => (
@@ -407,71 +407,70 @@ export default function NoteEditor({
           </aside>
 
           <main className="editor-content">
-            {view === 'edit' && (
-              <div className="markdown-toolbar">
-                <button
-                  draggable
-                  onDragStart={(e) => onToolbarDragStart(e, 'bold')}
-                  onClick={() => handleInsertMarkdown('**', '**', '굵은 텍스트')}
-                  title="굵게 (Drag 가능)"
-                ><Bold size={16} /></button>
-                <button
-                  draggable
-                  onDragStart={(e) => onToolbarDragStart(e, 'italic')}
-                  onClick={() => handleInsertMarkdown('*', '*', '기울임')}
-                  title="기울임"
-                ><Italic size={16} /></button>
-                <button
-                  draggable
-                  onDragStart={(e) => onToolbarDragStart(e, 'heading')}
-                  onClick={() => handleInsertMarkdown('# ', '', '제목')}
-                  title="제목"
-                ><Heading1 size={16} /></button>
-                <div className="toolbar-divider" />
-                <button
-                  draggable
-                  onDragStart={(e) => onToolbarDragStart(e, 'list')}
-                  onClick={() => handleInsertMarkdown('- ', '', '리스트')}
-                  title="불렛 리스트"
-                ><List size={16} /></button>
-                <button
-                  draggable
-                  onDragStart={(e) => onToolbarDragStart(e, 'quote')}
-                  onClick={() => handleInsertMarkdown('> ', '', '인용')}
-                  title="인용문"
-                ><Quote size={16} /></button>
-                <button
-                  draggable
-                  onDragStart={(e) => onToolbarDragStart(e, 'code')}
-                  onClick={() => handleInsertMarkdown('```\n', '\n```', '코드 입력')}
-                  title="코드 블록"
-                ><FileCode size={16} /></button>
-                <div className="toolbar-divider" />
-                <button
-                  draggable
-                  onDragStart={(e) => onToolbarDragStart(e, 'link')}
-                  onClick={() => handleInsertMarkdown('[', '](url)', '링크')}
-                  title="링크"
-                ><Link size={16} /></button>
-                <button
-                  draggable
-                  onDragStart={(e) => onToolbarDragStart(e, 'image')}
-                  onClick={() => handleInsertMarkdown('![', '](url)', '이미지')}
-                  title="이미지"
-                ><Image size={16} /></button>
-              </div>
-            )}
-
             {view === 'edit' ? (
-              <textarea
-                className="content-textarea"
-                value={editedNote.content}
-                onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
-                onDrop={onEditorDrop}
-                onDragOver={(e) => e.preventDefault()}
-                placeholder="내용(마크다운 지원)을 입력하세요..."
-                autoFocus
-              />
+              <div className="markdown-editor-wrapper">
+                <div className="markdown-toolbar">
+                  <button
+                    draggable
+                    onDragStart={(e) => onToolbarDragStart(e, 'bold')}
+                    onClick={() => handleInsertMarkdown('**', '**', '굵은 텍스트')}
+                    title="굵게 (Drag 가능)"
+                  ><Bold size={16} /></button>
+                  <button
+                    draggable
+                    onDragStart={(e) => onToolbarDragStart(e, 'italic')}
+                    onClick={() => handleInsertMarkdown('*', '*', '기울임')}
+                    title="기울임"
+                  ><Italic size={16} /></button>
+                  <button
+                    draggable
+                    onDragStart={(e) => onToolbarDragStart(e, 'heading')}
+                    onClick={() => handleInsertMarkdown('# ', '', '제목')}
+                    title="제목"
+                  ><Heading1 size={16} /></button>
+                  <div className="toolbar-divider" />
+                  <button
+                    draggable
+                    onDragStart={(e) => onToolbarDragStart(e, 'list')}
+                    onClick={() => handleInsertMarkdown('- ', '', '리스트')}
+                    title="불렛 리스트"
+                  ><List size={16} /></button>
+                  <button
+                    draggable
+                    onDragStart={(e) => onToolbarDragStart(e, 'quote')}
+                    onClick={() => handleInsertMarkdown('> ', '', '인용')}
+                    title="인용문"
+                  ><Quote size={16} /></button>
+                  <button
+                    draggable
+                    onDragStart={(e) => onToolbarDragStart(e, 'code')}
+                    onClick={() => handleInsertMarkdown('```\n', '\n```', '코드 입력')}
+                    title="코드 블록"
+                  ><FileCode size={16} /></button>
+                  <div className="toolbar-divider" />
+                  <button
+                    draggable
+                    onDragStart={(e) => onToolbarDragStart(e, 'link')}
+                    onClick={() => handleInsertMarkdown('[', '](url)', '링크')}
+                    title="링크"
+                  ><Link size={16} /></button>
+                  <button
+                    draggable
+                    onDragStart={(e) => onToolbarDragStart(e, 'image')}
+                    onClick={() => handleInsertMarkdown('![', '](url)', '이미지')}
+                    title="이미지"
+                  ><Image size={16} /></button>
+                </div>
+                <textarea
+                  className="content-textarea"
+                  value={editedNote.content}
+                  onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
+                  onDrop={onEditorDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  placeholder="내용(마크다운 지원)을 입력하세요..."
+                  autoFocus
+                />
+              </div>
             ) : view === 'preview' ? (
               <div className="markdown-preview scroll-area">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -516,7 +515,8 @@ export default function NoteEditor({
         }
 
         .editor-header {
-          padding: 1rem 1.5rem;
+          padding: 1.5rem 2rem;
+          background: var(--bg-secondary);
           border-bottom: 1px solid var(--border-glass);
           display: flex;
           align-items: center;
@@ -628,14 +628,21 @@ export default function NoteEditor({
         }
 
         .save-btn {
-          padding: 0.5rem 1.5rem;
+          padding: 0.6rem 2rem;
           background: var(--text-primary);
           color: var(--bg-primary);
           font-weight: 800;
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.6rem;
           text-transform: uppercase;
+          border-radius: 6px;
+          transition: all 0.2s;
+        }
+
+        .save-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
         }
 
         .save-btn.success {
@@ -655,12 +662,13 @@ export default function NoteEditor({
         }
 
         .editor-meta {
-          width: 240px;
+          width: 200px;
           border-right: 1px solid var(--border-glass);
-          padding: 2rem;
+          padding: 1.5rem;
           display: flex;
           flex-direction: column;
-          gap: 2.5rem;
+          gap: 1.75rem;
+          background: var(--bg-secondary);
         }
 
         .meta-item {
@@ -670,14 +678,30 @@ export default function NoteEditor({
         }
 
         .meta-item label {
-          font-size: 0.65rem;
-          font-weight: 900;
+          font-size: 0.6rem;
+          font-weight: 800;
           color: var(--text-muted);
           text-transform: uppercase;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.08em;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
         }
 
-        .meta-item select {
+        .meta-item select, .meta-item input {
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-glass);
+          border-radius: 4px;
+          padding: 0.4rem 0.6rem;
+          color: var(--text-primary);
+          font-size: 0.85rem;
+          outline: none;
+          font-family: inherit;
+        }
+
+        .meta-item select:focus, .meta-item input:focus {
+          border-color: var(--text-secondary);
+        }
 
         .tags-input input {
           background: transparent;
@@ -688,11 +712,12 @@ export default function NoteEditor({
           font-size: 0.9rem;
         }
 
-        .editor-content {
+        .markdown-editor-wrapper {
           flex: 1;
-          padding: 2rem;
           display: flex;
           flex-direction: column;
+          border: 1px solid var(--border-glass);
+          border-radius: 8px;
           overflow: hidden;
         }
 
@@ -700,11 +725,9 @@ export default function NoteEditor({
           display: flex;
           align-items: center;
           gap: 0.25rem;
-          padding: 0.5rem;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-glass);
-          border-bottom: none;
-          border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+          padding: 0.4rem;
+          background: var(--bg-tertiary);
+          border-bottom: 1px solid var(--border-glass);
         }
 
         .markdown-toolbar button {
@@ -737,14 +760,23 @@ export default function NoteEditor({
         .content-textarea {
           flex: 1;
           background: transparent;
-          border: 1px solid var(--border-glass); /* Re-add border to align with toolbar */
+          border: none;
           outline: none;
           resize: none;
           color: var(--text-primary);
-          font-size: 1.15rem;
-          line-height: 1.6;
+          font-size: 1.05rem;
+          line-height: 1.65;
           font-family: inherit;
           padding: 1.5rem;
+        }
+
+        .editor-content {
+          flex: 1;
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          overflow: hidden;
         }
 
         .markdown-preview {

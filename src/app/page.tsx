@@ -1016,8 +1016,16 @@ export default function Home() {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 0.5rem 0.5rem;
-          border-bottom: 1px solid var(--border-glass);
+          padding: 0.5rem 1rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          border-radius: 99px;
+          transition: all 0.2s;
+        }
+
+        .search-bar:focus-within {
+          border-color: var(--text-secondary);
+          background: var(--bg-tertiary);
         }
 
         .search-bar input {
