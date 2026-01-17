@@ -806,7 +806,7 @@ export default function Home() {
         .custom-checkbox {
           width: 20px;
           height: 20px;
-          border: 2px solid var(--text-muted); /* Clearly visible outline when unchecked */
+          border: 2px solid var(--border-glass); /* 항상 보이는 테두리 */
           border-radius: 4px;
           position: relative;
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
