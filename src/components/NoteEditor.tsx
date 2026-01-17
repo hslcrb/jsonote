@@ -44,8 +44,11 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
       }
       setAvailableTools(toolLists);
     };
-    fetchAllTools();
-  }, [mcpServers]);
+
+    if (mcpServers && mcpServers.length > 0) {
+      fetchAllTools();
+    }
+  }, [JSON.stringify(mcpServers)]);
 
   const handleCallTool = async (serverId: string, toolName: string) => {
     setIsToolLoading(toolName);
