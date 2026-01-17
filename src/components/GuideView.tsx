@@ -142,6 +142,16 @@ const GuideView: React.FC<GuideViewProps> = () => {
           color: var(--text-primary);
         }
 
+        @media (max-width: 640px) {
+          .guide-header { margin-bottom: 2rem; }
+          .guide-header h1 { font-size: 1.75rem; }
+          .guide-header p { font-size: 0.95rem; }
+          .guide-content { gap: 2.5rem; }
+          .section-body p { font-size: 0.95rem; }
+          .step-item { flex-direction: column; gap: 0.5rem; }
+          .step-label { min-width: auto; }
+        }
+
         code {
           background: var(--bg-tertiary);
           padding: 0.1rem 0.3rem;

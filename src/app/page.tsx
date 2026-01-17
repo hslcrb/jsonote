@@ -354,12 +354,15 @@ export default function Home() {
           width: 100%;
           height: 100%;
           border: 1px solid var(--border-glass);
+          position: relative;
+          overflow: hidden;
         }
 
         .mobile-view .app-shell {
           width: 380px;
           height: 800px;
-          border: 2px solid var(--text-primary);
+          border: none;
+          box-shadow: 0 32px 80px rgba(0,0,0,0.8);
         }
 
         .sidebar {
@@ -367,10 +370,23 @@ export default function Home() {
           border-right: 1px solid var(--border-glass);
           display: flex;
           flex-direction: column;
+          z-index: 100;
+          height: 100%;
+        }
+
+        /* Mobile sidebar behavior */
+        .mobile-view .sidebar,
+        @media (max-width: 768px) {
+          .sidebar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            box-shadow: 20px 0 50px rgba(0,0,0,0.3);
+          }
         }
 
         .sidebar-header {
-          padding: 2rem 1.5rem;
+          padding: 2.5rem 1.5rem 1.5rem;
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -388,75 +404,81 @@ export default function Home() {
           padding: 1rem;
           display: flex;
           flex-direction: column;
-          gap: 2rem;
+          gap: 2.5rem;
         }
 
         .new-note-btn {
           width: 100%;
-          padding: 0.8rem;
+          padding: 1rem;
           background: var(--text-primary);
           color: var(--bg-primary);
-          font-weight: 700;
+          font-weight: 800;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 0.5rem;
           text-transform: uppercase;
+          font-size: 0.85rem;
         }
 
         .nav-group {
           display: flex;
           flex-direction: column;
-          gap: 0.2rem;
+          gap: 0.25rem;
         }
 
         .nav-group label {
-          font-size: 0.65rem;
-          font-weight: 800;
+          font-size: 0.6rem;
+          font-weight: 900;
           color: var(--text-muted);
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.75rem;
           text-transform: uppercase;
+          letter-spacing: 0.1em;
+          padding-left: 0.5rem;
         }
 
         .nav-item {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 0.75rem;
+          padding: 0.85rem 1rem;
           color: var(--text-secondary);
-          font-weight: 500;
+          font-weight: 600;
           font-size: 0.9rem;
         }
 
         .nav-item.active {
           color: var(--text-primary);
           background: var(--bg-tertiary);
+          text-decoration: underline;
         }
 
         .nav-item-static {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 0.75rem;
+          padding: 0.85rem 1rem;
           color: var(--text-muted);
           font-size: 0.9rem;
+          font-weight: 600;
         }
 
         .sidebar-footer {
-          padding: 1rem;
+          padding: 1.5rem;
           border-top: 1px solid var(--border-glass);
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: 1rem;
         }
 
         .nav-item-minimal {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.75rem;
           padding: 0.5rem;
           font-size: 0.85rem;
           color: var(--text-secondary);
+          font-weight: 600;
         }
 
         .toggle-row {
@@ -465,8 +487,13 @@ export default function Home() {
         }
 
         .icon-btn-minimal {
-          padding: 0.5rem;
+          padding: 0.6rem;
           color: var(--text-muted);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--border-glass);
+          flex: 1;
         }
 
         .main-content {
@@ -474,10 +501,12 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           background: var(--bg-primary);
+          min-width: 0; /* Critical for flex stability */
+          height: 100%;
         }
 
         .content-header {
-          height: 64px;
+          height: 72px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -485,17 +514,23 @@ export default function Home() {
           border-bottom: 1px solid var(--border-glass);
         }
 
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
         .header-center {
           flex: 1;
           max-width: 400px;
-          margin: 0 2rem;
+          margin: 0 1rem;
         }
 
         .search-bar {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem 1rem;
+          gap: 0.75rem;
+          padding: 0.5rem 0.5rem;
           border-bottom: 1px solid var(--border-glass);
         }
 
@@ -505,26 +540,33 @@ export default function Home() {
           outline: none;
           color: var(--text-primary);
           width: 100%;
+          font-size: 0.9rem;
+          font-weight: 500;
         }
 
         .sync-btn {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          font-weight: 700;
-          font-size: 0.85rem;
+          font-weight: 800;
+          font-size: 0.75rem;
           text-transform: uppercase;
         }
 
         .main-scroll-area {
           flex: 1;
-          padding: 2rem;
+          padding: 2.5rem 1.5rem;
           overflow-y: auto;
+        }
+
+        .mobile-view .main-scroll-area {
+          padding: 1.5rem 1rem;
         }
 
         .notes-container {
           display: grid;
           gap: 1rem;
+          width: 100%;
         }
 
         .grid-view { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
@@ -535,7 +577,7 @@ export default function Home() {
           border: 1px solid var(--border-glass);
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
+          gap: 1rem;
           cursor: pointer;
         }
 
@@ -552,46 +594,71 @@ export default function Home() {
         .type-label {
           font-size: 0.6rem;
           font-weight: 900;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.15em;
           color: var(--text-muted);
         }
 
         .note-card-title {
-          font-size: 1.1rem;
-          font-weight: 700;
+          font-size: 1.25rem;
+          font-weight: 900;
+          text-transform: uppercase;
+          line-height: 1.2;
         }
 
         .note-card-preview {
-          font-size: 0.9rem;
+          font-size: 0.95rem;
           color: var(--text-secondary);
           display: -webkit-box;
-          -webkit-line-clamp: 2;
+          -webkit-line-clamp: 3;
           -webkit-box-orient: vertical;
           overflow: hidden;
+          line-height: 1.5;
         }
 
         .note-card-footer {
           margin-top: 1rem;
           font-size: 0.75rem;
           color: var(--text-muted);
+          font-weight: 700;
         }
 
         .empty-state {
-          padding: 4rem;
-          text-align: center;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 200px;
           color: var(--text-muted);
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-size: 0.85rem;
         }
 
         .breadcrumb span {
-          font-weight: 700;
+          font-weight: 900;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.1em;
+          font-size: 0.8rem;
         }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
         .hidden { display: none; }
         .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        .icon-btn {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-primary);
+        }
+
+        @media (max-width: 640px) {
+          .header-center { margin: 0 0.5rem; }
+          .main-scroll-area { padding: 1.5rem 1rem; }
+        }
       `}</style>
     </div>
   );
