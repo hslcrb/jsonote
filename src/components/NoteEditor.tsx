@@ -440,6 +440,8 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
           border-radius: 4px;
           text-transform: uppercase;
           transition: all 0.3s;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
         .save-status.saved {
