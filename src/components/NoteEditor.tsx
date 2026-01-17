@@ -145,43 +145,16 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
     };
 
     try {
-      // 1. 즉시 원격으로 전송 시작
+      // GitHub API로 직접 저장 (await 완료 = GitHub에 저장 완료)
       await onSave(updatedNote);
       setIsSaved(true);
 
       if (isManual) {
-        // 2. 깃허브 반영 여부 확인을 위한 폴링 (최대 10회, 1초 간격)
-        let verified = false;
-        let retries = 0;
-        const maxRetries = 10;
-
-        while (!verified && retries < maxRetries) {
-          retries++;
-          await new Promise(resolve => setTimeout(resolve, 1000));
-
-          try {
-            const savedConfig = localStorage.getItem('jsonote_storage_config');
-            if (savedConfig) {
-              const { getStorage } = await import('@/lib/storage');
-              const storage = getStorage(JSON.parse(savedConfig));
-              if (storage) {
-                const remoteNotes = await storage.fetchNotes();
-                const remoteNote = remoteNotes.find(n => n.metadata.id === updatedNote.metadata.id);
-
-                // 업데이트 시간이 원격과 일치하는지 확인
-                if (remoteNote && remoteNote.metadata.updatedAt === updatedNote.metadata.updatedAt) {
-                  verified = true;
-                  break;
-                }
-              }
-            }
-          } catch (e) {
-            console.warn('Verification retry failed:', e);
-          }
-        }
-
-        // 확인 완료 또는 최대 재시도 후 성공 표시
+        // 저장 성공 후 약간의 시각적 지연을 주고 성공 표시
+        await new Promise(resolve => setTimeout(resolve, 300));
         setSaveStatus('success');
+
+        // 1초 후 편집기 닫기
         setTimeout(() => {
           onClose();
         }, 1000);
@@ -190,7 +163,7 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
       console.error('Save failed:', error);
       if (isManual) {
         setSaveStatus('idle');
-        alert('저장에 실패했습니다. 설정을 확인해주세요.');
+        alert('저장에 실패했습니다. 네트워크 또는 GitHub 설정을 확인해주세요.');
       }
     }
   };
