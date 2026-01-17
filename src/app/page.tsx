@@ -365,47 +365,60 @@ export default function Home() {
           overflow: hidden;
           background-color: var(--bg-primary);
           transition: background-color 0.3s ease;
-          position: relative;
         }
 
-        /* Mobile Layout Mode (Full screen but narrow patterns) */
+        /* Mobile Layout Mode: Centered Column */
         .mobile-view {
-          flex-direction: column;
+          display: block;
+          overflow-y: auto;
+          background-color: #000; /* Outer background */
+        }
+
+        .mobile-view .sidebar,
+        .mobile-view .main-content {
+          width: 100%;
+          max-width: 500px;
+          margin: 0 auto;
+          position: relative;
+          background-color: var(--bg-primary);
+          box-shadow: 0 0 40px rgba(0,0,0,0.3);
         }
 
         .mobile-view .sidebar {
-          position: fixed !important;
-          top: 0;
-          left: 0;
-          height: 100%;
-          width: 280px !important;
-          max-width: 80%;
-          z-index: 1000;
-          box-shadow: 20px 0 50px rgba(0,0,0,0.4);
-          background: var(--bg-secondary);
+          height: auto;
+          border-right: none;
+          border-bottom: 1px solid var(--border-glass);
         }
 
         .mobile-view .main-content {
-          width: 100%;
+          min-height: 100vh;
+        }
+
+        .mobile-view .sidebar-footer {
+          position: sticky;
+          bottom: 0;
+          background: var(--bg-secondary);
+          backdrop-filter: blur(10px);
+          z-index: 100;
+        }
+
+        /* Desktop Layout Mode: Side-by-Side */
+        .desktop-view .sidebar { 
+          width: 280px;
+          border-right: 1px solid var(--border-glass); 
           height: 100%;
         }
 
-        .mobile-view .content-header {
-          padding: 0 1rem;
-          height: 64px;
-        }
-
-        .mobile-view .notes-container {
-          padding: 1rem;
+        .desktop-view .main-content {
+          flex: 1;
         }
 
         .sidebar { 
           display: flex; 
           flex-direction: column; 
-          border-right: 1px solid var(--border-glass); 
-          z-index: 50; 
           background: var(--bg-secondary);
           flex-shrink: 0;
+          z-index: 50; 
         }
         
         .sidebar-header { padding: 1.5rem; display: flex; align-items: center; justify-content: space-between; }
