@@ -1,7 +1,6 @@
 # 보안 및 개인정보
 
 [![English](./SECURITY.md)](./SECURITY.md)
-<img src="../public/logo.png" width="80" align="right" />
 
 ## 1. 토큰 보안
 사용자의 GitHub Personal Access Token은 브라우저의 `localStorage`에만 저장됩니다. 저희 서버로 전송되지 않으며, 모든 GitHub API 호출은 브라우저에서 직접 또는 설정된 사설 프록시를 통해 이루어집니다.

@@ -1,7 +1,6 @@
 # JSONOTE 기여 가이드
 
 [![English](./CONTRIBUTING.md)](./CONTRIBUTING.md)
-<img src="./public/logo.png" width="80" align="right" />
 
 JSONOTE에 관심을 가져주셔서 감사합니다! 프로젝트가 초기 단계인 만큼 여러분의 기여가 큰 힘이 됩니다.
 

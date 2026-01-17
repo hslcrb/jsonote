@@ -1,7 +1,6 @@
 # 시작 가이드
 
 [![English](./GUIDE.md)](./GUIDE.md)
-<img src="../public/logo.png" width="80" align="right" />
 
 이 가이드는 JSONOTE의 기본적인 조작법과 고급 기능을 설명합니다.
 

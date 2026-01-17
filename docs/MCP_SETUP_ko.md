@@ -1,7 +1,6 @@
 # MCP 설정 가이드
 
 [![English](./MCP_SETUP.md)](./MCP_SETUP.md)
-<img src="../public/logo.png" width="80" align="right" />
 
 Model Context Protocol (MCP)은 JSONOTE 내에서 AI 연동을 가능하게 합니다.
 

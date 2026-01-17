@@ -1,7 +1,6 @@
 # User Guide
 
 [![Korean](./GUIDE_ko.md)](./GUIDE_ko.md)
-<img src="../public/logo.png" width="80" align="right" />
 
 This guide covers the fundamental operations and advanced features of JSONOTE.
 

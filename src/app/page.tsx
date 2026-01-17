@@ -37,19 +37,19 @@ export default function Home() {
     {
       id: 'notion',
       name: 'Notion',
-      url: 'http://localhost:3000/notion/sse',
-      description: 'npx @modelcontextprotocol/server-notion 을 통해 로컬에서 실행 후 연결하세요.'
+      url: 'https://notion-mcp.example.com',
+      description: '노션 데이터베이스 및 페이지 동기화'
     },
     {
       id: 'github',
       name: 'GitHub',
-      url: 'http://localhost:3000/github/sse',
-      description: 'npx @modelcontextprotocol/server-github 을 통해 로컬에서 실행 후 연결하세요.'
+      url: 'https://github-mcp.example.com',
+      description: '저장소, 이슈, PR 등 통합 관리'
     },
     {
       id: 'google-maps',
       name: 'Google Maps',
-      url: 'http://localhost:3000/google-maps/sse',
+      url: 'https://maps-mcp.example.com',
       description: '장소 검색 및 지도 데이터 연동'
     }
   ];
@@ -434,10 +434,7 @@ export default function Home() {
           className="sidebar"
         >
           <div className="sidebar-header">
-            <div className="logo-wrapper">
-              <img src="/logo.png" alt="JSONOTE" className="sidebar-logo" />
-              <span className="logo-text">JSONOTE</span>
-            </div>
+            <span className="logo-text">JSONOTE</span>
             <button onClick={() => setIsSidebarOpen(false)} className="icon-btn mobile-only">
               <X size={20} />
             </button>
@@ -875,28 +872,16 @@ export default function Home() {
         }
 
         .sidebar-header {
-          padding: 2rem 1.5rem 1rem;
+          padding: 2.5rem 1.5rem 1.5rem;
           display: flex;
           justify-content: space-between;
           align-items: center;
         }
 
-        .logo-wrapper {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-
-        .sidebar-logo {
-          width: 32px;
-          height: 32px;
-          object-fit: contain;
-        }
-
         .logo-text {
-          font-family: 'Nanum Gothic', 'Outfit';
+          font-family: 'Outfit';
           font-weight: 900;
-          font-size: 1.25rem;
+          font-size: 1.5rem;
           letter-spacing: -0.05em;
         }
 
@@ -1152,11 +1137,10 @@ export default function Home() {
         }
 
         .type-label {
-          font-size: 0.6rem;
-          font-weight: 900;
-          color: var(--text-muted);
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-wrap: wrap;
         }
 
         .note-card-title {
@@ -1224,13 +1208,16 @@ export default function Home() {
         }
 
         .mobile-view .main-scroll-area {
-          padding: 1.5rem 1rem;
+          padding: 0;
+        }
+        .mobile-view .notes-container {
+          padding: 1rem;
         }
 
         .notes-container {
-          display: grid;
-          gap: 1rem;
-          width: 100%;
+          padding: 2.5rem;
+          max-width: 1000px;
+          margin: 0 auto;
         }
 
         .grid-view { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
@@ -1285,7 +1272,7 @@ export default function Home() {
 
         /* Tree Sidebar Styles */
         .tree-container {
-          padding: 0.5rem 0;
+          padding: 0;
         }
         .tree-level {
           display: flex;
@@ -1330,11 +1317,10 @@ export default function Home() {
 
         /* Database View Styles */
         .view-header {
-          padding-bottom: 1rem;
-          margin-bottom: 1.5rem;
-          border-bottom: 1px solid var(--border-glass);
+          padding-bottom: 0.75rem;
+          margin-bottom: 1rem;
           display: flex;
-          justify-content: space-between;
+          justify-content: flex-end;
           align-items: center;
         }
         .view-switcher {
@@ -1365,6 +1351,7 @@ export default function Home() {
           background: var(--bg-secondary);
           border-radius: 12px;
           border: 1px solid var(--border-glass);
+          width: 100%;
         }
         .notion-table {
           width: 100%;
@@ -1407,6 +1394,7 @@ export default function Home() {
           gap: 1.5rem;
           overflow-x: auto;
           padding-bottom: 1rem;
+          width: 100%;
         }
         .board-column {
           flex: 0 0 300px;

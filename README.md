@@ -1,7 +1,6 @@
 # JSONOTE (v0.1.0)
 
 [![Korean](https://img.shields.io/badge/Language-Korean-red)](./README_ko.md)
-<img src="./public/logo.png" width="200" align="center" />
 
 > **The Ultimate JSON-based Note-taking Application with GitHub Integration & MCP Support.**
 
@@ -54,7 +53,6 @@ npm run dev
 
 Explore more about JSONOTE through our detailed documentation:
 
-- 🎨 **[Logo Design](./public/logo.png)**: The visual identity of JSONOTE.
 - 📘 **[Getting Started Guide](./docs/GUIDE.md)** ([Korean](./docs/GUIDE_ko.md)): Learn the basics.
 - ⚙️ **[MCP Setup Guide](./docs/MCP_SETUP.md)** ([Korean](./docs/MCP_SETUP_ko.md)): Configure AI tools.
 - 🛡️ **[Security & Privacy](./docs/SECURITY.md)** ([Korean](./docs/SECURITY_ko.md)): How we handle your data.

@@ -1,7 +1,6 @@
 # JSONOTE (v0.1.0)
 
 [![English](https://img.shields.io/badge/Language-English-blue)](./README.md)
-<img src="./public/logo.png" width="200" align="center" />
 
 > **GitHub 연동 및 MCP 지원을 갖춘 궁극의 JSON 기반 노트 애플리케이션.**
 
@@ -54,7 +53,6 @@ npm run dev
 
 JSONOTE에 대한 더 깊은 내용은 아래 문서들을 확인하세요:
 
-- 🎨 **[로고 디자인](./public/logo.png)**: JSONOTE의 시각적 정체성.
 - 📘 **[시작 가이드](./docs/GUIDE_ko.md)** ([English](./docs/GUIDE.md)): 기본적인 사용법.
 - ⚙️ **[MCP 설정 가이드](./docs/MCP_SETUP_ko.md)** ([English](./docs/MCP_SETUP.md)): AI 도구 설정법.
 - 🛡️ **[보안 및 개인정보](./docs/SECURITY_ko.md)** ([English](./docs/SECURITY.md)): 데이터 처리 방식.

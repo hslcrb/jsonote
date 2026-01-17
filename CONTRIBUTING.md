@@ -1,7 +1,6 @@
 # Contributing to JSONOTE
 
 [![Korean](./CONTRIBUTING_ko.md)](./CONTRIBUTING_ko.md)
-<img src="./public/logo.png" width="80" align="right" />
 
 Thank you for your interest in contributing to JSONOTE! As the project is in its early stages, your contributions are highly valuable.
 
