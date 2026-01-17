@@ -46,11 +46,22 @@ const GuideView: React.FC<GuideViewProps> = () => {
 
         <section className="guide-section">
           <div className="section-body">
-            <h2>03. 시작하기</h2>
+            <h2>03. 보안 공지 (GITHUB 2FA)</h2>
+            <div className="warning-banner">
+              <p><strong>중요: 2단계 인증(2FA) 필수 적용</strong></p>
+              <p>GitHub의 보안 정책에 따라 모든 사용자는 <strong>2026년 2월 23일</strong>까지 2단계 인증을 활성화해야 합니다. 해당 기한 이후에는 인증 없이는 계정 이용이 영구적으로 제한될 수 있습니다.</p>
+            </div>
+            <p>보안 강화를 위해 지금 바로 GitHub 설정에서 2FA를 활성화하시기 바랍니다.</p>
+          </div>
+        </section>
+
+        <section className="guide-section">
+          <div className="section-body">
+            <h2>04. 시작하기</h2>
             <div className="steps-list">
               <div className="step-item">
                 <span className="step-label">가입</span>
-                <p>GitHub 계정을 생성하세요.</p>
+                <p>GitHub 계정을 생성하고 <strong>2단계 인증(2FA)</strong>을 활성화하세요.</p>
               </div>
               <div className="step-item">
                 <span className="step-label">저장소</span>
@@ -58,7 +69,11 @@ const GuideView: React.FC<GuideViewProps> = () => {
               </div>
               <div className="step-item">
                 <span className="step-label">토큰</span>
-                <p>Settings - Developer settings - Personal access tokens에서 <code>repo</code> 권한이 포함된 토큰을 발급받으세요.</p>
+                <div className="step-detail">
+                  <p>Settings - Developer settings - Personal access tokens 메뉴로 이동합니다.</p>
+                  <p>반드시 <strong>Tokens (classic)</strong> 옵션을 선택하여 <code>repo</code> 권한 포함 토큰을 발급받으세요.</p>
+                  <p className="sub-text">* Fine-grained tokens가 아닌 <strong>classic</strong> 버전을 권장합니다.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -138,6 +153,17 @@ const GuideView: React.FC<GuideViewProps> = () => {
           margin: 0;
         }
 
+        .step-detail {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .sub-text {
+          font-size: 0.85rem !important;
+          color: var(--text-muted) !important;
+        }
+
         strong {
           color: var(--text-primary);
         }
@@ -150,6 +176,25 @@ const GuideView: React.FC<GuideViewProps> = () => {
           .section-body p { font-size: 0.95rem; }
           .step-item { flex-direction: column; gap: 0.5rem; }
           .step-label { min-width: auto; }
+        }
+
+        .warning-banner {
+          background: var(--bg-secondary);
+          border: 1px solid var(--text-primary);
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .warning-banner p {
+          font-size: 0.95rem !important;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .warning-banner p:first-child {
+          margin-bottom: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         code {
