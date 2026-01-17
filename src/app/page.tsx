@@ -796,11 +796,11 @@ export default function Home() {
         }
 
         .checkbox-container {
-          padding: 1.5rem; /* Balanced padding for left-side placement */
+          padding: 0 0 0 1.5rem; /* 왼쪽만 패딩 */
           display: flex;
           align-items: center;
           justify-content: center;
-          flex-shrink: 0; /* Don't allow checkbox to be squeezed */
+          flex-shrink: 0;
         }
 
         .custom-checkbox {
@@ -856,6 +856,7 @@ export default function Home() {
         .note-card-main {
           flex: 1;
           padding: 1.5rem;
+          padding-left: 1rem; /* 체크박스와의 간격 축소 */
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
@@ -963,6 +964,19 @@ export default function Home() {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          margin-bottom: 0.25rem;
+        }
+
+        .del-btn {
+          padding: 0.4rem;
+          color: var(--text-muted);
+          transition: all 0.2s;
+          border-radius: 4px;
+        }
+
+        .del-btn:hover {
+          color: #ff4444;
+          background: rgba(255, 68, 68, 0.1);
         }
 
         .type-label {
