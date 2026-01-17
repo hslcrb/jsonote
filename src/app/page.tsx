@@ -163,6 +163,13 @@ export default function Home() {
     setToast({ message, type });
   };
 
+  // MCP 탭 진입 시 안내 토스트
+  useEffect(() => {
+    if (activeTab === 'mcp') {
+      showToast('현재 MCP 기능은 지속적으로 개발 중입니다. (브라우저 환경 최적화 중)', 'info');
+    }
+  }, [activeTab]);
+
   const closeConfirm = () => setConfirmState(prev => ({ ...prev, isOpen: false }));
 
   const showConfirm = (title: string, message: string, onConfirm: () => void, isDanger = false) => {
