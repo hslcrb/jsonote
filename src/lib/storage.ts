@@ -55,7 +55,8 @@ export class GitHubStorage implements IJsonoteStorage {
     }
 
     async saveNote(note: Note): Promise<void> {
-        const path = `notes/${note.metadata.id}.json`;
+        const baseName = note.metadata.customFilename || note.metadata.id;
+        const path = `notes/${baseName}.json`;
         const content = JSON.stringify(note, null, 2);
 
         let sha: string | undefined;

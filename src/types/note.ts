@@ -8,6 +8,7 @@ export interface NoteMetadata {
     type: NoteType;
     tags: string[];
     repository?: string;
+    customFilename?: string;
 }
 
 export interface Note {
