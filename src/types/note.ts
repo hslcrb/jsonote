@@ -1,4 +1,9 @@
-export type NoteType = 'general' | 'task' | 'meeting' | 'journal' | 'code';
+export type NoteType = 'general' | 'task' | 'meeting' | 'journal' | 'code' | 'database';
+
+export interface PropertyValue {
+    type: 'text' | 'number' | 'select' | 'multi_select' | 'date' | 'relation' | 'formula';
+    value: any;
+}
 
 export interface NoteMetadata {
     id: string;
@@ -10,6 +15,14 @@ export interface NoteMetadata {
     repository?: string;
     customFilename?: string;
     previousFilename?: string;
+    parentId?: string; // 무한 계층 구조를 위한 필드
+    properties?: Record<string, PropertyValue>; // 데이터베이스 속성
+    databaseConfig?: {
+        viewType: 'list' | 'table' | 'board' | 'calendar' | 'gallery';
+        columnOrder: string[];
+        filters: any[];
+        sorts: any[];
+    };
 }
 
 export interface Note {

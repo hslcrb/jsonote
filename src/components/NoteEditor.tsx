@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1, CheckCircle, ExternalLink } from 'lucide-react';
+import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1, CheckCircle, ExternalLink, Plus } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
 import { mcpClientManager } from '@/lib/mcp/client';
 import ReactMarkdown from 'react-markdown';
@@ -15,9 +15,18 @@ interface NoteEditorProps {
   onClose: () => void;
   mcpServers?: { id: string, name: string, url: string, enabled: boolean }[];
   storageConfig?: { provider: string; owner?: string; repo?: string; branch?: string };
+  allNotes?: Note[];
 }
 
-export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers = [], storageConfig }: NoteEditorProps) {
+export default function NoteEditor({
+  note,
+  onSave,
+  onDelete,
+  onClose,
+  mcpServers = [],
+  storageConfig,
+  allNotes = []
+}: NoteEditorProps) {
   const [editedNote, setEditedNote] = useState<Note>({ ...note });
   const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -292,8 +301,8 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
             </div>
 
             <div className="meta-item">
-              <label>태그</label>
-              <div className="tags-input">
+              <label>태그 (쉼표로 구분)</label>
+              <div className="input-with-icon">
                 <Tag size={14} />
                 <input
                   type="text"
@@ -307,6 +316,67 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
                     }
                   })}
                 />
+              </div>
+            </div>
+
+            <div className="meta-item">
+              <label>상위 페이지</label>
+              <select
+                value={editedNote.metadata.parentId || ''}
+                onChange={(e) => setEditedNote({
+                  ...editedNote,
+                  metadata: { ...editedNote.metadata, parentId: e.target.value || undefined }
+                })}
+              >
+                <option value="">없음 (최상위)</option>
+                {allNotes.filter(n => n.metadata.id !== editedNote.metadata.id).map(n => (
+                  <option key={n.metadata.id} value={n.metadata.id}>{n.metadata.title}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="meta-item">
+              <div className="prop-header">
+                <label>속성</label>
+                <button className="add-prop-btn" onClick={() => {
+                  const key = prompt('속성 이름을 입력하세요');
+                  if (key) {
+                    setEditedNote({
+                      ...editedNote,
+                      metadata: {
+                        ...editedNote.metadata,
+                        properties: {
+                          ...(editedNote.metadata.properties || {}),
+                          [key]: { type: 'text', value: '' }
+                        }
+                      }
+                    });
+                  }
+                }}><Plus size={12} /> 추가</button>
+              </div>
+              <div className="properties-list">
+                {Object.entries(editedNote.metadata.properties || {}).map(([key, prop]) => (
+                  <div key={key} className="prop-row">
+                    <span className="prop-key">{key}</span>
+                    <input
+                      className="prop-val"
+                      type="text"
+                      value={prop.value}
+                      onChange={(e) => {
+                        setEditedNote({
+                          ...editedNote,
+                          metadata: {
+                            ...editedNote.metadata,
+                            properties: {
+                              ...editedNote.metadata.properties,
+                              [key]: { ...prop, value: e.target.value }
+                            }
+                          }
+                        });
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
             <div className="meta-item">
@@ -608,21 +678,6 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
         }
 
         .meta-item select {
-          padding: 0.5rem;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-glass);
-          color: var(--text-primary);
-          outline: none;
-        }
-
-        .tags-input {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem;
-          border-bottom: 1px solid var(--border-glass);
-          color: var(--text-muted);
-        }
 
         .tags-input input {
           background: transparent;

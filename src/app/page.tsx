@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Plus, Settings, Search, Trash2, Menu, Info, Star, Cloud, Github, HardDrive, Sun, Moon, Monitor, Smartphone, LinkIcon, Zap, X } from 'lucide-react';
+import { FileText, Plus, Settings, Search, Trash2, Menu, Info, Star, Cloud, Github, HardDrive, Sun, Moon, Monitor, Smartphone, LinkIcon, Zap, X, Table, Layout, ChevronRight, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { Note, NoteType, StorageConfig } from '@/types/note';
 import NoteEditor from '@/components/NoteEditor';
@@ -27,6 +27,8 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'notes' | 'guide' | 'mcp'>('notes');
+  const [currentView, setCurrentView] = useState<'list' | 'table' | 'board' | 'calendar'>('list');
+  const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
   const [customMcpName, setCustomMcpName] = useState('');
   const [customMcpUrl, setCustomMcpUrl] = useState('');
 
@@ -143,6 +145,46 @@ export default function Home() {
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+
+  // 계층 구조 렌더링 함수
+  const renderNoteTree = (parentId: string | null = null, level: number = 0) => {
+    const children = notes.filter(n => (n.metadata.parentId || null) === parentId);
+
+    if (children.length === 0 && level > 0) return null;
+
+    return (
+      <div className="tree-level" style={{ paddingLeft: level > 0 ? '1rem' : '0' }}>
+        {children.map(note => {
+          const hasChildren = notes.some(n => n.metadata.parentId === note.metadata.id);
+          const isExpanded = expandedFolderIds.includes(note.metadata.id);
+
+          return (
+            <div key={note.metadata.id} className="tree-item-group">
+              <div
+                className={`tree-item ${selectedNote?.metadata.id === note.metadata.id ? 'active' : ''}`}
+                onClick={() => { setSelectedNote(note); setIsEditorOpen(true); }}
+              >
+                <div
+                  className="expander"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedFolderIds(prev =>
+                      isExpanded ? prev.filter(id => id !== note.metadata.id) : [...prev, note.metadata.id]
+                    );
+                  }}
+                >
+                  {hasChildren ? (isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />) : <span style={{ width: 14 }} />}
+                </div>
+                <FileText size={14} />
+                <span className="truncate">{note.metadata.title || '제목 없음'}</span>
+              </div>
+              {isExpanded && renderNoteTree(note.metadata.id, level + 1)}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   // Custom UI State
   const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
@@ -431,6 +473,13 @@ export default function Home() {
               </div>
 
               <div className="nav-group">
+                <label>워크스페이스</label>
+                <div className="tree-container">
+                  {renderNoteTree(null)}
+                </div>
+              </div>
+
+              <div className="nav-group">
                 <label>필터</label>
                 <button
                   className={`nav-item ${activeTab === 'notes' && filterType === 'journal' ? 'active' : ''}`}
@@ -524,50 +573,109 @@ export default function Home() {
               {activeTab === 'notes' ? (
                 <motion.section
                   key="notes"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className={`notes-container ${viewMode === 'mobile' ? 'list-view' : 'grid-view'}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="notes-container"
                 >
-                  <AnimatePresence initial={false}>
-                    {filteredNotes.map((note) => (
-                      <motion.div
-                        key={note.metadata.id}
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className={`note-card-flex ${selectedIds.includes(note.metadata.id) ? 'selected' : ''}`}
-                        onClick={() => selectedIds.length > 0 ? toggleSelection(note.metadata.id, {} as any) : (setSelectedNote(note), setIsEditorOpen(true))}
-                      >
-                        <div
-                          className={`checkbox-container ${selectedIds.includes(note.metadata.id) ? 'checked' : ''}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleSelection(note.metadata.id, e);
-                          }}
-                        >
-                          <div className="custom-checkbox" />
-                        </div>
-                        <div className="note-card-main">
-                          <div className="note-card-header">
-                            <span className="type-label">{note.metadata.type.toUpperCase()}</span>
+                  <div className="view-header">
+                    <div className="view-switcher">
+                      <button className={currentView === 'list' ? 'active' : ''} onClick={() => setCurrentView('list')}><Menu size={14} /> 리스트</button>
+                      <button className={currentView === 'table' ? 'active' : ''} onClick={() => setCurrentView('table')}><Table size={14} /> 테이블</button>
+                      <button className={currentView === 'board' ? 'active' : ''} onClick={() => setCurrentView('board')}><Layout size={14} /> 보드</button>
+                    </div>
+                  </div>
+
+                  {currentView === 'list' ? (
+                    <div className="notes-list-view">
+                      <AnimatePresence initial={false}>
+                        {filteredNotes.map((note) => (
+                          <motion.div
+                            key={note.metadata.id}
+                            layout
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className={`note-card-flex ${selectedIds.includes(note.metadata.id) ? 'selected' : ''}`}
+                            onClick={() => selectedIds.length > 0 ? toggleSelection(note.metadata.id, {} as any) : (setSelectedNote(note), setIsEditorOpen(true))}
+                          >
+                            <div
+                              className={`checkbox-container ${selectedIds.includes(note.metadata.id) ? 'checked' : ''}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleSelection(note.metadata.id, e);
+                              }}
+                            >
+                              <div className="custom-checkbox" />
+                            </div>
+                            <div className="note-card-main">
+                              <div className="note-card-header">
+                                <span className="type-label">{note.metadata.type.toUpperCase()}</span>
+                              </div>
+                              <h3 className="note-card-title">
+                                {note.metadata.title || '제목 없음'} · <span className="filename-badge">{note.metadata.customFilename || note.metadata.id}.json</span>
+                              </h3>
+                              <p className="note-card-preview">{note.content || '내용 없음'}</p>
+                              <div className="note-card-footer">
+                                <span className="date">{format(new Date(note.metadata.updatedAt), 'yyyy-MM-dd')}</span>
+                              </div>
+                            </div>
+                            {selectedIds.length === 0 && (
+                              <button className="del-btn-card" onClick={(e) => deleteNote(note.metadata.id, e)}>
+                                <Trash2 size={16} />
+                              </button>
+                            )}
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  ) : currentView === 'table' ? (
+                    <div className="table-view-container">
+                      <table className="notion-table">
+                        <thead>
+                          <tr>
+                            <th style={{ width: '40px' }}><div className="custom-checkbox" /></th>
+                            <th style={{ width: '300px' }}>이름</th>
+                            <th style={{ width: '120px' }}>유형</th>
+                            <th style={{ width: '200px' }}>태그</th>
+                            <th style={{ width: '150px' }}>최종 수정일</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredNotes.map(note => (
+                            <tr key={note.metadata.id} onClick={() => { setSelectedNote(note); setIsEditorOpen(true); }}>
+                              <td><div className={`custom-checkbox ${selectedIds.includes(note.metadata.id) ? 'checked' : ''}`} /></td>
+                              <td><div className="table-cell-title"><FileText size={14} /> {note.metadata.title}</div></td>
+                              <td><span className="type-badge">{note.metadata.type}</span></td>
+                              <td><div className="table-tags">{note.metadata.tags.map(t => <span key={t} className="tag">{t}</span>)}</div></td>
+                              <td>{format(new Date(note.metadata.updatedAt), 'MM-dd HH:mm')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : currentView === 'board' ? (
+                    <div className="board-view-container">
+                      {['general', 'task', 'meeting', 'journal', 'code'].map(type => (
+                        <div key={type} className="board-column">
+                          <div className="column-header">
+                            <span className="column-title">{type.toUpperCase()}</span>
+                            <span className="column-count">{filteredNotes.filter(n => n.metadata.type === type).length}</span>
                           </div>
-                          <h3 className="note-card-title">
-                            {note.metadata.title || '제목 없음'} · <span className="filename-badge">{note.metadata.customFilename || note.metadata.id}.json</span>
-                          </h3>
-                          <p className="note-card-preview">{note.content || '내용 없음'}</p>
-                          <div className="note-card-footer">
-                            <span className="date">{format(new Date(note.metadata.updatedAt), 'yyyy-MM-dd')}</span>
+                          <div className="board-cards">
+                            {filteredNotes.filter(n => n.metadata.type === type).map(note => (
+                              <div key={note.metadata.id} className="board-card" onClick={() => { setSelectedNote(note); setIsEditorOpen(true); }}>
+                                <h4>{note.metadata.title}</h4>
+                                <div className="card-meta">
+                                  {note.metadata.tags.slice(0, 2).map(t => <span key={t} className="tag">{t}</span>)}
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
-                        {selectedIds.length === 0 && (
-                          <button className="del-btn-card" onClick={(e) => deleteNote(note.metadata.id, e)}>
-                            <Trash2 size={16} />
-                          </button>
-                        )}
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                      ))}
+                    </div>
+                  ) : null}
+
                   {filteredNotes.length === 0 && (
                     <div className="empty-state">
                       <p>노트가 없습니다.</p>
@@ -693,6 +801,7 @@ export default function Home() {
             onClose={() => { setIsEditorOpen(false); setSelectedNote(null); }}
             mcpServers={storageConfig?.mcpServers}
             storageConfig={storageConfig || undefined}
+            allNotes={notes}
           />
         )}
       </AnimatePresence>
@@ -1157,6 +1266,176 @@ export default function Home() {
         .del-btn-card:hover {
           color: #ff4444;
           background: rgba(255, 68, 68, 0.1);
+        }
+
+        /* Tree Sidebar Styles */
+        .tree-container {
+          padding: 0.5rem 0;
+        }
+        .tree-level {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .tree-item-group {
+          display: flex;
+          flex-direction: column;
+        }
+        .tree-item {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.4rem 0.5rem;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+          transition: all 0.2s;
+        }
+        .tree-item:hover {
+          background: rgba(var(--accent-rgb), 0.1);
+          color: var(--text-primary);
+        }
+        .tree-item.active {
+          background: rgba(var(--accent-rgb), 0.2);
+          color: var(--text-primary);
+          font-weight: 600;
+        }
+        .expander {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 20px;
+          height: 20px;
+          border-radius: 4px;
+        }
+        .expander:hover {
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Database View Styles */
+        .view-header {
+          padding-bottom: 1rem;
+          margin-bottom: 1.5rem;
+          border-bottom: 1px solid var(--border-glass);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .view-switcher {
+          display: flex;
+          gap: 0.5rem;
+          background: var(--bg-secondary);
+          padding: 4px;
+          border-radius: 8px;
+        }
+        .view-switcher button {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.4rem 0.8rem;
+          font-size: 0.85rem;
+          border-radius: 6px;
+          color: var(--text-muted);
+        }
+        .view-switcher button.active {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Table View */
+        .table-view-container {
+          overflow-x: auto;
+          background: var(--bg-secondary);
+          border-radius: 12px;
+          border: 1px solid var(--border-glass);
+        }
+        .notion-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.9rem;
+        }
+        .notion-table th {
+          text-align: left;
+          padding: 1rem;
+          background: var(--bg-tertiary);
+          border-bottom: 1px solid var(--border-glass);
+          color: var(--text-muted);
+          font-weight: 600;
+        }
+        .notion-table td {
+          padding: 1rem;
+          border-bottom: 1px solid var(--border-glass);
+          cursor: pointer;
+        }
+        .notion-table tr:hover td {
+          background: rgba(255, 255, 255, 0.02);
+        }
+        .table-cell-title {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          font-weight: 500;
+        }
+        .type-badge {
+          padding: 2px 6px;
+          background: var(--bg-tertiary);
+          border-radius: 4px;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+        }
+
+        /* Board View */
+        .board-view-container {
+          display: flex;
+          gap: 1.5rem;
+          overflow-x: auto;
+          padding-bottom: 1rem;
+        }
+        .board-column {
+          flex: 0 0 300px;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+        .column-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0.5rem;
+        }
+        .column-title {
+          font-weight: 600;
+          font-size: 0.9rem;
+          color: var(--text-muted);
+        }
+        .board-cards {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        .board-card {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          border-radius: 12px;
+          padding: 1rem;
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .board-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+          border-color: var(--text-primary);
+        }
+        .board-card h4 {
+          margin-bottom: 0.5rem;
+          font-size: 1rem;
+        }
+        .card-meta {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
         }
 
         /* MCP Panel Styles */
