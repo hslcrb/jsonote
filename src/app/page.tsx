@@ -579,13 +579,14 @@ export default function Home() {
           font-weight: 500;
         }
 
-        .sync-btn {
+        .sync-indicator {
           display: flex;
           align-items: center;
           gap: 0.5rem;
           font-weight: 800;
-          font-size: 0.75rem;
+          font-size: 0.7rem;
           text-transform: uppercase;
+          color: var(--text-muted);
         }
 
         .main-scroll-area {
