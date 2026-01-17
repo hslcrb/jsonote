@@ -35,7 +35,7 @@ export default function NoteEditor({
   const [isSaved, setIsSaved] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success'>('idle');
 
-  // 로드 시 MCP 서버들에서 도구 목록 가져오기
+  // Fetch tool lists from MCP servers on load / 로드 시 MCP 서버들에서 도구 목록 가져오기
   React.useEffect(() => {
     const fetchAllTools = async () => {
       const toolLists = [];
@@ -158,13 +158,13 @@ export default function NoteEditor({
       }
     };
 
-    // 수동 저장이면 즉시 성공 상태 표시
+    // If manual save, show success state immediately / 수동 저장이면 즉시 성공 상태 표시
     if (isManual) {
       setSaveStatus('success');
     }
 
     try {
-      // 백그라운드에서 GitHub에 저장
+      // Save to GitHub in background / 백그라운드에서 GitHub에 저장
       await onSave(updatedNote);
       setIsSaved(true);
     } catch (error) {

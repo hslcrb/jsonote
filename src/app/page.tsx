@@ -235,7 +235,7 @@ export default function Home() {
   }, [storageConfig]);
 
   const handleSaveNote = async (updatedNote: Note) => {
-    // 1. 로컬 상태 즉시 업데이트
+    // 1. Immediately update local state / 1. 로컬 상태 즉시 업데이트
     const newNotes = notes.map(n => n.metadata.id === updatedNote.metadata.id ? updatedNote : n);
     if (!notes.find(n => n.metadata.id === updatedNote.metadata.id)) {
       newNotes.push(updatedNote); // New note support
@@ -244,10 +244,10 @@ export default function Home() {
     setNotes(newNotes);
     localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
 
-    // 에디터 상태 동기화 및 UI 목록 갱신을 위해 선택된 상태 업데이트
+    // Update selected state for editor sync and list refresh / 에디터 상태 동기화 및 UI 목록 갱신을 위해 선택된 상태 업데이트
     setSelectedNote(updatedNote);
 
-    // 2. 원격 저장소에 즉시 다이렉트 푸시
+    // 2. Direct push to remote repository / 2. 원격 저장소에 즉시 다이렉트 푸시
     if (storageConfig?.enabled) {
       const storage = getStorage(storageConfig);
       if (storage) {
@@ -257,7 +257,7 @@ export default function Home() {
         } catch (error) {
           console.error('Remote save failed:', error);
           showToast('원격 저장소 반영에 실패했습니다. 네트워크를 확인하세요.', 'error');
-          // 에러를 throw하지 않음 - 로컬 저장은 성공했으므로 편집기는 정상 진행
+          // Don't throw error - local save succeeded, so editor proceeds / 에러를 throw하지 않음 - 로컬 저장은 성공했으므로 편집기는 정상 진행
         }
       }
     }
@@ -407,7 +407,7 @@ export default function Home() {
     setStorageConfig(config);
     localStorage.setItem('jsonote_storage_config', JSON.stringify(config));
     setIsSettingsOpen(false);
-    // 설정 저장 즉시 동기화 트리거
+    // Trigger sync immediately after saving settings / 설정 저장 즉시 동기화 트리거
     setTimeout(() => handleSync(true), 1000);
   };
 

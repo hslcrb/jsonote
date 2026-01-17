@@ -15,8 +15,8 @@ export interface NoteMetadata {
     repository?: string;
     customFilename?: string;
     previousFilename?: string;
-    parentId?: string; // 무한 계층 구조를 위한 필드
-    properties?: Record<string, PropertyValue>; // 데이터베이스 속성
+    parentId?: string; // Field for infinite hierarchy / 무한 계층 구조를 위한 필드
+    properties?: Record<string, PropertyValue>; // Database properties / 데이터베이스 속성
     databaseConfig?: {
         viewType: 'list' | 'table' | 'board' | 'calendar' | 'gallery';
         columnOrder: string[];
@@ -31,29 +31,29 @@ export interface Note {
     data?: any;
 }
 
-// Storage Provider Types
+// Storage Provider Types / 저장소 제공자 유형
 export type StorageProvider = 'github' | 'gitlab' | 'gitea' | 's3' | 'webdav' | 'local';
 
 export interface StorageConfig {
     provider: StorageProvider;
     enabled: boolean;
-    // Common fields
+    // Common fields / 공통 필드
     url?: string;
     token?: string;
     owner?: string;
     repo?: string;
     branch?: string;
-    // S3 specific
+    // S3 specific / S3 전용 필드
     accessKey?: string;
     secretKey?: string;
     bucket?: string;
     region?: string;
     endpoint?: string;
-    // WebDAV / Custom specific
+    // WebDAV / Custom specific / WebDAV 및 커스텀 전용 필드
     username?: string;
     password?: string;
     path?: string;
-    // MCP Configuration
+    // MCP Configuration / MCP 설정
     mcpServers?: {
         id: string;
         name: string;

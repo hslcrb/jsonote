@@ -33,7 +33,7 @@ export class GitHubStorage implements IJsonoteStorage {
                     .map(async file => {
                         const content = await this.fetchNoteByPath(file.path);
                         if (content) {
-                            // 현재 파일명을 저장해두어 추후 변경 감지에 사용
+                            // Store current filename for detecting changes / 현재 파일명을 저장해두어 추후 변경 감지에 사용
                             const fileNameWithoutExt = decodeURIComponent(file.name.replace('.json', ''));
                             content.metadata.customFilename = fileNameWithoutExt;
                             content.metadata.previousFilename = fileNameWithoutExt;
@@ -70,7 +70,7 @@ export class GitHubStorage implements IJsonoteStorage {
         const encodedPath = `notes/${encodeURIComponent(baseName)}.json`;
         const content = JSON.stringify(note, null, 2);
 
-        // 파일명이 변경된 경우 기존 파일 삭제
+        // Delete old file if filename has changed / 파일명이 변경된 경우 기존 파일 삭제
         if (note.metadata.previousFilename && note.metadata.previousFilename !== baseName) {
             try {
                 const oldPath = `notes/${encodeURIComponent(note.metadata.previousFilename)}.json`;
@@ -94,7 +94,7 @@ export class GitHubStorage implements IJsonoteStorage {
             }
         }
 
-        // SHA 충돌 시 재시도 로직 (최대 3회)
+        // Retry logic for SHA conflicts (max 3) / SHA 충돌 시 재시도 로직 (최대 3회)
         let retries = 0;
         const maxRetries = 3;
 
@@ -110,7 +110,7 @@ export class GitHubStorage implements IJsonoteStorage {
                     });
                     sha = data.sha;
                 } catch (e) {
-                    // 파일이 없으면 sha는 undefined (새 파일 생성)
+                    // SHA is undefined if file doesn't exist (new file) / 파일이 없으면 sha는 undefined (새 파일 생성)
                 }
 
                 await this.octokit.rest.repos.createOrUpdateFileContents({
@@ -127,20 +127,20 @@ export class GitHubStorage implements IJsonoteStorage {
                 note.metadata.previousFilename = baseName;
                 return;
             } catch (error: any) {
-                // SHA 불일치 에러인 경우 재시도
+                // Retry on SHA mismatch error / SHA 불일치 에러인 경우 재시도
                 if (error.message && error.message.includes('does not match')) {
                     retries++;
                     console.warn(`SHA conflict, retrying... (${retries}/${maxRetries})`);
-                    // 잠시 대기 후 재시도
+                    // Wait before retry / 잠시 대기 후 재시도
                     await new Promise(resolve => setTimeout(resolve, 200 * retries));
                     continue;
                 }
-                // 다른 에러는 바로 throw
+                // Other errors throw immediately / 다른 에러는 바로 throw
                 throw error;
             }
         }
 
-        // 최대 재시도 횟수 초과
+        // Max retries exceeded / 최대 재시도 횟수 초과
         throw new Error('Failed to save note after multiple retries due to SHA conflicts');
     }
 
@@ -201,7 +201,7 @@ export class S3Storage implements IJsonoteStorage {
     }
 }
 
-// Factory to get storage
+// Factory to get storage / 저장소 객체 생성을 위한 팩토리
 export function getStorage(config: StorageConfig): IJsonoteStorage | null {
     if (!config.enabled) return null;
     switch (config.provider) {
