@@ -46,9 +46,10 @@ export default function NoteEditor({
   React.useEffect(() => {
     const fetchAllTools = async () => {
       const toolLists = [];
+      const failedServers = [];
+
       for (const server of mcpServers.filter(s => s.enabled)) {
         try {
-          await mcpClientManager.connect(server);
           const tools = await mcpClientManager.listTools(server.url);
           toolLists.push({
             serverId: server.id,
@@ -58,9 +59,15 @@ export default function NoteEditor({
           });
         } catch (e) {
           console.error(`Failed to load tools from ${server.name}:`, e);
+          failedServers.push(server.name);
         }
       }
+
       setAvailableTools(toolLists);
+
+      if (failedServers.length > 0) {
+        showToast?.(`${failedServers.join(', ')} 서버 연결에 실패했습니다.`, 'error');
+      }
     };
 
     if (mcpServers && mcpServers.length > 0) {

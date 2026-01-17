@@ -10,13 +10,9 @@ export class McpClientManager {
     // 브라우저에서는 Next.js API 프록시를 통해 MCP 서버와 통신
 
     async connect(config: McpServerConfig): Promise<void> {
-        // Connection test (fetching tool list) / 연결 테스트 (도구 목록 가져오기)
-        try {
-            await this.listTools(config.url);
-        } catch (error) {
-            console.error(`Failed to connect to ${config.name}:`, error);
-            throw error;
-        }
+        // Just a placeholder for SSE connection check / SSE 연결 확인을 위한 플레이홀더
+        // In the browser proxy model, connectivity is checked during tool listing
+        // 브라우저 프록시 모델에서는 도구 목록 조회 시 연결 상태가 확인됨
     }
 
     async listTools(serverUrl: string) {
