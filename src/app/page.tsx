@@ -355,7 +355,7 @@ export default function Home() {
             </div>
 
             <div className="header-right">
-              {isSelectionMode ? (
+              {selectedIds.length > 0 ? (
                 <div className="selection-actions">
                   <div
                     className={`checkbox-wrapper ${selectedIds.length === filteredNotes.length && filteredNotes.length > 0 ? 'checked' : ''}`}
@@ -367,14 +367,10 @@ export default function Home() {
                   </div>
                   <div className="action-buttons">
                     <button className="text-btn danger" onClick={deleteSelectedNotes}>선택 삭제</button>
-                    <button className="text-btn" onClick={() => { setIsSelectionMode(false); setSelectedIds([]); }}>취소</button>
+                    <button className="text-btn" onClick={() => setSelectedIds([])}>취소</button>
                   </div>
                 </div>
-              ) : (
-                <button className="icon-btn-minimal" onClick={() => setIsSelectionMode(true)} title="선택 모드">
-                  <CheckSquare size={18} />
-                </button>
-              )}
+              ) : null}
               {isSyncing && (
                 <div className="sync-indicator">
                   <Cloud size={14} className="animate-spin" />
@@ -402,20 +398,18 @@ export default function Home() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className={`note-card-flex ${selectedIds.includes(note.metadata.id) ? 'selected' : ''}`}
-                        onClick={() => isSelectionMode ? toggleSelection(note.metadata.id, {} as any) : (setSelectedNote(note), setIsEditorOpen(true))}
+                        onClick={() => selectedIds.length > 0 ? toggleSelection(note.metadata.id, {} as any) : (setSelectedNote(note), setIsEditorOpen(true))}
                       >
-                        {isSelectionMode && (
-                          <div
-                            className={`checkbox-container ${selectedIds.includes(note.metadata.id) ? 'checked' : ''}`}
-                            onClick={(e) => toggleSelection(note.metadata.id, e)}
-                          >
-                            <div className="custom-checkbox" />
-                          </div>
-                        )}
+                        <div
+                          className={`checkbox-container ${selectedIds.includes(note.metadata.id) ? 'checked' : ''}`}
+                          onClick={(e) => toggleSelection(note.metadata.id, e)}
+                        >
+                          <div className="custom-checkbox" />
+                        </div>
                         <div className="note-card-main">
                           <div className="note-card-header">
                             <span className="type-label">{note.metadata.type.toUpperCase()}</span>
-                            {!isSelectionMode && (
+                            {selectedIds.length === 0 && (
                               <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
                                 <Trash2 size={14} />
                               </button>
