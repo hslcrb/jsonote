@@ -67,10 +67,13 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
                   type="text"
                   className="filename-input"
                   value={editedNote.metadata.customFilename || ''}
-                  onChange={(e) => setEditedNote({
-                    ...editedNote,
-                    metadata: { ...editedNote.metadata, customFilename: e.target.value }
-                  })}
+                  onChange={(e) => {
+                    const filteredValue = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+                    setEditedNote({
+                      ...editedNote,
+                      metadata: { ...editedNote.metadata, customFilename: filteredValue }
+                    });
+                  }}
                   placeholder={editedNote.metadata.id}
                 />
                 <span className="ext">.json</span>
