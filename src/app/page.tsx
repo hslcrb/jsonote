@@ -138,8 +138,9 @@ export default function Home() {
       setNotes(resynced);
       localStorage.setItem('jsonote_notes', JSON.stringify(resynced));
       if (!silent) alert('동기화 완료');
-    } catch (e) {
-      if (!silent) alert('동기화 실패');
+    } catch (e: any) {
+      console.error('동기화 상세 오류:', e);
+      if (!silent) alert(`동기화 실패: ${e?.message || '알 수 없는 오류'}`);
     } finally {
       if (!silent) setIsSyncing(false);
     }
