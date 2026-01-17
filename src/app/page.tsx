@@ -474,7 +474,7 @@ export default function Home() {
                             )}
                           </div>
                           <h3 className="note-card-title">
-                            {note.metadata.title || '제목 없음'} · {note.metadata.customFilename || note.metadata.id}.json
+                            {note.metadata.title || '제목 없음'} · <span className="filename-badge">{note.metadata.customFilename || note.metadata.id}.json</span>
                           </h3>
                           <p className="note-card-preview">{note.content || '내용 없음'}</p>
                           <div className="note-card-footer">
@@ -856,6 +856,22 @@ export default function Home() {
           font-size: 1.25rem;
           font-weight: 900;
           color: var(--text-primary);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        .filename-badge {
+          background: var(--text-primary);
+          color: var(--bg-primary);
+          padding: 0.15rem 0.5rem;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.7rem;
+          font-weight: 800;
+          border-radius: 2px;
+          letter-spacing: 0;
+          text-transform: none;
         }
 
         .note-card-preview {
