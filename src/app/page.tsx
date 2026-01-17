@@ -7,9 +7,7 @@ import {
   Search,
   Github,
   Settings,
-  Folder,
   FileText,
-  Clock,
   Star,
   ChevronRight,
   Menu,
@@ -20,7 +18,6 @@ import {
   Smartphone,
   Hash,
   Trash2,
-  Type,
   Cloud,
   Info,
   HardDrive
@@ -42,13 +39,11 @@ export default function Home() {
   const [storageConfig, setStorageConfig] = useState<StorageConfig | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // States: Theme & Device View & Main content tab
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'notes' | 'guide'>('notes');
 
-  // Load persistence
   useEffect(() => {
     const savedNotes = localStorage.getItem('jsonote_notes');
     const savedConfig = localStorage.getItem('jsonote_storage_config');
@@ -57,21 +52,21 @@ export default function Home() {
 
     if (savedNotes) setNotes(JSON.parse(savedNotes));
     if (savedConfig) setStorageConfig(JSON.parse(savedConfig));
-    if (savedTheme) setTheme(savedTheme);
-    if (savedView) setViewMode(savedView);
+    if (savedTheme) setTheme(savedTheme || 'dark');
+    if (savedView) setViewMode(savedView || 'desktop');
 
     if (!savedNotes) {
       const mockNotes: Note[] = [
         {
           metadata: {
             id: '1',
-            title: 'Project jsonote Vision',
+            title: '제이소노트 프로젝트 비전',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             type: 'general',
-            tags: ['vision', 'jsonote'],
+            tags: ['비전', '제이소노트'],
           },
-          content: 'Building the ultimate JSON-based note taking app with GitHub integration.',
+          content: 'GitHub 연동을 통한 궁극의 JSON 기반 노트 앱 구축.',
         }
       ];
       setNotes(mockNotes);
@@ -79,7 +74,6 @@ export default function Home() {
     }
   }, []);
 
-  // Theme & View effects
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('jsonote_theme', theme);
@@ -89,10 +83,9 @@ export default function Home() {
     localStorage.setItem('jsonote_view', viewMode);
   }, [viewMode]);
 
-  // Auto-sync
   useEffect(() => {
     if (!storageConfig || !storageConfig.enabled) return;
-    const interval = setInterval(() => handleSync(true), 120000); // Poll every 2 mins
+    const interval = setInterval(() => handleSync(true), 120000);
     return () => clearInterval(interval);
   }, [storageConfig, notes]);
 
@@ -108,7 +101,7 @@ export default function Home() {
 
   const deleteNote = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('정말 이 노트를 삭제하시겠습니까?')) {
+    if (confirm('이 노트를 삭제하시겠습니까?')) {
       const newNotes = notes.filter(n => n.metadata.id !== id);
       setNotes(newNotes);
       localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
@@ -119,7 +112,7 @@ export default function Home() {
     const newNote: Note = {
       metadata: {
         id: Math.random().toString(36).substr(2, 9),
-        title: '제목 없는 노트',
+        title: '새로운 노트',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         type: 'general',
@@ -136,29 +129,17 @@ export default function Home() {
       if (!silent) setIsSettingsOpen(true);
       return;
     }
-
     const storage = getStorage(storageConfig);
-    if (!storage) {
-      if (!silent) alert('지원되지 않는 저장소 방식입니다.');
-      return;
-    }
-
+    if (!storage) return;
     if (!silent) setIsSyncing(true);
     try {
-      // Step 1: Push local updates to remote
-      for (const note of notes) {
-        await storage.saveNote(note);
-      }
-
-      // Step 2: Fetch latest from remote
+      for (const note of notes) await storage.saveNote(note);
       const resynced = await storage.fetchNotes();
       setNotes(resynced);
       localStorage.setItem('jsonote_notes', JSON.stringify(resynced));
-
-      if (!silent) alert('동기화가 성공적으로 완료되었습니다!');
+      if (!silent) alert('동기화 완료');
     } catch (e) {
-      console.error('Sync error:', e);
-      if (!silent) alert('동기화 중 오류가 발생했습니다.');
+      if (!silent) alert('동기화 실패');
     } finally {
       if (!silent) setIsSyncing(false);
     }
@@ -182,23 +163,18 @@ export default function Home() {
 
   return (
     <div className={`layout-container ${viewMode}-view`}>
-      <div className="app-shell shadow-2xl">
-        {/* Sidebar */}
+      <div className="app-shell">
         <motion.aside
           initial={false}
           animate={{
-            width: isSidebarOpen ? (viewMode === 'mobile' ? '100%' : '280px') : '0',
-            x: isSidebarOpen ? 0 : (viewMode === 'mobile' ? '-100%' : -280),
+            width: isSidebarOpen ? (viewMode === 'mobile' ? '100%' : '240px') : '0',
             opacity: isSidebarOpen ? 1 : 0
           }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          transition={{ duration: 0.2 }}
           className="sidebar"
         >
           <div className="sidebar-header">
-            <div className="logo-container">
-              <div className="logo-icon">J</div>
-              <span className="logo-text">jsonote</span>
-            </div>
+            <span className="logo-text">JSONOTE</span>
             <button onClick={() => setIsSidebarOpen(false)} className="icon-btn mobile-only">
               <X size={20} />
             </button>
@@ -206,111 +182,85 @@ export default function Home() {
 
           <div className="sidebar-content scroll-area">
             <button className="new-note-btn" onClick={createNewNote}>
-              <Plus size={20} />
-              <span>새 노트 작성</span>
+              <Plus size={18} />
+              <span>새 노트</span>
             </button>
 
             <nav className="sidebar-nav">
               <div className="nav-group">
-                <label>Main</label>
+                <label>메뉴</label>
                 <button
                   className={`nav-item ${activeTab === 'notes' && filterType === 'all' ? 'active' : ''}`}
-                  onClick={() => {
-                    setActiveTab('notes');
-                    setFilterType('all');
-                    if (viewMode === 'mobile') setIsSidebarOpen(false);
-                  }}
+                  onClick={() => { setActiveTab('notes'); setFilterType('all'); if (viewMode === 'mobile') setIsSidebarOpen(false); }}
                 >
-                  <FileText size={18} />
+                  <FileText size={16} />
                   <span>모든 노트</span>
                 </button>
                 <button
                   className={`nav-item ${activeTab === 'guide' ? 'active' : ''}`}
-                  onClick={() => {
-                    setActiveTab('guide');
-                    if (viewMode === 'mobile') setIsSidebarOpen(false);
-                  }}
+                  onClick={() => { setActiveTab('guide'); if (viewMode === 'mobile') setIsSidebarOpen(false); }}
                 >
-                  <Info size={18} />
-                  <span>소개 및 가이드</span>
+                  <Info size={16} />
+                  <span>사용 가이드</span>
                 </button>
               </div>
 
               <div className="nav-group">
-                <label>Favorites</label>
+                <label>필터</label>
                 <button
                   className={`nav-item ${activeTab === 'notes' && filterType === 'journal' ? 'active' : ''}`}
-                  onClick={() => {
-                    setActiveTab('notes');
-                    setFilterType('journal');
-                    if (viewMode === 'mobile') setIsSidebarOpen(false);
-                  }}
+                  onClick={() => { setActiveTab('notes'); setFilterType('journal'); if (viewMode === 'mobile') setIsSidebarOpen(false); }}
                 >
-                  <Star size={18} />
+                  <Star size={16} />
                   <span>저널</span>
                 </button>
               </div>
 
               <div className="nav-group">
-                <label>Storage</label>
+                <label>저장소</label>
                 <div className="nav-item-static">
-                  {storageConfig?.provider === 's3' ? <Cloud size={18} /> :
-                    storageConfig?.provider === 'github' ? <Github size={18} /> : <HardDrive size={18} />}
-                  <span className="truncate">{storageConfig?.provider?.toUpperCase() || 'Local'}</span>
-                  <span className="badge">{notes.length}</span>
+                  {storageConfig?.provider === 's3' ? <Cloud size={16} /> :
+                    storageConfig?.provider === 'github' ? <Github size={16} /> : <HardDrive size={16} />}
+                  <span className="truncate">{storageConfig?.provider?.toUpperCase() || 'LOCAL'}</span>
                 </div>
               </div>
             </nav>
           </div>
 
           <div className="sidebar-footer">
-            <button className="nav-item" onClick={() => setIsSettingsOpen(true)}>
-              <Settings size={18} />
+            <button className="nav-item-minimal" onClick={() => setIsSettingsOpen(true)}>
+              <Settings size={16} />
               <span>설정</span>
             </button>
-            <div className="toggle-group">
-              <button
-                onClick={toggleTheme}
-                className="icon-btn"
-                title={theme === 'dark' ? '라이트 모드로 변경' : '다크 모드로 변경'}
-              >
-                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            <div className="toggle-row">
+              <button onClick={toggleTheme} className="icon-btn-minimal">
+                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-              <button
-                onClick={toggleViewMode}
-                className="icon-btn"
-                title={viewMode === 'desktop' ? '모바일 뷰 시뮬레이션' : '데스크탑 뷰'}
-              >
-                {viewMode === 'desktop' ? <Smartphone size={18} /> : <Monitor size={18} />}
+              <button onClick={toggleViewMode} className="icon-btn-minimal">
+                {viewMode === 'desktop' ? <Smartphone size={16} /> : <Monitor size={16} />}
               </button>
             </div>
           </div>
         </motion.aside>
 
-        {/* Main Content */}
         <main className="main-content">
           <header className="content-header">
             <div className="header-left">
-              <button
-                onClick={() => setIsSidebarOpen(true)}
-                className={`icon-btn ${isSidebarOpen ? 'hidden' : ''}`}
-              >
+              <button onClick={() => setIsSidebarOpen(true)} className={`icon-btn ${isSidebarOpen ? 'hidden' : ''}`}>
                 <Menu size={20} />
               </button>
               <div className="breadcrumb desktop-only">
-                <span className="text-muted">Workspace</span>
-                <ChevronRight size={14} className="text-muted" />
-                <span className="current">{activeTab === 'notes' ? 'Notes' : 'User Guide'}</span>
+                <span className="current">{activeTab === 'notes' ? '노트 목록' : '사용 가이드'}</span>
               </div>
             </div>
 
             <div className="header-center desktop-only">
               {activeTab === 'notes' && (
                 <div className="search-bar">
-                  <Search size={18} className="text-muted" />
+                  <Search size={16} />
                   <input
                     type="text"
-                    placeholder="Search notes, tags..."
+                    placeholder="검색..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -319,14 +269,9 @@ export default function Home() {
             </div>
 
             <div className="header-right">
-              <button
-                className={`sync-btn ${isSyncing ? 'animate-pulse' : ''}`}
-                onClick={() => handleSync()}
-                disabled={isSyncing}
-                title="데이터 동기화"
-              >
-                <Cloud size={18} className={isSyncing ? 'animate-spin' : ''} />
-                <span className="desktop-only">{isSyncing ? 'Syncing...' : 'Sync Now'}</span>
+              <button className="sync-btn" onClick={() => handleSync()} disabled={isSyncing}>
+                <Cloud size={16} className={isSyncing ? 'animate-spin' : ''} />
+                <span className="desktop-only">{isSyncing ? '동기화 중' : '동기화'}</span>
               </button>
             </div>
           </header>
@@ -336,10 +281,9 @@ export default function Home() {
               {activeTab === 'notes' ? (
                 <motion.section
                   key="notes"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   className={`notes-container ${viewMode === 'mobile' ? 'list-view' : 'grid-view'}`}
                 >
                   <AnimatePresence initial={false}>
@@ -347,62 +291,33 @@ export default function Home() {
                       <motion.div
                         key={note.metadata.id}
                         layout
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         className="note-card"
-                        onClick={() => {
-                          setSelectedNote(note);
-                          setIsEditorOpen(true);
-                        }}
+                        onClick={() => { setSelectedNote(note); setIsEditorOpen(true); }}
                       >
                         <div className="note-card-header">
-                          <div className={`type-tag type-${note.metadata.type}`}>
-                            <Hash size={10} />
-                            {note.metadata.type === 'general' ? 'General' :
-                              note.metadata.type === 'meeting' ? 'Meeting' :
-                                note.metadata.type === 'task' ? 'To-do' :
-                                  note.metadata.type === 'journal' ? 'Journal' : 'Code'}
-                          </div>
-                          <button className="del-btn-minimal" onClick={(e) => deleteNote(note.metadata.id, e)}>
-                            <Trash2 size={16} />
+                          <span className="type-label">{note.metadata.type.toUpperCase()}</span>
+                          <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
+                            <Trash2 size={14} />
                           </button>
                         </div>
-                        <h3 className="note-card-title">{note.metadata.title || 'Untitled Note'}</h3>
-                        <p className="note-card-preview">{note.content || 'No content yet...'}</p>
+                        <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
+                        <p className="note-card-preview">{note.content || '내용 없음'}</p>
                         <div className="note-card-footer">
-                          <span className="date">
-                            {format(new Date(note.metadata.updatedAt), 'MMM dd')}
-                          </span>
-                          <div className="tags">
-                            {note.metadata.tags.slice(0, 2).map(tag => (
-                              <span key={tag} className="tag">#{tag}</span>
-                            ))}
-                          </div>
+                          <span className="date">{format(new Date(note.metadata.updatedAt), 'yyyy-MM-dd')}</span>
                         </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
                   {filteredNotes.length === 0 && (
                     <div className="empty-state">
-                      <div className="empty-icon-box">
-                        <FileText size={48} />
-                      </div>
-                      <p>No notes found matching your search.</p>
-                      <button className="new-note-btn-minimal" onClick={createNewNote}>
-                        Create your first note
-                      </button>
+                      <p>노트가 없습니다.</p>
                     </div>
                   )}
                 </motion.section>
               ) : (
-                <motion.div
-                  key="guide"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
+                <motion.div key="guide" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <GuideView />
                 </motion.div>
               )}
@@ -411,14 +326,9 @@ export default function Home() {
         </main>
       </div>
 
-      {/* Modals */}
       <AnimatePresence>
         {isSettingsOpen && (
-          <SettingsModal
-            config={storageConfig}
-            onSave={handleSaveSettings}
-            onClose={() => setIsSettingsOpen(false)}
-          />
+          <SettingsModal config={storageConfig} onSave={handleSaveSettings} onClose={() => setIsSettingsOpen(false)} />
         )}
         {isEditorOpen && selectedNote && (
           <NoteEditor
@@ -433,267 +343,160 @@ export default function Home() {
         .layout-container {
           height: 100vh;
           width: 100vw;
-          overflow: hidden;
-          background-color: var(--bg-primary);
-          transition: background-color 0.4s ease;
+          background: var(--bg-primary);
           display: flex;
           justify-content: center;
           align-items: center;
         }
 
-        /* App Shell - The core container */
         .app-shell {
           display: flex;
-          position: relative;
-          overflow: hidden;
-          background: var(--bg-primary);
-          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Desktop Mode: Full Screen */
-        .desktop-view .app-shell {
           width: 100%;
           height: 100%;
-        }
-
-        /* Mobile Simulation Mode: Phone Frame */
-        .mobile-view {
-          background-color: #08080a;
-          background-image: 
-            radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+          border: 1px solid var(--border-glass);
         }
 
         .mobile-view .app-shell {
-          width: 420px;
-          height: 880px;
-          max-height: 90vh;
-          border-radius: 48px;
-          border: 8px solid #1a1a1c;
-          box-shadow: 
-            0 50px 100px -20px rgba(0, 0, 0, 0.7),
-            0 0 0 1px rgba(255, 255, 255, 0.05);
-          margin: auto;
+          width: 380px;
+          height: 800px;
+          border: 2px solid var(--text-primary);
         }
 
-        /* Sidebar Styling */
         .sidebar {
-          height: 100%;
-          display: flex;
-          flex-direction: column;
           background: var(--bg-secondary);
           border-right: 1px solid var(--border-glass);
-          z-index: 100;
-          overflow: hidden;
-        }
-
-        .mobile-view .sidebar {
-          position: absolute;
-          left: 0;
-          top: 0;
-          z-index: 200;
-          border-right: none;
-          box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+          display: flex;
+          flex-direction: column;
         }
 
         .sidebar-header {
           padding: 2rem 1.5rem;
           display: flex;
-          align-items: center;
           justify-content: space-between;
-        }
-
-        .logo-container {
-          display: flex;
           align-items: center;
-          gap: 0.75rem;
-        }
-
-        .logo-icon {
-          width: 36px;
-          height: 36px;
-          background: var(--accent-gradient);
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: 800;
-          font-family: 'Outfit';
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .logo-text {
-          font-size: 1.4rem;
-          font-weight: 800;
           font-family: 'Outfit';
-          letter-spacing: -0.01em;
-          background: linear-gradient(to bottom, #fff, #94a3b8);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          font-weight: 900;
+          font-size: 1.5rem;
+          letter-spacing: -0.05em;
         }
 
         .sidebar-content {
           flex: 1;
-          padding: 0 1rem;
+          padding: 1rem;
           display: flex;
           flex-direction: column;
           gap: 2rem;
-          overflow-y: auto;
         }
 
         .new-note-btn {
           width: 100%;
-          padding: 1.1rem;
+          padding: 0.8rem;
+          background: var(--text-primary);
+          color: var(--bg-primary);
+          font-weight: 700;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 0.75rem;
-          font-weight: 700;
-          color: white;
-          background: var(--accent-gradient);
-          border-radius: 14px;
-          transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .new-note-btn:hover {
-          transform: translateY(-2px) scale(1.02);
-          box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+          gap: 0.5rem;
+          text-transform: uppercase;
         }
 
         .nav-group {
           display: flex;
           flex-direction: column;
-          gap: 0.4rem;
+          gap: 0.2rem;
         }
 
         .nav-group label {
-          font-size: 0.7rem;
-          font-weight: 700;
+          font-size: 0.65rem;
+          font-weight: 800;
           color: var(--text-muted);
-          padding-left: 1rem;
           margin-bottom: 0.5rem;
-          letter-spacing: 0.1em;
           text-transform: uppercase;
         }
 
         .nav-item {
           display: flex;
           align-items: center;
-          gap: 0.85rem;
-          padding: 0.9rem 1.1rem;
-          border-radius: 12px;
+          gap: 0.75rem;
+          padding: 0.75rem;
           color: var(--text-secondary);
-          font-weight: 600;
-          font-size: 0.95rem;
-          transition: all 0.2s;
-        }
-
-        .nav-item:hover {
-          background: rgba(255,255,255,0.03);
-          color: var(--text-primary);
+          font-weight: 500;
+          font-size: 0.9rem;
         }
 
         .nav-item.active {
-          background: rgba(59, 130, 246, 0.1);
-          color: var(--accent-primary);
-          box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2);
+          color: var(--text-primary);
+          background: var(--bg-tertiary);
         }
 
-        .badge {
-          margin-left: auto;
-          font-size: 0.75rem;
-          background: rgba(255,255,255,0.05);
-          padding: 0.2rem 0.6rem;
-          border-radius: 20px;
+        .nav-item-static {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem;
           color: var(--text-muted);
+          font-size: 0.9rem;
         }
 
         .sidebar-footer {
-          padding: 1.5rem;
+          padding: 1rem;
           border-top: 1px solid var(--border-glass);
-          background: rgba(0,0,0,0.1);
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.5rem;
         }
 
-        .toggle-group {
+        .nav-item-minimal {
           display: flex;
-          padding: 0.3rem;
-          background: rgba(0,0,0,0.3);
-          border-radius: 12px;
-          gap: 0.3rem;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem;
+          font-size: 0.85rem;
+          color: var(--text-secondary);
         }
 
-        .toggle-group button {
-          flex: 1;
-          height: 36px;
-          border-radius: 9px;
+        .toggle-row {
+          display: flex;
+          gap: 0.5rem;
         }
 
-        /* Main Content Styling */
+        .icon-btn-minimal {
+          padding: 0.5rem;
+          color: var(--text-muted);
+        }
+
         .main-content {
           flex: 1;
           display: flex;
           flex-direction: column;
-          height: 100%;
-          min-width: 0;
           background: var(--bg-primary);
-          position: relative;
         }
 
         .content-header {
-          height: 80px;
+          height: 64px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 2rem;
+          padding: 0 1.5rem;
           border-bottom: 1px solid var(--border-glass);
-          background: rgba(10, 10, 12, 0.8);
-          backdrop-filter: blur(20px);
-          z-index: 50;
         }
 
-        .header-left, .header-right {
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-        }
-
-        .breadcrumb {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.9rem;
-          font-weight: 500;
-        }
-
-        .breadcrumb span {
-          color: var(--text-muted);
-        }
-
-        .breadcrumb span.current {
-          color: var(--text-primary);
-          font-weight: 700;
+        .header-center {
+          flex: 1;
+          max-width: 400px;
+          margin: 0 2rem;
         }
 
         .search-bar {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          padding: 0.7rem 1.25rem;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid var(--border-glass);
-          border-radius: 12px;
-          width: 320px;
-          transition: all 0.3s;
-        }
-
-        .search-bar:focus-within {
-          background: rgba(255,255,255,0.06);
-          border-color: var(--accent-primary);
-          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          border-bottom: 1px solid var(--border-glass);
         }
 
         .search-bar input {
@@ -701,69 +504,43 @@ export default function Home() {
           border: none;
           outline: none;
           color: var(--text-primary);
-          font-size: 0.9rem;
           width: 100%;
         }
 
         .sync-btn {
-          padding: 0.7rem 1.2rem;
           display: flex;
           align-items: center;
-          gap: 0.6rem;
+          gap: 0.5rem;
           font-weight: 700;
-          font-size: 0.9rem;
-          border-radius: 12px;
-          background: var(--bg-tertiary);
-          border: 1px solid var(--border-glass);
+          font-size: 0.85rem;
+          text-transform: uppercase;
         }
 
         .main-scroll-area {
           flex: 1;
-          overflow-y: auto;
           padding: 2rem;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .mobile-view .main-scroll-area {
-          padding: 1.25rem;
+          overflow-y: auto;
         }
 
         .notes-container {
           display: grid;
-          gap: 1.5rem;
-          width: 100%;
-          max-width: 1400px;
-          margin: 0 auto;
+          gap: 1rem;
         }
 
-        .grid-view {
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        }
+        .grid-view { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        .list-view { grid-template-columns: 1fr; }
 
-        .list-view {
-          grid-template-columns: 1fr;
-          max-width: 800px;
-        }
-
-        /* Note Cards */
         .note-card {
-          padding: 1.75rem;
+          padding: 1.5rem;
+          border: 1px solid var(--border-glass);
           display: flex;
           flex-direction: column;
-          gap: 1rem;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-glass);
-          border-radius: 20px;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          gap: 0.75rem;
           cursor: pointer;
-          position: relative;
         }
 
         .note-card:hover {
-          transform: translateY(-4px);
-          border-color: var(--accent-primary);
-          box-shadow: 0 20px 40px -15px rgba(0,0,0,0.4);
+          border-color: var(--text-primary);
         }
 
         .note-card-header {
@@ -772,153 +549,49 @@ export default function Home() {
           align-items: center;
         }
 
-        .type-tag {
-          font-size: 0.65rem;
-          font-weight: 800;
-          padding: 0.35rem 0.75rem;
-          border-radius: 8px;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          display: flex;
-          align-items: center;
-          gap: 0.4rem;
+        .type-label {
+          font-size: 0.6rem;
+          font-weight: 900;
+          letter-spacing: 0.1em;
+          color: var(--text-muted);
         }
 
-        .type-general { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-        .type-meeting { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
-        .type-journal { background: rgba(236, 72, 153, 0.1); color: #ec4899; }
-        .type-task { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
-
         .note-card-title {
-          font-size: 1.2rem;
-          font-family: 'Outfit';
+          font-size: 1.1rem;
           font-weight: 700;
-          color: var(--text-primary);
-          line-height: 1.3;
         }
 
         .note-card-preview {
-          font-size: 0.95rem;
+          font-size: 0.9rem;
           color: var(--text-secondary);
-          line-height: 1.6;
           display: -webkit-box;
-          -webkit-line-clamp: 3;
+          -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
 
         .note-card-footer {
-          margin-top: auto;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-top: 1.25rem;
-          border-top: 1px solid var(--border-glass);
-        }
-
-        .date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
-        .tag { font-size: 0.75rem; color: var(--accent-primary); font-weight: 700; }
-
-        /* Icon Buttons */
-        .icon-btn {
-          width: 44px;
-          height: 44px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 12px;
-          color: var(--text-secondary);
-          transition: all 0.2s;
-        }
-
-        .header-center {
-          flex: 1;
-          display: flex;
-          justify-content: center;
-          padding: 0 2rem;
-        }
-
-        .nav-item-static {
-          display: flex;
-          align-items: center;
-          gap: 0.85rem;
-          padding: 0.9rem 1.1rem;
-          color: var(--text-muted);
-          font-weight: 600;
-          font-size: 0.95rem;
-        }
-
-        .del-btn-minimal {
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 8px;
-          color: var(--text-muted);
-          transition: all 0.2s;
-        }
-
-        .del-btn-minimal:hover {
-          background: rgba(244, 63, 94, 0.1);
-          color: #f43f5e;
-          transform: scale(1.1);
-        }
-
-        .empty-icon-box {
-          width: 80px;
-          height: 80px;
-          background: var(--bg-tertiary);
-          border-radius: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--text-muted);
-          margin-bottom: 1rem;
-        }
-
-        .new-note-btn-minimal {
           margin-top: 1rem;
-          padding: 0.75rem 1.5rem;
-          background: rgba(59, 130, 246, 0.1);
-          color: var(--accent-primary);
-          border-radius: 99px;
+          font-size: 0.75rem;
+          color: var(--text-muted);
+        }
+
+        .empty-state {
+          padding: 4rem;
+          text-align: center;
+          color: var(--text-muted);
+        }
+
+        .breadcrumb span {
           font-weight: 700;
-          font-size: 0.9rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
-
-        .new-note-btn-minimal:hover {
-          background: var(--accent-gradient);
-          color: white;
-          transform: translateY(-2px);
-        }
-
-        /* Custom Scrollbar for premium feel */
-        .scroll-area::-webkit-scrollbar {
-          width: 5px;
-        }
-        .scroll-area::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 10px;
-        }
-        .scroll-area::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.1);
-        }
-
-        @media (max-width: 640px) {
-          .search-bar { width: 100%; }
-        }
-
-        /* Utils */
-        .hidden { display: none; }
-        .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .text-muted { color: var(--text-muted); }
-        .text-nowrap { white-space: nowrap; }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+        .hidden { display: none; }
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       `}</style>
     </div>
   );

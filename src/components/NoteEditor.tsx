@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, Save, Eye, Code, Tag, Trash2, Maximize2, ChevronLeft } from 'lucide-react';
+import { Save, Tag, Maximize2, ChevronLeft } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
 
 interface NoteEditorProps {
@@ -28,26 +28,11 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="editor-overlay"
-    >
-      <motion.div
-        layout
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{
-          scale: 1,
-          y: 0,
-          width: isFullScreen ? '100%' : '90%',
-          height: isFullScreen ? '100%' : '85%'
-        }}
-        className="editor-container glass"
-      >
+    <div className="editor-overlay">
+      <div className={`editor-container ${isFullScreen ? 'fullscreen' : ''}`}>
         <header className="editor-header">
-          <div className="header-left-actions">
-            <button className="icon-btn" onClick={onClose}>
+          <div className="header-left">
+            <button className="icon-btn" onClick={onClose} aria-label="닫기">
               <ChevronLeft size={20} />
             </button>
             <input
@@ -58,20 +43,34 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
                 ...editedNote,
                 metadata: { ...editedNote.metadata, title: e.target.value }
               })}
-              placeholder="제목 없는 노트"
+              placeholder="제목"
             />
           </div>
           <div className="header-actions">
-            <div className="tab-switcher glass desktop-only">
-              <button className={view === 'edit' ? 'active' : ''} onClick={() => setView('edit')}>편집</button>
-              <button className={view === 'json' ? 'active' : ''} onClick={() => setView('json')}>JSON</button>
+            <div className="tab-switcher desktop-only">
+              <button
+                className={view === 'edit' ? 'active' : ''}
+                onClick={() => setView('edit')}
+              >
+                편집
+              </button>
+              <button
+                className={view === 'json' ? 'active' : ''}
+                onClick={() => setView('json')}
+              >
+                JSON
+              </button>
             </div>
-            <button className="icon-btn desktop-only" onClick={() => setIsFullScreen(!isFullScreen)}>
+            <button
+              className="icon-btn desktop-only"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+              aria-label="전체화면"
+            >
               <Maximize2 size={18} />
             </button>
-            <button className="save-btn glass-card" onClick={handleSave}>
+            <button className="save-btn" onClick={handleSave}>
               <Save size={18} />
-              <span className="desktop-only text-nowrap">저장</span>
+              <span className="desktop-only">저장</span>
             </button>
           </div>
         </header>
@@ -86,7 +85,6 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
                   ...editedNote,
                   metadata: { ...editedNote.metadata, type: e.target.value as NoteType }
                 })}
-                className="glass"
               >
                 <option value="general">일반</option>
                 <option value="task">할 일</option>
@@ -97,9 +95,9 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
             </div>
 
             <div className="meta-item">
-              <label>태그 (쉼표로 구분)</label>
-              <div className="tags-input-wrapper glass">
-                <Tag size={14} className="text-muted" />
+              <label>태그</label>
+              <div className="tags-input">
+                <Tag size={14} />
                 <input
                   type="text"
                   placeholder="태그..."
@@ -122,217 +120,209 @@ export default function NoteEditor({ note, onSave, onClose }: NoteEditorProps) {
                 className="content-textarea"
                 value={editedNote.content}
                 onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
-                placeholder="생각을 기록하세요..."
+                placeholder="내용을 입력하세요..."
                 autoFocus
               />
             ) : (
-              <pre className="json-viewer scroll-area">
+              <pre className="json-viewer">
                 {JSON.stringify(editedNote, null, 2)}
               </pre>
             )}
           </main>
         </div>
-      </motion.div>
+      </div>
 
       <style jsx>{`
-                .editor-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.4);
-                    backdrop-filter: blur(8px);
-                    z-index: 1000;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
+        .editor-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: var(--bg-primary);
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
 
-                .editor-container {
-                    max-width: 1200px;
-                    display: flex;
-                    flex-direction: column;
-                    border-radius: var(--radius-lg);
-                    overflow: hidden;
-                    box-shadow: var(--shadow-lg);
-                    transition: width 0.3s ease, height 0.3s ease;
-                }
+        .editor-container {
+          width: 90%;
+          height: 90%;
+          background: var(--bg-primary);
+          border: 1px solid var(--border-glass);
+          display: flex;
+          flex-direction: column;
+        }
 
-                .editor-header {
-                    padding: 0.75rem 1.5rem;
-                    border-bottom: 1px solid var(--border-glass);
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 1rem;
-                    background: rgba(var(--bg-secondary), 0.5);
-                }
+        .editor-container.fullscreen {
+          width: 100%;
+          height: 100%;
+        }
 
-                .header-left-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    flex: 1;
-                }
+        .editor-header {
+          padding: 1rem 1.5rem;
+          border-bottom: 1px solid var(--border-glass);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
 
-                .title-input {
-                    background: transparent;
-                    border: none;
-                    outline: none;
-                    font-size: 1.25rem;
-                    font-weight: 700;
-                    font-family: 'Outfit', sans-serif;
-                    color: var(--text-primary);
-                    width: 100%;
-                }
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex: 1;
+        }
 
-                .header-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.75rem;
-                }
+        .title-input {
+          background: transparent;
+          border: none;
+          outline: none;
+          font-size: 1.5rem;
+          font-weight: 900;
+          font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+          color: var(--text-primary);
+          width: 100%;
+          text-transform: uppercase;
+        }
 
-                .tab-switcher {
-                    display: flex;
-                    padding: 0.2rem;
-                    border-radius: var(--radius-md);
-                }
+        .header-actions {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
 
-                .tab-switcher button {
-                    padding: 0.35rem 0.75rem;
-                    font-size: 0.8rem;
-                    font-weight: 600;
-                    border-radius: var(--radius-sm);
-                    color: var(--text-secondary);
-                }
+        .tab-switcher {
+          display: flex;
+          border-right: 1px solid var(--border-glass);
+          padding-right: 1rem;
+        }
 
-                .tab-switcher button.active {
-                    background: var(--bg-tertiary);
-                    color: var(--text-primary);
-                }
+        .tab-switcher button {
+          padding: 0.5rem 1rem;
+          font-size: 0.8rem;
+          font-weight: 800;
+          color: var(--text-muted);
+          text-transform: uppercase;
+        }
 
-                .save-btn {
-                    padding: 0.6rem 1.25rem;
-                    background: var(--accent-gradient);
-                    color: white;
-                    font-weight: 700;
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                    border-radius: var(--radius-full);
-                }
+        .tab-switcher button.active {
+          color: var(--text-primary);
+          text-decoration: underline;
+        }
 
-                .editor-body {
-                    flex: 1;
-                    display: flex;
-                    overflow: hidden;
-                }
+        .save-btn {
+          padding: 0.5rem 1.5rem;
+          background: var(--text-primary);
+          color: var(--bg-primary);
+          font-weight: 800;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          text-transform: uppercase;
+        }
 
-                .editor-meta {
-                    width: 260px;
-                    border-right: 1px solid var(--border-glass);
-                    padding: 2rem;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 2rem;
-                    background: rgba(0, 0, 0, 0.02);
-                }
+        .editor-body {
+          flex: 1;
+          display: flex;
+          overflow: hidden;
+        }
 
-                .meta-item {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.75rem;
-                }
+        .editor-meta {
+          width: 240px;
+          border-right: 1px solid var(--border-glass);
+          padding: 2rem;
+          display: flex;
+          flex-direction: column;
+          gap: 2.5rem;
+        }
 
-                .meta-item label {
-                    font-size: 0.7rem;
-                    font-weight: 800;
-                    color: var(--text-muted);
-                    text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                }
+        .meta-item {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
 
-                .meta-item select, .tags-input-wrapper {
-                    padding: 0.6rem 0.85rem;
-                    border-radius: var(--radius-md);
-                    font-size: 0.9rem;
-                    color: var(--text-primary);
-                }
+        .meta-item label {
+          font-size: 0.65rem;
+          font-weight: 900;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
 
-                .tags-input-wrapper {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                }
+        .meta-item select {
+          padding: 0.5rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          color: var(--text-primary);
+          outline: none;
+        }
 
-                .tags-input-wrapper input {
-                    background: transparent;
-                    border: none;
-                    outline: none;
-                    color: inherit;
-                    width: 100%;
-                }
+        .tags-input {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem;
+          border-bottom: 1px solid var(--border-glass);
+          color: var(--text-muted);
+        }
 
-                .editor-content {
-                    flex: 1;
-                    padding: 2rem;
-                    display: flex;
-                    flex-direction: column;
-                    overflow: hidden;
-                }
+        .tags-input input {
+          background: transparent;
+          border: none;
+          outline: none;
+          color: var(--text-primary);
+          width: 100%;
+          font-size: 0.9rem;
+        }
 
-                .content-textarea {
-                    flex: 1;
-                    background: transparent;
-                    border: none;
-                    outline: none;
-                    resize: none;
-                    color: var(--text-primary);
-                    font-size: 1.15rem;
-                    line-height: 1.8;
-                    font-family: inherit;
-                }
+        .editor-content {
+          flex: 1;
+          padding: 2rem;
+          display: flex;
+          flex-direction: column;
+        }
 
-                .json-viewer {
-                    flex: 1;
-                    margin: 0;
-                    padding: 1.5rem;
-                    border-radius: var(--radius-md);
-                    background: var(--bg-tertiary);
-                    color: #10b981;
-                    font-family: 'JetBrains Mono', monospace;
-                    font-size: 0.9rem;
-                    overflow: auto;
-                }
+        .content-textarea {
+          flex: 1;
+          background: transparent;
+          border: none;
+          outline: none;
+          resize: none;
+          color: var(--text-primary);
+          font-size: 1.25rem;
+          line-height: 1.6;
+          font-family: inherit;
+        }
 
-                .icon-btn {
-                    width: 40px;
-                    height: 40px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: var(--radius-md);
-                    color: var(--text-secondary);
-                }
+        .json-viewer {
+          flex: 1;
+          background: var(--bg-secondary);
+          padding: 1.5rem;
+          color: var(--text-secondary);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.9rem;
+          overflow: auto;
+          border: 1px solid var(--border-glass);
+        }
 
-                .icon-btn:hover {
-                    background: rgba(255, 255, 255, 0.05);
-                    color: var(--text-primary);
-                }
+        .icon-btn {
+          color: var(--text-muted);
+        }
 
-                @media (max-width: 768px) {
-                    .editor-container {
-                        width: 100% !important;
-                        height: 100% !important;
-                        border-radius: 0;
-                    }
-                    .editor-meta { display: none; }
-                    .editor-content { padding: 1.5rem; }
-                }
+        .icon-btn:hover {
+          color: var(--text-primary);
+        }
 
-                .text-nowrap { white-space: nowrap; }
-            `}</style>
-    </motion.div>
+        @media (max-width: 768px) {
+          .editor-container { width: 100%; height: 100%; border: none; }
+          .editor-meta { display: none; }
+          .editor-content { padding: 1.5rem; }
+        }
+      `}</style>
+    </div>
   );
 }
