@@ -526,7 +526,7 @@ export default function Home() {
             onDelete={deleteNote}
             onClose={() => { setIsEditorOpen(false); setSelectedNote(null); }}
             mcpServers={storageConfig?.mcpServers}
-            storageConfig={storageConfig}
+            storageConfig={storageConfig || undefined}
           />
         )}
       </AnimatePresence>
