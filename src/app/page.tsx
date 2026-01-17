@@ -148,13 +148,12 @@ export default function Home() {
       const storage = getStorage(storageConfig);
       if (storage) {
         try {
-          // handleSync를 통해 전체 동기화를 기다리는 대신, 해당 노트만 즉시 서버로 전송
           await storage.saveNote(updatedNote);
           console.log('Remote save successful');
         } catch (error) {
           console.error('Remote save failed:', error);
           showToast('원격 저장소 반영에 실패했습니다. 네트워크를 확인하세요.', 'error');
-          throw error; // 에디터에서 에러를 인지하도록 전달 (저장 버튼 상태 초기화 등)
+          // 에러를 throw하지 않음 - 로컬 저장은 성공했으므로 편집기는 정상 진행
         }
       }
     }
