@@ -155,8 +155,8 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
       setIsSaved(true);
 
       if (isManual) {
-        // 저장 성공 - GitHub 확인 링크 표시
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // 저장 성공 - 정확히 0.5초 후 GitHub 확인 링크 표시
+        await new Promise(resolve => setTimeout(resolve, 500));
         setSaveStatus('success');
         // 자동으로 닫지 않음 - 사용자가 GitHub 링크를 클릭하거나 직접 닫을 때까지 유지
       }

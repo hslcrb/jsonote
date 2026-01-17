@@ -87,6 +87,8 @@ button {
   background: none;
   font-family: inherit;
   transition: all var(--transition-fast);
+  border-radius: 9999px;
+  /* 완전히 둥근 모서리 */
 }
 
 a {
