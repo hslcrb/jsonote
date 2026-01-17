@@ -29,6 +29,8 @@ import NoteEditor from '@/components/NoteEditor';
 import SettingsModal from '@/components/SettingsModal';
 import GuideView from '@/components/GuideView';
 import { getStorage } from '@/lib/storage';
+import Toast, { ToastType } from '@/components/Toast';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -87,6 +89,40 @@ export default function Home() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
 
+  // Custom UI State
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [confirmState, setConfirmState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    isDanger?: boolean;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => { }
+  });
+
+  const showToast = (message: string, type: ToastType = 'info') => {
+    setToast({ message, type });
+  };
+
+  const closeConfirm = () => setConfirmState(prev => ({ ...prev, isOpen: false }));
+
+  const showConfirm = (title: string, message: string, onConfirm: () => void, isDanger = false) => {
+    setConfirmState({
+      isOpen: true,
+      title,
+      message,
+      onConfirm: () => {
+        onConfirm();
+        closeConfirm();
+      },
+      isDanger
+    });
+  };
+
   useEffect(() => {
     if (!storageConfig || !storageConfig.enabled) return;
     handleSync(true);
@@ -109,56 +145,75 @@ export default function Home() {
   };
 
   const deleteNote = async (id: string, e?: React.MouseEvent) => {
-    e?.stopPropagation();
+    if (e) e.stopPropagation();
     const noteToDelete = notes.find(n => n.metadata.id === id);
     if (!noteToDelete) return;
 
-    if (confirm('이 노트를 삭제하시겠습니까?')) {
-      const newNotes = notes.filter(n => n.metadata.id !== id);
-      setNotes(newNotes);
-      localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
+    showConfirm(
+      '노트 삭제',
+      `'${noteToDelete.metadata.title}' 노트를 영구히 삭제하시겠습니까?`,
+      async () => {
+        const newNotes = notes.filter(n => n.metadata.id !== id);
+        setNotes(newNotes);
+        localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
+        setIsEditorOpen(false);
+        setSelectedNote(null);
 
-      if (storageConfig?.enabled) {
-        const storage = getStorage(storageConfig);
-        if (storage) {
-          setIsSyncing(true);
-          try {
-            await storage.deleteNote(noteToDelete);
-          } catch (e) {
-            console.error('Delete failed:', e);
-          } finally {
-            setIsSyncing(false);
+        if (storageConfig?.enabled) {
+          const storage = getStorage(storageConfig);
+          if (storage) {
+            setIsSyncing(true);
+            try {
+              await storage.deleteNote(noteToDelete);
+              showToast('노트가 삭제되었습니다.', 'success');
+            } catch (e) {
+              console.error('Delete failed:', e);
+              showToast('삭제 중 오류가 발생했습니다.', 'error');
+            } finally {
+              setIsSyncing(false);
+            }
           }
+        } else {
+          showToast('노트가 삭제되었습니다.', 'success');
         }
-      }
-    }
+      },
+      true
+    );
   };
 
   const deleteSelectedNotes = async () => {
     if (selectedIds.length === 0) return;
-    if (confirm(`${selectedIds.length}개의 노트를 삭제하시겠습니까?`)) {
-      setIsSyncing(true);
-      try {
-        const storage = storageConfig?.enabled ? getStorage(storageConfig) : null;
 
-        if (storage) {
-          for (const id of selectedIds) {
-            const noteToDelete = notes.find(n => n.metadata.id === id);
-            if (noteToDelete) await storage.deleteNote(noteToDelete);
+    showConfirm(
+      '일괄 삭제',
+      `${selectedIds.length}개의 노치를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`,
+      async () => {
+        setIsSyncing(true);
+        try {
+          const storage = storageConfig?.enabled ? getStorage(storageConfig) : null;
+
+          if (storage) {
+            for (const id of selectedIds) {
+              const noteToDelete = notes.find(n => n.metadata.id === id);
+              if (noteToDelete) await storage.deleteNote(noteToDelete);
+            }
           }
-        }
 
-        const remainingNotes = notes.filter(n => !selectedIds.includes(n.metadata.id));
-        setNotes(remainingNotes);
-        localStorage.setItem('jsonote_notes', JSON.stringify(remainingNotes));
-        setSelectedIds([]);
-        setIsSelectionMode(false);
-      } catch (e) {
-        console.error('Bulk delete failed:', e);
-      } finally {
-        setIsSyncing(false);
-      }
-    }
+          const remainingNotes = notes.filter(n => !selectedIds.includes(n.metadata.id));
+          setNotes(remainingNotes);
+          localStorage.setItem('jsonote_notes', JSON.stringify(remainingNotes));
+          setSelectedIds([]);
+          setIsSelectionMode(false);
+          showToast(`${selectedIds.length}개의 노트를 삭제했습니다.`, 'success');
+        } catch (e) {
+          console.error('Bulk delete failed:', e);
+          showToast('일부 노트를 삭제하는 중 오류가 발생했습니다.', 'error');
+        } finally {
+          setIsSyncing(false);
+        }
+      },
+      true
+    );
   };
 
   const toggleSelection = (id: string, e: React.MouseEvent) => {
@@ -220,9 +275,10 @@ export default function Home() {
       localStorage.setItem('jsonote_notes', JSON.stringify(remoteNotes));
 
       console.log('Sync complete: Local state reconciled with remote.');
+      if (!silent) showToast('동기화가 완료되었습니다.', 'success');
     } catch (error) {
       console.error('Sync failed:', error);
-      if (!silent) alert('동기화에 실패했습니다. 설정을 확인해주세요.');
+      if (!silent) showToast('동기화에 실패했습니다. 설정을 확인해주세요.', 'error');
     } finally {
       if (!silent || isSyncing) setIsSyncing(false);
     }
@@ -457,6 +513,25 @@ export default function Home() {
           />
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        title={confirmState.title}
+        message={confirmState.message}
+        onConfirm={confirmState.onConfirm}
+        onCancel={closeConfirm}
+        isDanger={confirmState.isDanger}
+      />
 
       <style jsx>{`
         .layout-container {

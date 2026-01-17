@@ -108,10 +108,12 @@ export default function NoteEditor({ note, onSave, onDelete, onClose }: NoteEdit
             <button
               className="icon-btn"
               onClick={() => {
-                if (confirm('이 노트를 삭제하시겠습니까?')) {
-                  onDelete(note.metadata.id);
-                  onClose();
-                }
+                onDelete(note.metadata.id);
+                // Note: we don't call onClose() here because the parent's onDelete 
+                // will handle the confirmation and then we may want to keep the editor 
+                // open until confirmed, or the parent will close it.
+                // Actually, if deletion is confirmed in Home, Home updates state 
+                // which should close the editor if planned.
               }}
               title="삭제"
             >
