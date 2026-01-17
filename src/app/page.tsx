@@ -417,7 +417,9 @@ export default function Home() {
                               </button>
                             )}
                           </div>
-                          <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
+                          <h3 className="note-card-title">
+                            {note.metadata.title || '제목 없음'} · {note.metadata.customFilename || note.metadata.id}.json
+                          </h3>
                           <p className="note-card-preview">{note.content || '내용 없음'}</p>
                           <div className="note-card-footer">
                             <span className="date">{format(new Date(note.metadata.updatedAt), 'yyyy-MM-dd')}</span>
