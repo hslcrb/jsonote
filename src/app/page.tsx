@@ -508,11 +508,6 @@ export default function Home() {
                         <div className="note-card-main">
                           <div className="note-card-header">
                             <span className="type-label">{note.metadata.type.toUpperCase()}</span>
-                            {selectedIds.length === 0 && (
-                              <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
-                                <Trash2 size={14} />
-                              </button>
-                            )}
                           </div>
                           <h3 className="note-card-title">
                             {note.metadata.title || '제목 없음'} · <span className="filename-badge">{note.metadata.customFilename || note.metadata.id}.json</span>
