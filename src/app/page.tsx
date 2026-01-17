@@ -131,17 +131,30 @@ export default function Home() {
   }, [storageConfig]);
 
   const handleSaveNote = async (updatedNote: Note) => {
+    // 1. 로컬 상태 즉시 업데이트
     const newNotes = notes.find(n => n.metadata.id === updatedNote.metadata.id)
       ? notes.map(n => n.metadata.id === updatedNote.metadata.id ? updatedNote : n)
       : [...notes, updatedNote];
     setNotes(newNotes);
     localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
 
-    // We update selectedNote to keep the editor in sync with saved state
+    // 에디터 상태 동기화
     setSelectedNote(updatedNote);
 
+    // 2. 원격 저장소에 즉시 다이렉트 푸시
     if (storageConfig?.enabled) {
-      await handleSync(true);
+      const storage = getStorage(storageConfig);
+      if (storage) {
+        try {
+          // handleSync를 통해 전체 동기화를 기다리는 대신, 해당 노트만 즉시 서버로 전송
+          await storage.saveNote(updatedNote);
+          console.log('Remote save successful');
+        } catch (error) {
+          console.error('Remote save failed:', error);
+          showToast('원격 저장소 반영에 실패했습니다. 네트워크를 확인하세요.', 'error');
+          throw error; // 에디터에서 에러를 인지하도록 전달 (저장 버튼 상태 초기화 등)
+        }
+      }
     }
   };
 
