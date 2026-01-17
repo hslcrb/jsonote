@@ -85,9 +85,14 @@ export default function Home() {
 
   useEffect(() => {
     if (!storageConfig || !storageConfig.enabled) return;
-    const interval = setInterval(() => handleSync(true), 120000);
+
+    // 즉시 동기화 실행
+    handleSync(true);
+
+    // 1분마다 자동 동기화
+    const interval = setInterval(() => handleSync(true), 60000);
     return () => clearInterval(interval);
-  }, [storageConfig, notes]);
+  }, [storageConfig]);
 
   const handleSaveNote = (updatedNote: Note) => {
     const newNotes = notes.find(n => n.metadata.id === updatedNote.metadata.id)
@@ -97,6 +102,11 @@ export default function Home() {
     localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
     setIsEditorOpen(false);
     setSelectedNote(null);
+
+    // 저장 즉시 동기화 시도
+    if (storageConfig?.enabled) {
+      setTimeout(() => handleSync(true), 500);
+    }
   };
 
   const deleteNote = (id: string, e: React.MouseEvent) => {
@@ -105,6 +115,11 @@ export default function Home() {
       const newNotes = notes.filter(n => n.metadata.id !== id);
       setNotes(newNotes);
       localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
+
+      // 삭제 즉시 동기화 시도
+      if (storageConfig?.enabled) {
+        setTimeout(() => handleSync(true), 500);
+      }
     }
   };
 
@@ -125,18 +140,33 @@ export default function Home() {
   };
 
   const handleSync = async (silent: boolean = false) => {
-    if (!storageConfig || !storageConfig.enabled) {
+    // 최신 설정을 가져오기 위해 직접 localStorage 확인 (상태 업데이트 지연 방지)
+    const currentConfigStr = localStorage.getItem('jsonote_storage_config');
+    const currentConfig = currentConfigStr ? JSON.parse(currentConfigStr) : storageConfig;
+
+    if (!currentConfig || !currentConfig.enabled) {
       if (!silent) setIsSettingsOpen(true);
       return;
     }
-    const storage = getStorage(storageConfig);
+
+    const storage = getStorage(currentConfig);
     if (!storage) return;
+
     if (!silent) setIsSyncing(true);
     try {
-      for (const note of notes) await storage.saveNote(note);
+      // 현재 메모리에 있는 최신 노트들 업로드
+      const currentNotes = JSON.parse(localStorage.getItem('jsonote_notes') || '[]');
+      for (const note of currentNotes) {
+        await storage.saveNote(note);
+      }
+
+      // 서버의 최신 데이터와 병합하여 가져오기
       const resynced = await storage.fetchNotes();
+
+      // 로컬 스토리지 및 상태 업데이트
       setNotes(resynced);
       localStorage.setItem('jsonote_notes', JSON.stringify(resynced));
+
       if (!silent) alert('동기화 완료');
     } catch (e: any) {
       console.error('동기화 상세 오류:', e);
@@ -150,6 +180,8 @@ export default function Home() {
     setStorageConfig(config);
     localStorage.setItem('jsonote_storage_config', JSON.stringify(config));
     setIsSettingsOpen(false);
+    // 설정 저장 즉시 동기화 트리거
+    setTimeout(() => handleSync(true), 1000);
   };
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -270,10 +302,12 @@ export default function Home() {
             </div>
 
             <div className="header-right">
-              <button className="sync-btn" onClick={() => handleSync()} disabled={isSyncing}>
-                <Cloud size={16} className={isSyncing ? 'animate-spin' : ''} />
-                <span className="desktop-only">{isSyncing ? '동기화 중' : '동기화'}</span>
-              </button>
+              {isSyncing && (
+                <div className="sync-indicator">
+                  <Cloud size={14} className="animate-spin" />
+                  <span className="desktop-only">저장 중...</span>
+                </div>
+              )}
             </div>
           </header>
 
