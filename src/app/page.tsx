@@ -796,12 +796,11 @@ export default function Home() {
         }
 
         .checkbox-container {
-          padding: 1.5rem; /* 모든 방향 균등 패딩 */
+          width: 60px; /* 고정 너비 */
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
-          align-self: center; /* 세로 중앙 정렬 */
         }
 
         .custom-checkbox {
@@ -837,8 +836,8 @@ export default function Home() {
 
         .note-card-flex {
           display: flex;
-          flex-direction: row; /* Force horizontal, left-to-right */
-          align-items: center; /* Center items vertically */
+          flex-direction: row;
+          align-items: stretch; /* 전체 높이에 맞춤 */
           gap: 0;
           background: transparent;
           border-bottom: 1px solid var(--border-glass);
@@ -857,7 +856,6 @@ export default function Home() {
         .note-card-main {
           flex: 1;
           padding: 1.5rem;
-          padding-left: 1rem; /* 체크박스와의 간격 축소 */
           display: flex;
           flex-direction: column;
           gap: 0.5rem;

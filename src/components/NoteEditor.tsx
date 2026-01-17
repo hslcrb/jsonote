@@ -138,9 +138,8 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
   }, [editedNote.content, editedNote.metadata.title, editedNote.metadata.customFilename]);
 
 
-  const handleSave = async (isManual: boolean = false) => {
-    if (isManual) setSaveStatus('saving');
 
+  const handleSave = async (isManual: boolean = false) => {
     const updatedNote = {
       ...editedNote,
       metadata: {
@@ -149,16 +148,15 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
       }
     };
 
+    // 수동 저장이면 즉시 성공 상태 표시
+    if (isManual) {
+      setSaveStatus('success');
+    }
+
     try {
-      // GitHub API로 직접 저장
+      // 백그라운드에서 GitHub에 저장
       await onSave(updatedNote);
       setIsSaved(true);
-
-      if (isManual) {
-        // 저장 성공 - 바로 GitHub 확인 링크 표시
-        setSaveStatus('success');
-        // 자동으로 닫지 않음 - 사용자가 GitHub 링크를 클릭하거나 직접 닫을 때까지 유지
-      }
     } catch (error) {
       console.error('Save failed:', error);
       if (isManual) {
