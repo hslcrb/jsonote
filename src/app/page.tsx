@@ -681,6 +681,23 @@ export default function Home() {
         .action-buttons {
           display: flex;
           gap: 0.5rem;
+          color: var(--text-primary);
+        }
+
+        .text-btn.danger {
+          background: #ff4444;
+          color: #ffffff;
+          font-weight: 900;
+        }
+
+        .text-btn {
+          color: var(--text-primary);
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-glass);
+          font-size: 0.75rem;
+          font-weight: 800;
+          padding: 0.4rem 0.8rem;
+          border-radius: var(--radius-sm);
         }
 
         .checkbox-container {
@@ -694,11 +711,15 @@ export default function Home() {
         .custom-checkbox {
           width: 20px;
           height: 20px;
-          border: 2px solid var(--border-glass);
+          border: 2px solid var(--text-muted); /* Clearly visible outline when unchecked */
           border-radius: 4px;
           position: relative;
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           background: transparent;
+        }
+
+        .custom-checkbox:hover {
+          border-color: var(--text-secondary);
         }
 
         .checked .custom-checkbox, .checkbox-container.checked .custom-checkbox {
@@ -711,7 +732,7 @@ export default function Home() {
           position: absolute;
           width: 6px;
           height: 10px;
-          border: solid var(--bg-primary);
+          border: solid var(--bg-primary); /* Checkmark color contrast with checkbox background */
           border-width: 0 2.5px 2.5px 0;
           top: 45%;
           left: 50%;
