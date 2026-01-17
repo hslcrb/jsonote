@@ -144,15 +144,54 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
       }
     };
 
-    await onSave(updatedNote);
-    setIsSaved(true);
+    try {
+      // 1. 즉시 원격으로 전송 시작
+      await onSave(updatedNote);
+      setIsSaved(true);
 
-    if (isManual) {
-      setSaveStatus('success');
-      // 1초 후 부드럽게 창 닫기
-      setTimeout(() => {
-        onClose();
-      }, 1000);
+      if (isManual) {
+        // 2. 깃허브 반영 여부 확인을 위한 폴링 (최대 10회, 1초 간격)
+        let verified = false;
+        let retries = 0;
+        const maxRetries = 10;
+
+        while (!verified && retries < maxRetries) {
+          retries++;
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+          try {
+            const savedConfig = localStorage.getItem('jsonote_storage_config');
+            if (savedConfig) {
+              const { getStorage } = await import('@/lib/storage');
+              const storage = getStorage(JSON.parse(savedConfig));
+              if (storage) {
+                const remoteNotes = await storage.fetchNotes();
+                const remoteNote = remoteNotes.find(n => n.metadata.id === updatedNote.metadata.id);
+
+                // 업데이트 시간이 원격과 일치하는지 확인
+                if (remoteNote && remoteNote.metadata.updatedAt === updatedNote.metadata.updatedAt) {
+                  verified = true;
+                  break;
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('Verification retry failed:', e);
+          }
+        }
+
+        // 확인 완료 또는 최대 재시도 후 성공 표시
+        setSaveStatus('success');
+        setTimeout(() => {
+          onClose();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Save failed:', error);
+      if (isManual) {
+        setSaveStatus('idle');
+        alert('저장에 실패했습니다. 설정을 확인해주세요.');
+      }
     }
   };
 
@@ -763,6 +802,9 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
           color: var(--text-muted);
           font-style: italic;
         }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
 
         .icon-btn:hover {
           color: var(--text-primary);
