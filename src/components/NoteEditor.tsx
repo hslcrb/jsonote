@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1 } from 'lucide-react';
+import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1, CheckCircle } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
 import { mcpClientManager } from '@/lib/mcp/client';
 import ReactMarkdown from 'react-markdown';
@@ -10,7 +10,7 @@ import remarkGfm from 'remark-gfm';
 
 interface NoteEditorProps {
   note: Note;
-  onSave: (note: Note) => void;
+  onSave: (note: Note) => Promise<void>;
   onDelete: (id: string) => void;
   onClose: () => void;
   mcpServers?: { id: string, name: string, url: string, enabled: boolean }[];
@@ -23,6 +23,7 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
   const [availableTools, setAvailableTools] = useState<{ serverId: string, serverName: string, tools: any[] }[]>([]);
   const [isToolLoading, setIsToolLoading] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success'>('idle');
 
   // 로드 시 MCP 서버들에서 도구 목록 가져오기
   React.useEffect(() => {
@@ -132,7 +133,9 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
     }
   }, [editedNote.content, editedNote.metadata.title, editedNote.metadata.customFilename]);
 
-  const handleSave = () => {
+  const handleSave = async (isManual: boolean = false) => {
+    if (isManual) setSaveStatus('saving');
+
     const updatedNote = {
       ...editedNote,
       metadata: {
@@ -140,8 +143,17 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
         updatedAt: new Date().toISOString()
       }
     };
-    onSave(updatedNote);
+
+    await onSave(updatedNote);
     setIsSaved(true);
+
+    if (isManual) {
+      setSaveStatus('success');
+      // 1초 후 부드럽게 창 닫기
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    }
   };
 
   return (
@@ -225,9 +237,18 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
             >
               <Trash2 size={18} />
             </button>
-            <button className="save-btn" onClick={handleSave}>
-              <Save size={18} />
-              <span className="desktop-only">저장</span>
+            <button
+              className={`save-btn ${saveStatus}`}
+              onClick={() => handleSave(true)}
+              disabled={saveStatus !== 'idle'}
+            >
+              {saveStatus === 'saving' ? <Loader2 size={18} className="animate-spin" /> :
+                saveStatus === 'success' ? <CheckCircle size={18} /> :
+                  <Save size={18} />}
+              <span className="desktop-only">
+                {saveStatus === 'saving' ? '저장 중' :
+                  saveStatus === 'success' ? '저장 완료' : '저장'}
+              </span>
             </button>
           </div>
         </header>
@@ -526,6 +547,16 @@ export default function NoteEditor({ note, onSave, onDelete, onClose, mcpServers
           align-items: center;
           gap: 0.5rem;
           text-transform: uppercase;
+        }
+
+        .save-btn.success {
+          background: #22c55e !important;
+          color: white !important;
+        }
+
+        .save-btn:disabled {
+          opacity: 0.8;
+          cursor: not-allowed;
         }
 
         .editor-body {
