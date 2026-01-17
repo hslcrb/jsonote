@@ -31,6 +31,12 @@ export class GitHubStorage implements IJsonoteStorage {
                     .filter(file => file.name.endsWith('.json'))
                     .map(async file => {
                         const content = await this.fetchNoteByPath(file.path);
+                        if (content) {
+                            // 현재 파일명을 저장해두어 추후 변경 감지에 사용
+                            const fileNameWithoutExt = decodeURIComponent(file.name.replace('.json', ''));
+                            content.metadata.customFilename = fileNameWithoutExt;
+                            content.metadata.previousFilename = fileNameWithoutExt;
+                        }
                         return content;
                     })
             );
@@ -43,28 +49,56 @@ export class GitHubStorage implements IJsonoteStorage {
     }
 
     private async fetchNoteByPath(path: string): Promise<Note | null> {
-        const { data }: any = await this.octokit.rest.repos.getContent({
-            owner: this.config.owner!,
-            repo: this.config.repo!,
-            path,
-            ref: this.config.branch
-        });
+        try {
+            const { data }: any = await this.octokit.rest.repos.getContent({
+                owner: this.config.owner!,
+                repo: this.config.repo!,
+                path,
+                ref: this.config.branch
+            });
 
-        const content = Buffer.from(data.content, 'base64').toString();
-        return JSON.parse(content);
+            const content = Buffer.from(data.content, 'base64').toString();
+            return JSON.parse(content);
+        } catch (e) {
+            return null;
+        }
     }
 
     async saveNote(note: Note): Promise<void> {
         const baseName = note.metadata.customFilename || note.metadata.id;
-        const path = `notes/${baseName}.json`;
+        const encodedPath = `notes/${encodeURIComponent(baseName)}.json`;
         const content = JSON.stringify(note, null, 2);
+
+        // 파일명이 변경된 경우 기존 파일 삭제
+        if (note.metadata.previousFilename && note.metadata.previousFilename !== baseName) {
+            try {
+                const oldPath = `notes/${encodeURIComponent(note.metadata.previousFilename)}.json`;
+                const { data: oldData }: any = await this.octokit.rest.repos.getContent({
+                    owner: this.config.owner!,
+                    repo: this.config.repo!,
+                    path: oldPath,
+                    ref: this.config.branch
+                });
+
+                await this.octokit.rest.repos.deleteFile({
+                    owner: this.config.owner!,
+                    repo: this.config.repo!,
+                    path: oldPath,
+                    message: `Rename note: ${note.metadata.previousFilename} -> ${baseName}`,
+                    sha: oldData.sha,
+                    branch: this.config.branch
+                });
+            } catch (e) {
+                console.warn('Old file deletion failed (maybe already deleted):', e);
+            }
+        }
 
         let sha: string | undefined;
         try {
             const { data }: any = await this.octokit.rest.repos.getContent({
                 owner: this.config.owner!,
                 repo: this.config.repo!,
-                path,
+                path: encodedPath,
                 ref: this.config.branch
             });
             sha = data.sha;
@@ -73,12 +107,15 @@ export class GitHubStorage implements IJsonoteStorage {
         await this.octokit.rest.repos.createOrUpdateFileContents({
             owner: this.config.owner!,
             repo: this.config.repo!,
-            path,
+            path: encodedPath,
             message: `Update note: ${note.metadata.title}`,
             content: Buffer.from(content).toString('base64'),
             branch: this.config.branch,
             sha
         });
+
+        // 저장이 성공하면 현재 파일명을 previousFilename으로 업데이트
+        note.metadata.previousFilename = baseName;
     }
 }
 
