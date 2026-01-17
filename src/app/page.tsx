@@ -367,39 +367,53 @@ export default function Home() {
           transition: background-color 0.3s ease;
         }
 
-        /* Mobile Layout Mode: Centered Column */
+        /* Mobile View Mode: Centered Phone-like Column */
         .mobile-view {
-          display: block;
-          overflow-y: auto;
-          background-color: #000; /* Outer background */
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: #0c0c0e; /* Clean neutral outer background */
         }
 
-        .mobile-view .sidebar,
-        .mobile-view .main-content {
+        /* Container for the mobile app simulation */
+        .mobile-view .main-content,
+        .mobile-view .sidebar {
           width: 100%;
-          max-width: 500px;
-          margin: 0 auto;
-          position: relative;
+          max-width: 420px;
+          height: 100%;
+          max-height: 850px;
+          margin: 0;
           background-color: var(--bg-primary);
-          box-shadow: 0 0 40px rgba(0,0,0,0.3);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+          border-radius: 32px;
+          overflow: hidden;
+          position: absolute;
+        }
+
+        .mobile-view .main-content {
+          border: 1px solid var(--border-glass);
+          z-index: 10;
         }
 
         .mobile-view .sidebar {
-          height: auto;
-          border-right: none;
-          border-bottom: 1px solid var(--border-glass);
+          position: absolute !important;
+          left: 50% !important;
+          transform: translateX(-50%) !important;
+          z-index: 1000 !important;
         }
 
-        .mobile-view .main-content {
-          min-height: 100vh;
+        /* Adjustments for the mobile internal elements */
+        .mobile-view .content-header {
+          height: 64px;
+          padding: 0 1.25rem;
         }
 
-        .mobile-view .sidebar-footer {
-          position: sticky;
-          bottom: 0;
-          background: var(--bg-secondary);
-          backdrop-filter: blur(10px);
-          z-index: 100;
+        .mobile-view .notes-container {
+          padding: 1.25rem;
+        }
+
+        .mobile-view .new-note-btn {
+          padding: 0.85rem;
         }
 
         /* Desktop Layout Mode: Side-by-Side */
