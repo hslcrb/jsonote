@@ -168,6 +168,14 @@ export default function Home() {
     );
   };
 
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredNotes.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredNotes.map(n => n.metadata.id));
+    }
+  };
+
   const createNewNote = () => {
     const newNote: Note = {
       metadata: {
@@ -349,12 +357,21 @@ export default function Home() {
             <div className="header-right">
               {isSelectionMode ? (
                 <div className="selection-actions">
-                  <span className="selection-count">{selectedIds.length}개 선택됨</span>
-                  <button className="text-btn danger" onClick={deleteSelectedNotes}>삭제</button>
-                  <button className="text-btn" onClick={() => { setIsSelectionMode(false); setSelectedIds([]); }}>취소</button>
+                  <div
+                    className={`checkbox-wrapper ${selectedIds.length === filteredNotes.length && filteredNotes.length > 0 ? 'checked' : ''}`}
+                    onClick={toggleSelectAll}
+                    title="전체 선택"
+                  >
+                    <div className="custom-checkbox" />
+                    <span className="selection-count">{selectedIds.length}개 선택</span>
+                  </div>
+                  <div className="action-buttons">
+                    <button className="text-btn danger" onClick={deleteSelectedNotes}>선택 삭제</button>
+                    <button className="text-btn" onClick={() => { setIsSelectionMode(false); setSelectedIds([]); }}>취소</button>
+                  </div>
                 </div>
               ) : (
-                <button className="icon-btn-minimal" onClick={() => setIsSelectionMode(true)} title="선택 삭제">
+                <button className="icon-btn-minimal" onClick={() => setIsSelectionMode(true)} title="선택 모드">
                   <CheckSquare size={18} />
                 </button>
               )}
@@ -384,23 +401,31 @@ export default function Home() {
                         layout
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className={`note-card ${selectedIds.includes(note.metadata.id) ? 'selected' : ''}`}
+                        className={`note-card-flex ${selectedIds.includes(note.metadata.id) ? 'selected' : ''}`}
                         onClick={() => isSelectionMode ? toggleSelection(note.metadata.id, {} as any) : (setSelectedNote(note), setIsEditorOpen(true))}
                       >
-                        <div className="note-card-header">
-                          <span className="type-label">{note.metadata.type.toUpperCase()}</span>
-                          {isSelectionMode ? (
-                            <div className={`checkbox ${selectedIds.includes(note.metadata.id) ? 'checked' : ''}`} />
-                          ) : (
-                            <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </div>
-                        <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
-                        <p className="note-card-preview">{note.content || '내용 없음'}</p>
-                        <div className="note-card-footer">
-                          <span className="date">{format(new Date(note.metadata.updatedAt), 'yyyy-MM-dd')}</span>
+                        {isSelectionMode && (
+                          <div
+                            className={`checkbox-container ${selectedIds.includes(note.metadata.id) ? 'checked' : ''}`}
+                            onClick={(e) => toggleSelection(note.metadata.id, e)}
+                          >
+                            <div className="custom-checkbox" />
+                          </div>
+                        )}
+                        <div className="note-card-main">
+                          <div className="note-card-header">
+                            <span className="type-label">{note.metadata.type.toUpperCase()}</span>
+                            {!isSelectionMode && (
+                              <button className="del-btn" onClick={(e) => deleteNote(note.metadata.id, e)}>
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                          <h3 className="note-card-title">{note.metadata.title || '제목 없음'}</h3>
+                          <p className="note-card-preview">{note.content || '내용 없음'}</p>
+                          <div className="note-card-footer">
+                            <span className="date">{format(new Date(note.metadata.updatedAt), 'yyyy-MM-dd')}</span>
+                          </div>
                         </div>
                       </motion.div>
                     ))}
@@ -642,44 +667,124 @@ export default function Home() {
         .selection-actions {
           display: flex;
           align-items: center;
+          gap: 2rem;
+          margin-right: 1.5rem;
+        }
+
+        .checkbox-wrapper {
+          display: flex;
+          align-items: center;
           gap: 1rem;
-          margin-right: 1rem;
+          cursor: pointer;
+          user-select: none;
+          padding: 0.5rem 1rem;
+          background: var(--bg-secondary);
+          border-radius: var(--radius-sm);
+        }
+
+        .action-buttons {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .checkbox-container {
+          padding: 1.5rem 0 1.5rem 1.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .custom-checkbox {
+          width: 20px;
+          height: 20px;
+          border: 2px solid var(--border-glass);
+          border-radius: 4px;
+          position: relative;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          background: transparent;
+        }
+
+        .checked .custom-checkbox, .checkbox-container.checked .custom-checkbox {
+          border-color: var(--text-primary);
+          background: var(--text-primary);
+        }
+
+        .checked .custom-checkbox::after, .checkbox-container.checked .custom-checkbox::after {
+          content: '';
+          position: absolute;
+          width: 6px;
+          height: 10px;
+          border: solid var(--bg-primary);
+          border-width: 0 2.5px 2.5px 0;
+          top: 45%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .note-card-flex {
+          display: flex;
+          align-items: stretch;
+          gap: 0;
+          background: transparent;
+          border-bottom: 1px solid var(--border-glass);
+          transition: var(--transition-fast);
+          cursor: pointer;
+        }
+
+        .note-card-flex:hover {
+          background: var(--bg-secondary);
+        }
+
+        .note-card-flex.selected {
+          background: var(--bg-tertiary);
+        }
+
+        .note-card-main {
+          flex: 1;
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .type-label {
+          font-size: 0.6rem;
+          font-weight: 900;
+          color: var(--text-muted);
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+        }
+
+        .note-card-title {
+          font-size: 1.25rem;
+          font-weight: 900;
+          color: var(--text-primary);
+        }
+
+        .note-card-preview {
+          font-size: 0.9rem;
+          color: var(--text-secondary);
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          margin-bottom: 0.5rem;
+        }
+
+        .note-card-footer {
+          margin-top: 0.5rem;
+        }
+
+        .date {
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: var(--text-muted);
         }
 
         .selection-count {
           font-size: 0.75rem;
-          font-weight: 800;
-          color: var(--text-muted);
-        }
-
-        .text-btn {
-          font-size: 0.75rem;
           font-weight: 900;
-          padding: 0.3rem 0.6rem;
-          border-radius: var(--radius-sm);
-        }
-
-        .text-btn.danger {
-          background: #ff4444;
-          color: white;
-        }
-
-        .checkbox {
-          width: 18px;
-          height: 18px;
-          border: 2px solid var(--border-glass);
-          border-radius: var(--radius-sm);
-          transition: all 0.2s;
-        }
-
-        .checkbox.checked {
-          background: var(--text-primary);
-          border-color: var(--text-primary);
-        }
-
-        .note-card.selected {
-          border-color: var(--text-primary);
-          background: var(--bg-tertiary);
+          color: var(--text-primary);
         }
 
         .sync-indicator {
