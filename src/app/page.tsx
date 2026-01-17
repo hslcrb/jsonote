@@ -26,15 +26,38 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
   const [activeTab, setActiveTab] = useState<'notes' | 'guide' | 'mcp'>('notes');
+  const [customMcpName, setCustomMcpName] = useState('');
+  const [customMcpUrl, setCustomMcpUrl] = useState('');
 
-  // 유명한 MCP 서버 프리셋
+  // 실제 작동하는 MCP 서버 (사용자가 직접 설정 필요)
   const POPULAR_MCP_SERVERS = [
-    { id: 'filesystem', name: 'FileSystem', url: 'http://localhost:3001/sse', description: '파일 시스템 접근' },
-    { id: 'fetch', name: 'Fetch', url: 'http://localhost:3002/sse', description: 'HTTP 요청' },
-    { id: 'puppeteer', name: 'Puppeteer', url: 'http://localhost:3003/sse', description: '브라우저 제어' },
-    { id: 'sqlite', name: 'SQLite', url: 'http://localhost:3004/sse', description: '데이터베이스' },
-    { id: 'github', name: 'GitHub', url: 'http://localhost:3005/sse', description: 'GitHub API' },
+    {
+      id: 'notion',
+      name: 'Notion MCP',
+      url: 'https://mcp.notion.com/mcp',
+      description: 'Notion 워크스페이스 연결 (공식)'
+    },
   ];
+
+  const addCustomMcpServer = () => {
+    if (!customMcpName || !customMcpUrl) {
+      alert('이름과 URL을 모두 입력해주세요.');
+      return;
+    }
+    const newServer = {
+      id: `custom-${Date.now()}`,
+      name: customMcpName,
+      url: customMcpUrl,
+      enabled: true
+    };
+    const updated = {
+      ...storageConfig!,
+      mcpServers: [...(storageConfig?.mcpServers || []), newServer]
+    };
+    handleSaveSettings(updated);
+    setCustomMcpName('');
+    setCustomMcpUrl('');
+  };
 
   const addMcpServer = (preset: typeof POPULAR_MCP_SERVERS[0]) => {
     const existing = storageConfig?.mcpServers?.find(s => s.id === preset.id);
@@ -562,6 +585,30 @@ export default function Home() {
                     </div>
                   </div>
 
+                  <div className="mcp-section">
+                    <h2>커스텀 MCP 서버 추가</h2>
+                    <div className="mcp-custom-form">
+                      <input
+                        type="text"
+                        placeholder="서버 이름 (예: My Custom MCP)"
+                        value={customMcpName}
+                        onChange={(e) => setCustomMcpName(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="MCP 서버 URL (예: http://localhost:3000/sse)"
+                        value={customMcpUrl}
+                        onChange={(e) => setCustomMcpUrl(e.target.value)}
+                      />
+                      <button onClick={addCustomMcpServer} className="mcp-add-custom-btn">
+                        추가
+                      </button>
+                    </div>
+                    <p className="mcp-hint">
+                      팁: MCP 서버는 로컬에서 실행 중이어야 합니다.
+                      공식 MCP 서버는 <a href="https://github.com/modelcontextprotocol/servers" target="_blank">GitHub</a>에서 확인하세요.
+                    </p>
+                  </div>
                   {storageConfig?.mcpServers && storageConfig.mcpServers.length > 0 && (
                     <div className="mcp-section">
                       <h2>내 MCP 도구</h2>
@@ -1187,6 +1234,52 @@ export default function Home() {
         .mcp-item button:hover {
           background: var(--text-primary);
           color: var(--bg-primary);
+        }
+
+        .mcp-custom-form {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .mcp-custom-form input {
+          padding: 0.75rem;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-glass);
+          border-radius: var(--radius-sm);
+          color: var(--text-primary);
+          font-size: 1rem;
+        }
+
+        .mcp-custom-form input:focus {
+          outline: none;
+          border-color: var(--text-primary);
+        }
+
+        .mcp-add-custom-btn {
+          padding: 0.75rem;
+          background: var(--text-primary);
+          color: var(--bg-primary);
+          border: none;
+          border-radius: var(--radius-sm);
+          font-weight: 700;
+          transition: all 0.2s;
+        }
+
+        .mcp-add-custom-btn:hover {
+          opacity: 0.8;
+        }
+
+        .mcp-hint {
+          margin-top: 0.5rem;
+          font-size: 0.85rem;
+          color: var(--text-muted);
+          line-height: 1.5;
+        }
+
+        .mcp-hint a {
+          color: var(--text-primary);
+          text-decoration: underline;
         }
 
         .type-label {
