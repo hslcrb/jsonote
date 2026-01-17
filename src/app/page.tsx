@@ -132,13 +132,15 @@ export default function Home() {
 
   const handleSaveNote = async (updatedNote: Note) => {
     // 1. 로컬 상태 즉시 업데이트
-    const newNotes = notes.find(n => n.metadata.id === updatedNote.metadata.id)
-      ? notes.map(n => n.metadata.id === updatedNote.metadata.id ? updatedNote : n)
-      : [...notes, updatedNote];
+    const newNotes = notes.map(n => n.metadata.id === updatedNote.metadata.id ? updatedNote : n);
+    if (!notes.find(n => n.metadata.id === updatedNote.metadata.id)) {
+      newNotes.push(updatedNote); // New note support
+    }
+
     setNotes(newNotes);
     localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
 
-    // 에디터 상태 동기화
+    // 에디터 상태 동기화 및 UI 목록 갱신을 위해 선택된 상태 업데이트
     setSelectedNote(updatedNote);
 
     // 2. 원격 저장소에 즉시 다이렉트 푸시
