@@ -103,19 +103,27 @@ export class GitHubStorage implements IJsonoteStorage {
             try {
                 let sha: string | undefined;
                 try {
-                    const { data }: any = await this.octokit.rest.repos.getContent({
+                    // List directory to find SHA without downloading content (Fixes >1MB issue)
+                    const { data } = await this.octokit.rest.repos.getContent({
                         owner: this.config.owner!,
                         repo: this.config.repo!,
-                        path: encodedPath,
+                        path: 'notes',
                         ref: this.config.branch,
                         headers: {
-                            'If-None-Match': '', // Force fresh fetch (bust cache)
+                            'If-None-Match': '',
                             'Cache-Control': 'no-cache'
                         }
                     });
-                    sha = data.sha;
+
+                    if (Array.isArray(data)) {
+                        const targetName = `${encodeURIComponent(baseName)}.json`;
+                        const targetFile = data.find((f: any) => f.name === targetName || f.path === encodedPath);
+                        if (targetFile) {
+                            sha = targetFile.sha;
+                        }
+                    }
                 } catch (e) {
-                    // SHA is undefined if file doesn't exist (new file) / 파일이 없으면 sha는 undefined (새 파일 생성)
+                    // Folder doesn't exist or empty, proceed as new file
                 }
 
                 await this.octokit.rest.repos.createOrUpdateFileContents({
@@ -156,19 +164,46 @@ export class GitHubStorage implements IJsonoteStorage {
         const encodedPath = `notes/${encodeURIComponent(baseName)}.json`;
 
         try {
-            const { data }: any = await this.octokit.rest.repos.getContent({
-                owner: this.config.owner!,
-                repo: this.config.repo!,
-                path: encodedPath,
-                ref: this.config.branch
-            });
+            // Get SHA from directory listing to handle large files
+            let sha = '';
+            try {
+                const { data } = await this.octokit.rest.repos.getContent({
+                    owner: this.config.owner!,
+                    repo: this.config.repo!,
+                    path: 'notes',
+                    ref: this.config.branch,
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+
+                if (Array.isArray(data)) {
+                    const targetName = `${encodeURIComponent(baseName)}.json`;
+                    const targetFile = data.find((f: any) => f.name === targetName || f.path === encodedPath);
+                    if (targetFile) {
+                        sha = targetFile.sha;
+                    }
+                }
+            } catch (dirErr) {
+                // If dir list fails, we likely can't delete anyway, but let's try fallback or throw
+            }
+
+            if (!sha) {
+                // Try fallback to direct get if dir list failed or file not found (though direct get fails on large files)
+                // If we don't have SHA, delete will fail.
+                const { data }: any = await this.octokit.rest.repos.getContent({
+                    owner: this.config.owner!,
+                    repo: this.config.repo!,
+                    path: encodedPath,
+                    ref: this.config.branch
+                });
+                sha = data.sha;
+            }
 
             await this.octokit.rest.repos.deleteFile({
                 owner: this.config.owner!,
                 repo: this.config.repo!,
                 path: encodedPath,
                 message: `Delete note: ${note.metadata.title}`,
-                sha: data.sha,
+                sha: sha,
                 branch: this.config.branch
             });
         } catch (e: any) {
