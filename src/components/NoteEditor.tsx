@@ -136,6 +136,9 @@ export default function NoteEditor({
     reader.readAsDataURL(file);
   };
 
+  // Global cache for decoded images to prevent re-decoding (Persists across re-renders)
+  const globalImageCache = new Map<string, string>();
+
   // Custom Image component for ReactMarkdown
   const MarkdownImage = ({ src, alt }: { src?: string, alt?: string }) => {
     const [decodedSrc, setDecodedSrc] = React.useState<string | null>(null);
@@ -143,12 +146,21 @@ export default function NoteEditor({
     React.useEffect(() => {
       if (src?.startsWith('lz:')) {
         const compressedData = src.substring(3);
+
+        // 1. Check Cache first (Instant render)
+        if (globalImageCache.has(compressedData)) {
+          setDecodedSrc(globalImageCache.get(compressedData)!);
+          return;
+        }
+
         if (compressedData) {
           try {
             const LZString = require('lz-string');
             const decompressed = LZString.decompressFromEncodedURIComponent(compressedData);
             if (decompressed) {
               setDecodedSrc(decompressed);
+              // 2. Save to Cache
+              globalImageCache.set(compressedData, decompressed);
             } else {
               setDecodedSrc(null);
             }
