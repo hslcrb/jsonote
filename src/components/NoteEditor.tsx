@@ -219,11 +219,6 @@ export default function NoteEditor({
                   })}
                   placeholder="제목"
                 />
-                {!isSaved && (
-                  <span className="save-status saving">
-                    저장 중...
-                  </span>
-                )}
               </div>
               <div className="filename-wrapper">
                 <span className="label">파일명:</span>
@@ -613,23 +608,6 @@ export default function NoteEditor({
           display: flex;
           align-items: center;
           gap: 1rem;
-        }
-
-        .save-status {
-          font-size: 0.65rem;
-          font-weight: 800;
-          padding: 0.2rem 0.5rem;
-          border-radius: 4px;
-          text-transform: uppercase;
-          transition: all 0.3s;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-
-        .save-status.saving {
-          color: var(--text-primary);
-          background: var(--bg-tertiary);
-          font-style: italic;
         }
 
         .title-input {
