@@ -35,7 +35,11 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ tools: tools.tools });
     } catch (error: any) {
-        console.error('MCP list-tools error:', error);
+        if (error.message?.includes('fetch failed') || error.code === 'ECONNREFUSED') {
+            console.warn(`[MCP Proxy] Target server unreachable: ${error.message}`);
+        } else {
+            console.error('MCP list-tools error:', error);
+        }
         return NextResponse.json(
             { error: error.message || 'Failed to list tools' },
             { status: 500 }

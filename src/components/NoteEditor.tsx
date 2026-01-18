@@ -58,7 +58,8 @@ export default function NoteEditor({
             tools: tools || []
           });
         } catch (e) {
-          console.error(`Failed to load tools from ${server.name}:`, e);
+          // Silent warning for connection issues to avoid console noise
+          console.warn(`[MCP] Could not connect to ${server.name} (${server.url}). It might be offline.`);
           failedServers.push(server.name);
         }
       }
