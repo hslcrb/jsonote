@@ -22,8 +22,6 @@ interface NoteEditorProps {
   showPrompt?: (title: string, message: string, defaultValue: string, onConfirm: (value: string) => void) => void;
 }
 
-// Global cache for decoded images to prevent re-decoding (Persists across re-renders)
-const globalImageCache = new Map<string, string>();
 
 export default function NoteEditor({
   note,
@@ -45,7 +43,6 @@ export default function NoteEditor({
   const [isSaved, setIsSaved] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success'>('idle');
   const [isGitGlowing, setIsGitGlowing] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Fetch tool lists from MCP servers on load / 로드 시 MCP 서버들에서 도구 목록 가져오기
   React.useEffect(() => {
@@ -104,245 +101,6 @@ export default function NoteEditor({
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 20 * 1024 * 1024) { // Limit to 20MB for processing
-      showToast?.('이미지 크기는 20MB 이하여야 합니다.', 'error');
-      return;
-    }
-
-    showToast?.('이미지 최적화 처리 중 (WebP 변환)...', 'info');
-
-    // Use Image API to optimize (Resize & WebP Conversion)
-    const img = new globalThis.Image(); // Avoid conflict with lucide Image
-    const url = URL.createObjectURL(file);
-
-    img.onload = async () => {
-      URL.revokeObjectURL(url);
-      const canvas = document.createElement('canvas');
-      let width = img.width;
-      let height = img.height;
-
-      // Max Width 1920px (Reasonable for notes)
-      const MAX_WIDTH = 1920;
-      if (width > MAX_WIDTH) {
-        height = Math.round(height * (MAX_WIDTH / width));
-        width = MAX_WIDTH;
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // Convert to WebP 0.9 (High Quality but good compression)
-      const webpDataUrl = canvas.toDataURL('image/webp', 0.9);
-
-      try {
-        // Compare LZ-String compression vs Raw Base64
-        const LZString = require('lz-string');
-        const compressed = LZString.compressToEncodedURIComponent(webpDataUrl);
-
-        let finalString: string;
-        // Heuristic: If compression doesn't save at least 5%, just use data URI (faster, standard)
-        // Actually, for Base64 data, LZ often INCREASES size. So simple check.
-        if (compressed.length < webpDataUrl.length) {
-          finalString = `lz:${compressed}`;
-        } else {
-          finalString = webpDataUrl; // Use standard Data URI
-        }
-
-        const markdownImage = `\n![${file.name}](${finalString})`;
-        handleInsertMarkdown('', '', markdownImage);
-
-        showToast?.('이미지가 최적화되어 삽입되었습니다.', 'success');
-      } catch (err) {
-        console.error('Processing error:', err);
-        showToast?.('이미지 처리 실패', 'error');
-      }
-    };
-    img.onerror = () => {
-      showToast?.('이미지 로드 실패', 'error');
-    }
-    img.src = url;
-  };
-
-  // Custom Image component for ReactMarkdown
-  const MarkdownImage = ({ src, alt }: { src?: string, alt?: string }) => {
-    const [decodedSrc, setDecodedSrc] = React.useState<string | null>(null);
-
-    React.useEffect(() => {
-      if (src?.startsWith('lz:')) {
-        const compressedData = src.substring(3);
-
-        // 1. Check Cache first (Instant render)
-        if (globalImageCache.has(compressedData)) {
-          setDecodedSrc(globalImageCache.get(compressedData)!);
-          return;
-        }
-
-        if (compressedData) {
-          try {
-            const LZString = require('lz-string');
-            const decompressed = LZString.decompressFromEncodedURIComponent(compressedData);
-            if (decompressed) {
-              setDecodedSrc(decompressed);
-              // 2. Save to Cache
-              globalImageCache.set(compressedData, decompressed);
-            } else {
-              setDecodedSrc(null);
-            }
-          } catch (e) {
-            console.error('Decompression failed:', e);
-            setDecodedSrc(null);
-          }
-        }
-      } else if (src?.startsWith('data:')) {
-        setDecodedSrc(src); // Standard Data URI, render directly
-      } else if (src?.startsWith('img:')) {
-        // Legacy support for previous versions
-        const id = src.substring(4);
-        const imgData = editedNote.data?.images?.[id];
-        if (imgData) {
-          try {
-            const LZString = require('lz-string');
-            // Try explicit decompression or fallback (handle previous formats if needed)
-            const decompressed = LZString.decompressFromUTF16(imgData.data);
-            if (decompressed) {
-              setDecodedSrc(decompressed);
-            }
-          } catch (e) { console.error(e); }
-        }
-      } else {
-        setDecodedSrc(src || null);
-      }
-    }, [src]);
-
-    if (!decodedSrc) return <span className="image-loading">이미지 복원 중...</span>;
-    return <img src={decodedSrc} alt={alt} className="markdown-img" />;
-  };
-
-  // Helper: Mask content for display (Handle both lz: and data: URIs)
-  const getMaskedContent = (fullText: string) => {
-    // Mask LZ: ![alt](lz:PREFIX8...REMAINDER) -> ![alt](lz:PREFIX8...(image)...)
-    let masked = fullText.replace(/\(lz:([A-Za-z0-9+\-$]{8})([A-Za-z0-9+\-$]{20,})\)/g, '(lz:$1...(image)...)');
-    // Mask Data URI: ![alt](data:image/xxx;base64,PREFIX...REMAINDER) -> ![alt](data:image/xxx;base64,PREFIX...(image)...)
-    masked = masked.replace(/\(data:image\/([a-zA-Z]+);base64,([A-Za-z0-9+/]{15})([A-Za-z0-9+/=]+)\)/g, '(data:image/$1;base64,$2...(image)...)');
-    return masked;
-  };
-
-  // Helper: Unmask content (Restore full strings)
-  const getUnmaskedContent = (displayText: string, originalFullText: string) => {
-    // 1. Extract all real blobs from original text
-    const blobs = new Map<string, string>();
-
-    // Find LZ blobs
-    const lzRegex = /lz:([A-Za-z0-9+\-$]{8})([A-Za-z0-9+\-$]{20,})/g;
-    let match;
-    while ((match = lzRegex.exec(originalFullText)) !== null) {
-      blobs.set(match[1], match[0]);
-    }
-
-    // Find Data URI blobs
-    const dataRegex = /data:image\/([a-zA-Z]+);base64,([A-Za-z0-9+/]{15})([A-Za-z0-9+/=]+)/g;
-    while ((match = dataRegex.exec(originalFullText)) !== null) {
-      blobs.set(match[2], match[0]); // Key is the 15-char prefix
-    }
-
-    // 2. Replace placeholders in display text
-    let unmasked = displayText.replace(/lz:([A-Za-z0-9+\-$]{8})\.\.\.\(image\)\.\.\./g, (placeholder, prefix) => {
-      return blobs.has(prefix) ? blobs.get(prefix)! : placeholder;
-    });
-
-    unmasked = unmasked.replace(/data:image\/([a-zA-Z]+);base64,([A-Za-z0-9+/]{15})\.\.\.\(image\)\.\.\./g, (placeholder, type, prefix) => {
-      return blobs.has(prefix) ? blobs.get(prefix)! : placeholder;
-    });
-
-    return unmasked;
-  };
-
-  // Helper: Map display cursor position to real content position (Updated for both types)
-  const mapDisplayIndexToRealIndex = (displayIndex: number, displayText: string, fullText: string) => {
-    let realIndex = 0;
-    let currentDisplayIndex = 0;
-
-    // Check for both types of placeholders
-    // We iterate through the display text and identify placeholders
-    // Simplified regex that matches EITHER placeholder format
-    const combinedRegex = /(\(lz:([A-Za-z0-9+\-$]{8})\.\.\.\(image\)\.\.\.\))|(\(data:image\/[a-zA-Z]+;base64,([A-Za-z0-9+/]{15})\.\.\.\(image\)\.\.\.\))/g;
-
-    let match;
-    let lastIndex = 0;
-
-    while ((match = combinedRegex.exec(displayText)) !== null) {
-      // Length of text before this match
-      const beforeLen = match.index - lastIndex;
-
-      if (currentDisplayIndex + beforeLen >= displayIndex) {
-        return realIndex + (displayIndex - currentDisplayIndex);
-      }
-
-      currentDisplayIndex += beforeLen;
-      realIndex += beforeLen;
-
-      const placeholderLen = match[0].length;
-      const isLz = !!match[2]; // Capturing group for LZ prefix
-      const prefix = isLz ? match[2] : match[4]; // Group 4 is DataURI prefix
-
-      // Find full blob in real text
-      // We need to find the full string in `fullText` that corresponds to this placeholder.
-      // The placeholder starts with `(lz:` or `(data:`. The full string also starts with `(lz:` or `(data:`.
-      // We can search for the prefix within the full string.
-
-      let fullBlobStart = -1;
-      let fullBlobEnd = -1;
-
-      if (isLz) {
-        // Search for `(lz:PREFIX...`
-        const searchPattern = `(lz:${prefix}`;
-        fullBlobStart = fullText.indexOf(searchPattern, realIndex);
-        if (fullBlobStart !== -1) {
-          fullBlobStart = fullText.lastIndexOf('(', fullBlobStart); // Ensure we get the opening paren
-          fullBlobEnd = fullText.indexOf(')', fullBlobStart);
-        }
-      } else {
-        // Search for `(data:image/...;base64,PREFIX...`
-        const searchPattern = `base64,${prefix}`;
-        fullBlobStart = fullText.indexOf(searchPattern, realIndex);
-        if (fullBlobStart !== -1) {
-          fullBlobStart = fullText.lastIndexOf('(', fullBlobStart); // Ensure we get the opening paren
-          fullBlobEnd = fullText.indexOf(')', fullBlobStart);
-        }
-      }
-
-      if (fullBlobStart === -1 || fullBlobEnd === -1) {
-        // Fallback: if we can't find the full blob, treat as 1:1 mapping for this segment
-        if (currentDisplayIndex + placeholderLen >= displayIndex) return realIndex + (displayIndex - currentDisplayIndex);
-        currentDisplayIndex += placeholderLen;
-        realIndex += placeholderLen;
-      } else {
-        const fullBlobLen = (fullBlobEnd + 1) - fullBlobStart; // Include both parens
-
-        if (currentDisplayIndex + placeholderLen >= displayIndex) {
-          // If target is within the placeholder in display text
-          // Map to the start of the real blob, or end if past placeholder end
-          if (displayIndex >= currentDisplayIndex + placeholderLen) return realIndex + fullBlobLen;
-          return realIndex;
-        }
-
-        currentDisplayIndex += placeholderLen;
-        realIndex += fullBlobLen;
-      }
-      lastIndex = combinedRegex.lastIndex;
-    }
-
-    // Remaining text
-    return realIndex + (displayIndex - currentDisplayIndex);
-  };
 
   const handleInsertMarkdown = (prefix: string, suffix: string = '', defaultText: string = '') => {
     const textarea = document.querySelector('.content-textarea') as HTMLTextAreaElement;
@@ -351,26 +109,17 @@ export default function NoteEditor({
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
 
-    // Map visual coordinates to real coordinates
-    const displayVal = textarea.value;
     const realText = editedNote.content;
-    const realStart = mapDisplayIndexToRealIndex(start, displayVal, realText);
-    const realEnd = mapDisplayIndexToRealIndex(end, displayVal, realText);
-
-    const selection = realText.substring(realStart, realEnd) || defaultText;
-    const before = realText.substring(0, realStart);
-    const after = realText.substring(realEnd);
+    const selection = realText.substring(start, end) || defaultText;
+    const before = realText.substring(0, start);
+    const after = realText.substring(end);
 
     const newContent = before + (prefix ? prefix : '') + (selection ? selection : '') + (suffix ? suffix : '') + after;
 
     setEditedNote(prev => ({ ...prev, content: newContent }));
 
-    // Correctly restore cursor position: We calculate the New Display Cursor
-    // New Text -> Masked -> Find position
     setTimeout(() => {
       textarea.focus();
-      // Simple approximation for standard text insertions (works 99% of time unless inserting masked content)
-      // Since prefix/suffix are usually short and safe:
       const newCursorPos = start + prefix.length;
       textarea.setSelectionRange(newCursorPos, newCursorPos + (selection === defaultText ? defaultText.length : selection.length));
     }, 0);
@@ -747,16 +496,9 @@ export default function NoteEditor({
                     title="링크"
                   ><Link size={16} /></button>
                   <button
-                    onClick={() => fileInputRef.current?.click()}
-                    title="이미지 업로드 (LZ-String 압축)"
+                    onClick={() => handleInsertMarkdown('![', '](https://)', '이미지 설명')}
+                    title="이미지 추가 (URL)"
                   ><Image size={16} /></button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                  />
                 </div>
                 {editedNote.metadata.type === 'todo' ? (
                   <div className="todo-editor-wrapper">
@@ -805,10 +547,9 @@ export default function NoteEditor({
                 ) : (
                   <textarea
                     className="content-textarea"
-                    value={getMaskedContent(editedNote.content)}
+                    value={editedNote.content}
                     onChange={(e) => {
-                      const newRealContent = getUnmaskedContent(e.target.value, editedNote.content);
-                      setEditedNote({ ...editedNote, content: newRealContent });
+                      setEditedNote({ ...editedNote, content: e.target.value });
                     }}
                     onDrop={onEditorDrop}
                     onDragOver={(e) => e.preventDefault()}
@@ -821,9 +562,6 @@ export default function NoteEditor({
               <div className="markdown-preview scroll-area">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
-                  components={{
-                    img: (props) => <MarkdownImage src={props.src as string} alt={props.alt as string} />
-                  }}
                 >
                   {editedNote.content || '*내용이 없습니다.*'}
                 </ReactMarkdown>
