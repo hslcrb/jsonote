@@ -177,24 +177,27 @@ export default function NoteEditor({
     };
 
     // If manual save, show success state immediately / 수동 저장이면 즉시 성공 상태 표시
+    setSaveStatus('saving');
+
     if (isManual) {
-      setSaveStatus('success');
-      // Trigger Git Glow Effect
       setIsGitGlowing(true);
-      setTimeout(() => {
-        setIsGitGlowing(false);
-        setSaveStatus('idle');
-      }, 1000);
     }
 
     try {
-      // Save to GitHub in background / 백그라운드에서 GitHub에 저장
       await onSave(updatedNote);
       setIsSaved(true);
+      setSaveStatus('success');
+
+      if (isManual) {
+        setTimeout(() => setIsGitGlowing(false), 1000);
+      }
+
+      setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (error) {
       console.error('Save failed:', error);
+      setSaveStatus('idle');
       if (isManual) {
-        setSaveStatus('idle');
+        setIsGitGlowing(false);
         showToast?.('저장에 실패했습니다. 네트워크 또는 GitHub 설정을 확인해주세요.', 'error');
       }
     }
