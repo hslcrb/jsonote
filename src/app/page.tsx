@@ -1105,10 +1105,15 @@ export default function Home() {
         }
 
         .text-btn.danger {
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-glass);
+          font-weight: 700;
+        }
+
+        .text-btn.danger:hover {
           background: var(--text-primary);
           color: var(--bg-primary);
-          font-weight: 900;
-          border: 1px solid var(--border-glass);
         }
 
         .text-btn {
@@ -1353,14 +1358,13 @@ export default function Home() {
           transition: all 0.2s;
         }
         .tree-item:hover {
-          background: var(--text-primary);
-          color: var(--bg-primary);
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
         }
         .tree-item.active {
-          background: var(--text-primary);
-          color: var(--bg-primary);
-          font-weight: 900;
-          text-decoration: underline;
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+          font-weight: 700;
         }
         .expander {
           display: flex;
@@ -1399,9 +1403,9 @@ export default function Home() {
           color: var(--text-muted);
         }
         .view-switcher button.active {
-          background: var(--text-primary);
-          color: var(--bg-primary);
-          box-shadow: none;
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+          box-shadow: var(--shadow-sm);
         }
 
         /* Table View */
@@ -1692,8 +1696,9 @@ export default function Home() {
         .mcp-setup-guide {
           margin-top: 2rem;
           padding: 1.5rem;
-          background: var(--bg-primary);
-          border: 1px solid var(--border-glass);
+          background: var(--bg-secondary);
+          border-radius: var(--radius-md);
+          border: 1px dashed var(--border-glass);
         }
 
         .mcp-setup-guide h3 {

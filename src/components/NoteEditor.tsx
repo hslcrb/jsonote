@@ -576,8 +576,8 @@ export default function NoteEditor({
 
         .save-status.saving {
           color: var(--text-primary);
-          background: var(--bg-primary);
-          border: 1px solid var(--border-glass);
+          background: var(--bg-tertiary);
+          font-style: italic;
         }
 
         .title-input {
@@ -657,9 +657,8 @@ export default function NoteEditor({
         }
 
         .save-btn:hover {
-          background: var(--bg-primary);
-          color: var(--text-primary);
-          border: 1px solid var(--border-glass);
+          opacity: 0.9;
+          transform: translateY(-1px);
         }
 
         .save-btn.success {
@@ -883,8 +882,8 @@ export default function NoteEditor({
 
         .empty-tools {
           font-size: 0.75rem;
-          color: var(--text-primary);
-          font-weight: 800;
+          color: var(--text-muted);
+          font-style: italic;
         }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

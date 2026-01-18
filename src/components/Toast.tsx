@@ -55,31 +55,33 @@ export default function Toast({ message, type, onClose }: ToastProps) {
           align-items: center;
           gap: 0.75rem;
           padding: 0.75rem 1.25rem;
-          background: var(--bg-primary);
+          background: var(--bg-glass);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
           border: 1px solid var(--border-glass);
-          border-radius: 0;
-          box-shadow: none;
+          border-radius: var(--radius-full);
+          box-shadow: var(--shadow-lg);
           min-width: 280px;
         }
 
         .toast-message {
           flex: 1;
           font-size: 0.85rem;
-          font-weight: 900;
+          font-weight: 600;
           color: var(--text-primary);
-          text-transform: uppercase;
         }
 
         .toast-close {
-          color: var(--text-primary);
+          color: var(--text-secondary);
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: var(--transition-fast);
         }
 
         .toast-close:hover {
-          background: var(--text-primary);
-          color: var(--bg-primary);
+          color: var(--text-primary);
+          transform: scale(1.1);
         }
 
         .text-primary { color: var(--text-primary); }

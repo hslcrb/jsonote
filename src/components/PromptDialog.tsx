@@ -75,7 +75,9 @@ export default function PromptDialog({
               left: 0;
               right: 0;
               bottom: 0;
-              background: rgba(0, 0, 0, 0.95);
+              background: rgba(0, 0, 0, 0.7);
+              backdrop-filter: blur(8px);
+              -webkit-backdrop-filter: blur(8px);
               z-index: 10000;
               display: flex;
               align-items: center;
@@ -84,56 +86,56 @@ export default function PromptDialog({
             }
 
             .dialog-container {
-              background: var(--bg-primary);
+              background: var(--bg-secondary);
               border: 1px solid var(--border-glass);
-              border-radius: 0;
+              border-radius: var(--radius-lg);
               width: 100%;
               max-width: 400px;
-              padding: 2.5rem;
-              box-shadow: none;
+              padding: 2rem;
+              box-shadow: var(--shadow-lg);
             }
 
             .dialog-header {
               display: flex;
               align-items: center;
               gap: 1rem;
-              margin-bottom: 1.5rem;
+              margin-bottom: 1rem;
             }
 
             .dialog-header h3 {
               margin: 0;
               font-size: 1.25rem;
-              font-weight: 900;
+              font-weight: 800;
               text-transform: uppercase;
-              letter-spacing: 0.1em;
+              letter-spacing: 0.05em;
               font-family: 'Nanum Gothic', sans-serif;
               color: var(--text-primary);
             }
 
             .dialog-message {
-              color: var(--text-primary);
+              color: var(--text-secondary);
               font-size: 0.95rem;
               line-height: 1.6;
-              margin-bottom: 2rem;
-              font-weight: 500;
+              margin-bottom: 1.5rem;
             }
 
             .dialog-input {
               width: 100%;
-              background: var(--bg-primary);
+              background: var(--bg-tertiary);
               border: 1px solid var(--border-glass);
-              border-radius: 0;
+              border-radius: var(--radius-md);
               padding: 0.75rem 1rem;
               color: var(--text-primary);
               font-size: 1rem;
-              margin-bottom: 2.5rem;
+              margin-bottom: 2rem;
               outline: none;
               font-family: 'Nanum Gothic', sans-serif;
+              transition: var(--transition-fast);
             }
 
             .dialog-input:focus {
-              background: var(--text-primary);
-              color: var(--bg-primary);
+              border-color: var(--text-secondary);
+              background: var(--bg-secondary);
             }
 
             .dialog-footer {
@@ -145,22 +147,22 @@ export default function PromptDialog({
             .dialog-btn {
               padding: 0.75rem 1.5rem;
               font-size: 0.85rem;
-              font-weight: 900;
+              font-weight: 700;
               text-transform: uppercase;
-              border-radius: 0;
-              transition: none;
+              border-radius: var(--radius-md);
+              transition: var(--transition-fast);
               font-family: 'Nanum Gothic', sans-serif;
-              border: 1px solid var(--border-glass);
             }
 
             .cancel {
-              color: var(--text-primary);
-              background: var(--bg-primary);
+              color: var(--text-muted);
+              background: var(--bg-tertiary);
+              border: 1px solid var(--border-glass);
             }
 
             .cancel:hover {
-              background: var(--text-primary);
-              color: var(--bg-primary);
+              background: var(--bg-secondary);
+              color: var(--text-primary);
             }
 
             .confirm {
@@ -169,8 +171,8 @@ export default function PromptDialog({
             }
 
             .confirm:hover {
-              background: var(--bg-primary);
-              color: var(--text-primary);
+              opacity: 0.9;
+              transform: translateY(-1px);
             }
 
             .text-primary { color: var(--text-primary); }
