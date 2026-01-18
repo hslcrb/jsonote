@@ -108,36 +108,67 @@ export default function NoteEditor({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) { // Increased limit to 5MB
-      showToast?.('이미지 크기는 5MB 이하여야 합니다.', 'error');
+    if (file.size > 20 * 1024 * 1024) { // Limit to 20MB for processing
+      showToast?.('이미지 크기는 20MB 이하여야 합니다.', 'error');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      const base64String = event.target?.result as string;
+    showToast?.('이미지 최적화 처리 중 (WebP 변환)...', 'info');
 
-      showToast?.('이미지 압축 및 텍스트 변환 중...', 'info');
+    // Use Image API to optimize (Resize & WebP Conversion)
+    const img = new globalThis.Image(); // Avoid conflict with lucide Image
+    const url = URL.createObjectURL(file);
+
+    img.onload = async () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      // Max Width 1920px (Reasonable for notes)
+      const MAX_WIDTH = 1920;
+      if (width > MAX_WIDTH) {
+        height = Math.round(height * (MAX_WIDTH / width));
+        width = MAX_WIDTH;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert to WebP 0.9 (High Quality but good compression)
+      const webpDataUrl = canvas.toDataURL('image/webp', 0.9);
 
       try {
+        // Compare LZ-String compression vs Raw Base64
         const LZString = require('lz-string');
-        // Use compressToEncodedURIComponent to make it safe for Markdown link () characters
-        const compressed = LZString.compressToEncodedURIComponent(base64String);
+        const compressed = LZString.compressToEncodedURIComponent(webpDataUrl);
 
-        // Insert inline directly into Markdown
-        // ![filename](lz:compressed_data)
-        const markdownImage = `\n![${file.name}](lz:${compressed})`;
+        let finalString: string;
+        // Heuristic: If compression doesn't save at least 5%, just use data URI (faster, standard)
+        // Actually, for Base64 data, LZ often INCREASES size. So simple check.
+        if (compressed.length < webpDataUrl.length) {
+          finalString = `lz:${compressed}`;
+        } else {
+          finalString = webpDataUrl; // Use standard Data URI
+        }
 
+        const markdownImage = `\n![${file.name}](${finalString})`;
         handleInsertMarkdown('', '', markdownImage);
 
-        showToast?.('이미지가 텍스트로 변환되어 삽입되었습니다.', 'success');
+        showToast?.('이미지가 최적화되어 삽입되었습니다.', 'success');
       } catch (err) {
-        console.error('Compression error:', err);
-        showToast?.('이미지 변환 실패: ' + (err as Error).message, 'error');
+        console.error('Processing error:', err);
+        showToast?.('이미지 처리 실패', 'error');
       }
     };
-    // Read as DataURL directly (Base64)
-    reader.readAsDataURL(file);
+    img.onerror = () => {
+      showToast?.('이미지 로드 실패', 'error');
+    }
+    img.src = url;
   };
 
   // Custom Image component for ReactMarkdown
@@ -170,6 +201,8 @@ export default function NoteEditor({
             setDecodedSrc(null);
           }
         }
+      } else if (src?.startsWith('data:')) {
+        setDecodedSrc(src); // Standard Data URI, render directly
       } else if (src?.startsWith('img:')) {
         // Legacy support for previous versions
         const id = src.substring(4);
@@ -193,44 +226,62 @@ export default function NoteEditor({
     return <img src={decodedSrc} alt={alt} className="markdown-img" />;
   };
 
-  // Helper: Mask content for display (Shorten LZ strings)
+  // Helper: Mask content for display (Handle both lz: and data: URIs)
   const getMaskedContent = (fullText: string) => {
-    // Pattern: ![alt](lz:PREFIX8...REMAINDER) -> ![alt](lz:PREFIX8...(image)...)
-    // We target lz: followed by at least 28 chars to ensure we don't mask short strings randomly (though improbable)
-    return fullText.replace(/\(lz:([A-Za-z0-9+\-$]{8})([A-Za-z0-9+\-$]{20,})\)/g, '(lz:$1...(image)...)');
+    // Mask LZ: ![alt](lz:PREFIX8...REMAINDER) -> ![alt](lz:PREFIX8...(image)...)
+    let masked = fullText.replace(/\(lz:([A-Za-z0-9+\-$]{8})([A-Za-z0-9+\-$]{20,})\)/g, '(lz:$1...(image)...)');
+    // Mask Data URI: ![alt](data:image/xxx;base64,PREFIX...REMAINDER) -> ![alt](data:image/xxx;base64,PREFIX...(image)...)
+    masked = masked.replace(/\(data:image\/([a-zA-Z]+);base64,([A-Za-z0-9+/]{15})([A-Za-z0-9+/=]+)\)/g, '(data:image/$1;base64,$2...(image)...)');
+    return masked;
   };
 
   // Helper: Unmask content (Restore full strings)
   const getUnmaskedContent = (displayText: string, originalFullText: string) => {
     // 1. Extract all real blobs from original text
     const blobs = new Map<string, string>();
-    const regex = /lz:([A-Za-z0-9+\-$]{8})([A-Za-z0-9+\-$]{20,})/g;
+
+    // Find LZ blobs
+    const lzRegex = /lz:([A-Za-z0-9+\-$]{8})([A-Za-z0-9+\-$]{20,})/g;
     let match;
-    while ((match = regex.exec(originalFullText)) !== null) {
-      blobs.set(match[1], match[0]); // store "lz:FULLSTRING"
+    while ((match = lzRegex.exec(originalFullText)) !== null) {
+      blobs.set(match[1], match[0]);
     }
 
-    // 2. Replace placeholders with real blobs
-    return displayText.replace(/lz:([A-Za-z0-9+\-$]{8})\.\.\.\(image\)\.\.\./g, (placeholder, prefix) => {
+    // Find Data URI blobs
+    const dataRegex = /data:image\/([a-zA-Z]+);base64,([A-Za-z0-9+/]{15})([A-Za-z0-9+/=]+)/g;
+    while ((match = dataRegex.exec(originalFullText)) !== null) {
+      blobs.set(match[2], match[0]); // Key is the 15-char prefix
+    }
+
+    // 2. Replace placeholders in display text
+    let unmasked = displayText.replace(/lz:([A-Za-z0-9+\-$]{8})\.\.\.\(image\)\.\.\./g, (placeholder, prefix) => {
       return blobs.has(prefix) ? blobs.get(prefix)! : placeholder;
     });
+
+    unmasked = unmasked.replace(/data:image\/([a-zA-Z]+);base64,([A-Za-z0-9+/]{15})\.\.\.\(image\)\.\.\./g, (placeholder, type, prefix) => {
+      return blobs.has(prefix) ? blobs.get(prefix)! : placeholder;
+    });
+
+    return unmasked;
   };
 
-  // Helper: Map display cursor position to real content position
+  // Helper: Map display cursor position to real content position (Updated for both types)
   const mapDisplayIndexToRealIndex = (displayIndex: number, displayText: string, fullText: string) => {
     let realIndex = 0;
     let currentDisplayIndex = 0;
 
-    // Regex to find placeholders in display text
-    const regex = /\(lz:([A-Za-z0-9+\-$]{8})\.\.\.\(image\)\.\.\.\)/g; // Include Parens for easier math
+    // Check for both types of placeholders
+    // We iterate through the display text and identify placeholders
+    // Simplified regex that matches EITHER placeholder format
+    const combinedRegex = /(\(lz:([A-Za-z0-9+\-$]{8})\.\.\.\(image\)\.\.\.\))|(\(data:image\/[a-zA-Z]+;base64,([A-Za-z0-9+/]{15})\.\.\.\(image\)\.\.\.\))/g;
+
     let match;
     let lastIndex = 0;
 
-    while ((match = regex.exec(displayText)) !== null) {
+    while ((match = combinedRegex.exec(displayText)) !== null) {
       // Length of text before this match
       const beforeLen = match.index - lastIndex;
 
-      // If our target displayIndex is before this match end
       if (currentDisplayIndex + beforeLen >= displayIndex) {
         return realIndex + (displayIndex - currentDisplayIndex);
       }
@@ -238,41 +289,55 @@ export default function NoteEditor({
       currentDisplayIndex += beforeLen;
       realIndex += beforeLen;
 
-      // Add match length to display, but Full Blob length to real
       const placeholderLen = match[0].length;
+      const isLz = !!match[2]; // Capturing group for LZ prefix
+      const prefix = isLz ? match[2] : match[4]; // Group 4 is DataURI prefix
 
-      // Find the corresponding blob length in fullText
-      // We assume correct order or uniqueness. To be safe, look up by prefix.
-      const prefix = match[1];
-      // Construct exact regex for this blob in fullText starting around realIndex?
-      // Simpler: find the first occurrence of this blob after realIndex in fullText
-      const fullBlobStart = fullText.indexOf(`lz:${prefix}`, realIndex);
-      if (fullBlobStart === -1) {
-        // Fallback (shouldn't happen): treat as 1:1
-        if (currentDisplayIndex + placeholderLen >= displayIndex) {
-          return realIndex + (displayIndex - currentDisplayIndex);
+      // Find full blob in real text
+      // We need to find the full string in `fullText` that corresponds to this placeholder.
+      // The placeholder starts with `(lz:` or `(data:`. The full string also starts with `(lz:` or `(data:`.
+      // We can search for the prefix within the full string.
+
+      let fullBlobStart = -1;
+      let fullBlobEnd = -1;
+
+      if (isLz) {
+        // Search for `(lz:PREFIX...`
+        const searchPattern = `(lz:${prefix}`;
+        fullBlobStart = fullText.indexOf(searchPattern, realIndex);
+        if (fullBlobStart !== -1) {
+          fullBlobStart = fullText.lastIndexOf('(', fullBlobStart); // Ensure we get the opening paren
+          fullBlobEnd = fullText.indexOf(')', fullBlobStart);
         }
+      } else {
+        // Search for `(data:image/...;base64,PREFIX...`
+        const searchPattern = `base64,${prefix}`;
+        fullBlobStart = fullText.indexOf(searchPattern, realIndex);
+        if (fullBlobStart !== -1) {
+          fullBlobStart = fullText.lastIndexOf('(', fullBlobStart); // Ensure we get the opening paren
+          fullBlobEnd = fullText.indexOf(')', fullBlobStart);
+        }
+      }
+
+      if (fullBlobStart === -1 || fullBlobEnd === -1) {
+        // Fallback: if we can't find the full blob, treat as 1:1 mapping for this segment
+        if (currentDisplayIndex + placeholderLen >= displayIndex) return realIndex + (displayIndex - currentDisplayIndex);
         currentDisplayIndex += placeholderLen;
         realIndex += placeholderLen;
       } else {
-        // Calculate full blob end
-        // pattern: lz:CHARS... until )
-        const fullBlobEnd = fullText.indexOf(')', fullBlobStart);
-        const fullBlobLen = (fullBlobEnd + 1) - (fullBlobStart - 1); // include parens ( and )
+        const fullBlobLen = (fullBlobEnd + 1) - fullBlobStart; // Include both parens
 
-        // Check if target is inside the placeholder (impossible to edit middle of placeholder meaningfully)
         if (currentDisplayIndex + placeholderLen >= displayIndex) {
-          // If inside, map to END of really blob (user trying to edit placeholder usually means append/delete)
-          // Or map proportionally? No, just return end of blob if at end of placeholder
+          // If target is within the placeholder in display text
+          // Map to the start of the real blob, or end if past placeholder end
           if (displayIndex >= currentDisplayIndex + placeholderLen) return realIndex + fullBlobLen;
-          return realIndex; // Map start to start
+          return realIndex;
         }
 
         currentDisplayIndex += placeholderLen;
         realIndex += fullBlobLen;
       }
-
-      lastIndex = regex.lastIndex;
+      lastIndex = combinedRegex.lastIndex;
     }
 
     // Remaining text
