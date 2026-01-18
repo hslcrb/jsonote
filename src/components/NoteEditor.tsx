@@ -22,6 +22,9 @@ interface NoteEditorProps {
   showPrompt?: (title: string, message: string, defaultValue: string, onConfirm: (value: string) => void) => void;
 }
 
+// Global cache for decoded images to prevent re-decoding (Persists across re-renders)
+const globalImageCache = new Map<string, string>();
+
 export default function NoteEditor({
   note,
   onSave,
@@ -135,9 +138,6 @@ export default function NoteEditor({
     // Read as DataURL directly (Base64)
     reader.readAsDataURL(file);
   };
-
-  // Global cache for decoded images to prevent re-decoding (Persists across re-renders)
-  const globalImageCache = new Map<string, string>();
 
   // Custom Image component for ReactMarkdown
   const MarkdownImage = ({ src, alt }: { src?: string, alt?: string }) => {
