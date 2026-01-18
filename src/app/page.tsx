@@ -376,7 +376,15 @@ export default function Home() {
 
   return (
     <div className={`layout-container`}>
-      {isWarmMode && <div className="warm-overlay" style={{ background: `rgba(255, 140, 0, ${warmIntensity})` }} />}
+      {isWarmMode && (
+        <div
+          className="warm-overlay"
+          style={{
+            backgroundColor: `rgba(255, 140, 0, ${warmIntensity * 0.5})`,
+            filter: `sepia(${warmIntensity * 100}%) brightness(95%)`
+          }}
+        />
+      )}
       <div className="app-shell">
         <motion.aside
           initial={false}
@@ -1544,15 +1552,13 @@ export default function Home() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(255, 140, 0, 0.12);
           pointer-events: none;
           z-index: 9999;
-          mix-blend-mode: multiply;
-          transition: background 1.5s ease-in-out;
+          transition: background 0.5s ease-in-out, filter 0.5s ease-in-out;
         }
 
         .icon-btn-minimal.active {
-          color: #ff8c00;
+          color: var(--text-primary);
         }
 
         .warm-control-panel {
@@ -1586,7 +1592,7 @@ export default function Home() {
         .warm-slider {
           width: 100%;
           cursor: pointer;
-          accent-color: #ff8c00;
+          accent-color: var(--text-primary);
           height: 4px;
           -webkit-appearance: none;
           background: var(--bg-tertiary);
@@ -1598,7 +1604,7 @@ export default function Home() {
           -webkit-appearance: none;
           width: 14px;
           height: 14px;
-          background: #ff8c00;
+          background: var(--text-primary);
           border-radius: 50%;
           cursor: pointer;
           border: 2px solid var(--bg-primary);
