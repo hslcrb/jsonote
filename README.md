@@ -14,7 +14,7 @@ This project is currently in the early stages of development. The first official
 ### 1. GitHub Native Synchronization
 - Your notes are stored as `.json` files in your private GitHub repository.
 - Full version control through Git.
-- Real-time sync with retry logic for conflict resolution.
+- Real-time sync with **visual feedback** (Saving... -> Saved!).
 
 ### 2. Notion-Inspired Workspace
 - **Infinite Hierarchy**: Nest pages within pages to build a comprehensive knowledge base.
@@ -29,7 +29,7 @@ This project is currently in the early stages of development. The first official
 ### 4. Developer-Friendly UI
 - **Glassmorphism Design**: Premium obsidian-dark aesthetic.
 - **Nanum Gothic Typography**: Clean and professional local font rendering.
-- **Markdown Support**: Syntax highlighting and easy formatting tools.
+- **Markdown Support**: Syntax highlighting, standard URL-based images, and easy formatting tools.
 
 ---
 
@@ -45,7 +45,18 @@ npm run dev
 1. Go to **Settings** in the app.
 2. Enter your **GitHub Personal Access Token** (Fine-grained or Classic).
 3. Specify your `Owner`, `Repo`, and `Branch`.
-4. Your notes will automatically sync upon saving.
+4. Click **Test Connection (연결 진단)** to verify your token and permissions instantly.
+5. Your notes will automatically sync upon saving.
+
+### Troubleshooting
+If you encounter synchronization errors (e.g., "SHA not supplied" or "Bad Credentials"):
+1. Open **Settings**.
+2. Click the **Test Connection** button.
+3. The tool will diagnose:
+   - Token validity (Auth)
+   - Repository access (Read)
+   - Write permissions (Push)
+4. Follow the on-screen logs to resolve specific permission issues.
 
 ---
 
