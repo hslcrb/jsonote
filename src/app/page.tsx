@@ -25,6 +25,7 @@ export default function Home() {
 
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [isWarmMode, setIsWarmMode] = useState(false);
+  const [warmIntensity, setWarmIntensity] = useState(0.12);
 
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
@@ -36,11 +37,13 @@ export default function Home() {
     const savedConfig = localStorage.getItem('jsonote_storage_config');
     const savedTheme = localStorage.getItem('jsonote_theme') as 'dark' | 'light';
     const savedWarm = localStorage.getItem('jsonote_warm') === 'true';
+    const savedIntensity = localStorage.getItem('jsonote_warm_intensity');
 
     if (savedNotes) setNotes(JSON.parse(savedNotes));
     if (savedConfig) setStorageConfig(JSON.parse(savedConfig));
     if (savedTheme) setTheme(savedTheme || 'dark');
     setIsWarmMode(savedWarm);
+    if (savedIntensity) setWarmIntensity(parseFloat(savedIntensity));
 
     if (!savedNotes) {
       const mockNotes: Note[] = [
@@ -68,7 +71,8 @@ export default function Home() {
 
   useEffect(() => {
     localStorage.setItem('jsonote_warm', isWarmMode.toString());
-  }, [isWarmMode]);
+    localStorage.setItem('jsonote_warm_intensity', warmIntensity.toString());
+  }, [isWarmMode, warmIntensity]);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -372,7 +376,7 @@ export default function Home() {
 
   return (
     <div className={`layout-container`}>
-      {isWarmMode && <div className="warm-overlay" />}
+      {isWarmMode && <div className="warm-overlay" style={{ background: `rgba(255, 140, 0, ${warmIntensity})` }} />}
       <div className="app-shell">
         <motion.aside
           initial={false}
@@ -465,6 +469,18 @@ export default function Home() {
               <button onClick={toggleWarmMode} className={`icon-btn-minimal ${isWarmMode ? 'active' : ''}`} title="나이트 모드 (블루라이트 차단)">
                 <Zap size={16} />
               </button>
+            </div>
+            <div className={`warm-control-panel ${isWarmMode ? 'active' : ''}`}>
+              <div className="intensity-label">블루라이트 차단 강도</div>
+              <input
+                type="range"
+                min="0.05"
+                max="0.4"
+                step="0.01"
+                value={warmIntensity}
+                onChange={(e) => setWarmIntensity(parseFloat(e.target.value))}
+                className="warm-slider"
+              />
             </div>
           </div>
         </motion.aside>
@@ -1539,6 +1555,54 @@ export default function Home() {
           color: #ff8c00;
         }
 
+        .warm-control-panel {
+          max-height: 0;
+          overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          opacity: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .warm-control-panel.active {
+          max-height: 80px;
+          opacity: 1;
+          margin-top: 0.5rem;
+          padding: 0.75rem;
+          background: var(--bg-secondary);
+          border-radius: 8px;
+          border: 1px solid var(--border-glass);
+        }
+
+        .intensity-label {
+          font-size: 0.6rem;
+          font-weight: 800;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .warm-slider {
+          width: 100%;
+          cursor: pointer;
+          accent-color: #ff8c00;
+          height: 4px;
+          -webkit-appearance: none;
+          background: var(--bg-tertiary);
+          border-radius: 2px;
+          outline: none;
+        }
+
+        .warm-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 14px;
+          height: 14px;
+          background: #ff8c00;
+          border-radius: 50%;
+          cursor: pointer;
+          border: 2px solid var(--bg-primary);
+        }
         @media (max-width: 640px) {
           .header-center { margin: 0 0.5rem; }
           .main-scroll-area { padding: 1.5rem 1rem; }
