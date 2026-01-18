@@ -7,39 +7,39 @@ import { CheckCircle, AlertCircle, X, Info } from 'lucide-react';
 export type ToastType = 'success' | 'error' | 'info';
 
 interface ToastProps {
-    message: string;
-    type: ToastType;
-    onClose: () => void;
+  message: string;
+  type: ToastType;
+  onClose: () => void;
 }
 
 export default function Toast({ message, type, onClose }: ToastProps) {
-    useEffect(() => {
-        const timer = setTimeout(onClose, 3000);
-        return () => clearTimeout(timer);
-    }, [onClose]);
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
 
-    const icons = {
-        success: <CheckCircle className="text-green-500" size={18} />,
-        error: <AlertCircle className="text-red-500" size={18} />,
-        info: <Info className="text-blue-500" size={18} />
-    };
+  const icons = {
+    success: <CheckCircle className="text-primary" size={18} />,
+    error: <AlertCircle className="text-primary" size={18} />,
+    info: <Info className="text-primary" size={18} />
+  };
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="toast-container"
-        >
-            <div className={`toast-content ${type}`}>
-                {icons[type]}
-                <span className="toast-message">{message}</span>
-                <button onClick={onClose} className="toast-close">
-                    <X size={14} />
-                </button>
-            </div>
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className="toast-container"
+    >
+      <div className={`toast-content ${type}`}>
+        {icons[type]}
+        <span className="toast-message">{message}</span>
+        <button onClick={onClose} className="toast-close">
+          <X size={14} />
+        </button>
+      </div>
 
-            <style jsx>{`
+      <style jsx>{`
         .toast-container {
           position: fixed;
           bottom: 2rem;
@@ -55,35 +55,37 @@ export default function Toast({ message, type, onClose }: ToastProps) {
           align-items: center;
           gap: 0.75rem;
           padding: 0.75rem 1.25rem;
-          background: var(--bg-tertiary);
+          background: var(--bg-primary);
           border: 1px solid var(--border-glass);
-          border-radius: var(--radius-full);
-          box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+          border-radius: 0;
+          box-shadow: none;
           min-width: 280px;
         }
 
         .toast-message {
           flex: 1;
           font-size: 0.85rem;
-          font-weight: 600;
+          font-weight: 900;
           color: var(--text-primary);
+          text-transform: uppercase;
         }
 
         .toast-close {
-          color: var(--text-muted);
+          color: var(--text-primary);
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
         .toast-close:hover {
-          color: var(--text-primary);
+          background: var(--text-primary);
+          color: var(--bg-primary);
         }
 
-        .success { border-color: rgba(34, 197, 94, 0.3); }
-        .error { border-color: rgba(239, 68, 68, 0.3); }
-        .info { border-color: rgba(59, 130, 246, 0.3); }
+        .text-primary { color: var(--text-primary); }
+
+        .success, .error, .info { border-color: var(--border-glass); }
       `}</style>
-        </motion.div>
-    );
+    </motion.div>
+  );
 }

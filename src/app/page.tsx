@@ -1105,9 +1105,10 @@ export default function Home() {
         }
 
         .text-btn.danger {
-          background: #ff4444;
-          color: #ffffff;
+          background: var(--text-primary);
+          color: var(--bg-primary);
           font-weight: 900;
+          border: 1px solid var(--border-glass);
         }
 
         .text-btn {
@@ -1301,8 +1302,9 @@ export default function Home() {
         }
 
         .del-btn:hover {
-          color: #ff4444;
-          background: rgba(255, 68, 68, 0.1);
+          color: var(--text-primary);
+          background: var(--bg-primary);
+          border: 1px solid var(--border-glass);
         }
 
         .del-btn-card {
@@ -1316,8 +1318,14 @@ export default function Home() {
         }
 
         .del-btn-card:hover {
-          color: #ff4444;
-          background: rgba(255, 68, 68, 0.1);
+          color: var(--text-primary);
+          background: var(--bg-primary);
+          border: 1px solid var(--border-glass);
+        }
+
+        .del-btn-small:hover {
+          color: var(--text-primary);
+          text-decoration: underline;
         }
 
         /* Tree Sidebar Styles */
@@ -1345,13 +1353,14 @@ export default function Home() {
           transition: all 0.2s;
         }
         .tree-item:hover {
-          background: rgba(var(--accent-rgb), 0.1);
-          color: var(--text-primary);
+          background: var(--text-primary);
+          color: var(--bg-primary);
         }
         .tree-item.active {
-          background: rgba(var(--accent-rgb), 0.2);
-          color: var(--text-primary);
-          font-weight: 600;
+          background: var(--text-primary);
+          color: var(--bg-primary);
+          font-weight: 900;
+          text-decoration: underline;
         }
         .expander {
           display: flex;
@@ -1390,9 +1399,9 @@ export default function Home() {
           color: var(--text-muted);
         }
         .view-switcher button.active {
-          background: var(--bg-tertiary);
-          color: var(--text-primary);
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          background: var(--text-primary);
+          color: var(--bg-primary);
+          box-shadow: none;
         }
 
         /* Table View */
@@ -1561,9 +1570,8 @@ export default function Home() {
         }
 
         .mcp-add-btn.active {
-          background: #22c55e;
-          color: white;
-          border-color: #22c55e;
+          background: var(--text-primary);
+          border-color: var(--text-primary);
         }
 
         .mcp-list {
@@ -1582,8 +1590,12 @@ export default function Home() {
           border-radius: var(--radius-sm);
         }
 
+        .mcp-card.active {
+          border-color: var(--text-primary);
+        }
+
         .mcp-item.enabled {
-          border-color: #22c55e;
+          border-color: var(--text-primary);
         }
 
         .mcp-info {
@@ -1680,9 +1692,8 @@ export default function Home() {
         .mcp-setup-guide {
           margin-top: 2rem;
           padding: 1.5rem;
-          background: rgba(var(--accent-rgb), 0.05);
-          border-radius: var(--radius-md);
-          border: 1px dashed var(--border-glass);
+          background: var(--bg-primary);
+          border: 1px solid var(--border-glass);
         }
 
         .mcp-setup-guide h3 {
@@ -1701,8 +1712,9 @@ export default function Home() {
         }
 
         .command-box {
-          background: #000;
-          color: #0f0;
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-glass);
           padding: 1rem;
           border-radius: var(--radius-sm);
           font-family: 'Fira Code', monospace;

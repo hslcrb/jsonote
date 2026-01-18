@@ -575,8 +575,9 @@ export default function NoteEditor({
         }
 
         .save-status.saving {
-          color: var(--bg-primary);
-          background: #eab308; /* Yellow */
+          color: var(--text-primary);
+          background: var(--bg-primary);
+          border: 1px solid var(--border-glass);
         }
 
         .title-input {
@@ -656,13 +657,14 @@ export default function NoteEditor({
         }
 
         .save-btn:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-glass);
         }
 
         .save-btn.success {
-          background: #22c55e !important;
-          color: white !important;
+          background: var(--text-primary) !important;
+          color: var(--bg-primary) !important;
         }
 
         .save-btn:disabled {
@@ -881,8 +883,8 @@ export default function NoteEditor({
 
         .empty-tools {
           font-size: 0.75rem;
-          color: var(--text-muted);
-          font-style: italic;
+          color: var(--text-primary);
+          font-weight: 800;
         }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -893,7 +895,8 @@ export default function NoteEditor({
         }
 
         .icon-btn[title="삭제"]:hover {
-          color: #ff4444;
+          background: var(--text-primary);
+          color: var(--bg-primary);
         }
 
         @media (max-width: 768px) {

@@ -471,8 +471,8 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
         }
 
         .dot.active {
-          background: #22c55e;
-          box-shadow: 0 0 10px #22c55e;
+          background: var(--text-primary);
+          border: 1px solid var(--border-glass);
         }
 
         .status-row .label {
@@ -557,7 +557,8 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
         }
 
         .del-btn-small:hover {
-          color: #ff4444;
+          color: var(--text-primary);
+          text-decoration: underline;
         }
 
         .empty-mcp {

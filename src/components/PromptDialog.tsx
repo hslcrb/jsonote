@@ -5,78 +5,77 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
 
 interface PromptDialogProps {
-    isOpen: boolean;
-    title: string;
-    message: string;
-    defaultValue?: string;
-    onConfirm: (value: string) => void;
-    onCancel: () => void;
+  isOpen: boolean;
+  title: string;
+  message: string;
+  defaultValue?: string;
+  onConfirm: (value: string) => void;
+  onCancel: () => void;
 }
 
 export default function PromptDialog({
-    isOpen,
-    title,
-    message,
-    defaultValue = '',
-    onConfirm,
-    onCancel
+  isOpen,
+  title,
+  message,
+  defaultValue = '',
+  onConfirm,
+  onCancel
 }: PromptDialogProps) {
-    const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(defaultValue);
 
-    useEffect(() => {
-        if (isOpen) setValue(defaultValue);
-    }, [isOpen, defaultValue]);
+  useEffect(() => {
+    if (isOpen) setValue(defaultValue);
+  }, [isOpen, defaultValue]);
 
-    const handleSubmit = (e?: React.FormEvent) => {
-        e?.preventDefault();
-        onConfirm(value);
-    };
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    onConfirm(value);
+  };
 
-    return (
-        <AnimatePresence>
-            {isOpen && (
-                <div className="dialog-overlay">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="dialog-container"
-                    >
-                        <div className="dialog-header">
-                            <MessageSquare className="text-muted" size={24} />
-                            <h3>{title}</h3>
-                        </div>
-                        <p className="dialog-message">{message}</p>
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="dialog-overlay">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="dialog-container"
+          >
+            <div className="dialog-header">
+              <MessageSquare className="text-primary" size={24} />
+              <h3>{title}</h3>
+            </div>
+            <p className="dialog-message">{message}</p>
 
-                        <form onSubmit={handleSubmit}>
-                            <input
-                                className="dialog-input"
-                                type="text"
-                                value={value}
-                                onChange={(e) => setValue(e.target.value)}
-                                autoFocus
-                            />
+            <form onSubmit={handleSubmit}>
+              <input
+                className="dialog-input"
+                type="text"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                autoFocus
+              />
 
-                            <div className="dialog-footer">
-                                <button type="button" className="dialog-btn cancel" onClick={onCancel}>
-                                    취소
-                                </button>
-                                <button type="submit" className="dialog-btn confirm">
-                                    확인
-                                </button>
-                            </div>
-                        </form>
-                    </motion.div>
+              <div className="dialog-footer">
+                <button type="button" className="dialog-btn cancel" onClick={onCancel}>
+                  취소
+                </button>
+                <button type="submit" className="dialog-btn confirm">
+                  확인
+                </button>
+              </div>
+            </form>
+          </motion.div>
 
-                    <style jsx>{`
+          <style jsx>{`
             .dialog-overlay {
               position: fixed;
               top: 0;
               left: 0;
               right: 0;
               bottom: 0;
-              background: rgba(0, 0, 0, 0.85);
-              backdrop-filter: blur(4px);
+              background: rgba(0, 0, 0, 0.95);
               z-index: 10000;
               display: flex;
               align-items: center;
@@ -87,18 +86,18 @@ export default function PromptDialog({
             .dialog-container {
               background: var(--bg-primary);
               border: 1px solid var(--border-glass);
-              border-radius: var(--radius-lg);
+              border-radius: 0;
               width: 100%;
               max-width: 400px;
-              padding: 2rem;
-              box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+              padding: 2.5rem;
+              box-shadow: none;
             }
 
             .dialog-header {
               display: flex;
               align-items: center;
               gap: 1rem;
-              margin-bottom: 1rem;
+              margin-bottom: 1.5rem;
             }
 
             .dialog-header h3 {
@@ -106,32 +105,35 @@ export default function PromptDialog({
               font-size: 1.25rem;
               font-weight: 900;
               text-transform: uppercase;
-              letter-spacing: 0.05em;
+              letter-spacing: 0.1em;
               font-family: 'Nanum Gothic', sans-serif;
+              color: var(--text-primary);
             }
 
             .dialog-message {
-              color: var(--text-secondary);
+              color: var(--text-primary);
               font-size: 0.95rem;
               line-height: 1.6;
-              margin-bottom: 1.5rem;
+              margin-bottom: 2rem;
+              font-weight: 500;
             }
 
             .dialog-input {
               width: 100%;
-              background: var(--bg-tertiary);
+              background: var(--bg-primary);
               border: 1px solid var(--border-glass);
-              border-radius: 4px;
+              border-radius: 0;
               padding: 0.75rem 1rem;
               color: var(--text-primary);
               font-size: 1rem;
-              margin-bottom: 2rem;
+              margin-bottom: 2.5rem;
               outline: none;
               font-family: 'Nanum Gothic', sans-serif;
             }
 
             .dialog-input:focus {
-              border-color: var(--text-secondary);
+              background: var(--text-primary);
+              color: var(--bg-primary);
             }
 
             .dialog-footer {
@@ -145,19 +147,20 @@ export default function PromptDialog({
               font-size: 0.85rem;
               font-weight: 900;
               text-transform: uppercase;
-              border-radius: var(--radius-sm);
-              transition: all 0.2s;
+              border-radius: 0;
+              transition: none;
               font-family: 'Nanum Gothic', sans-serif;
+              border: 1px solid var(--border-glass);
             }
 
             .cancel {
-              color: var(--text-muted);
-              background: var(--bg-secondary);
+              color: var(--text-primary);
+              background: var(--bg-primary);
             }
 
             .cancel:hover {
-              background: var(--bg-tertiary);
-              color: var(--text-primary);
+              background: var(--text-primary);
+              color: var(--bg-primary);
             }
 
             .confirm {
@@ -165,10 +168,15 @@ export default function PromptDialog({
               color: var(--bg-primary);
             }
 
-            .text-muted { color: var(--text-muted); }
+            .confirm:hover {
+              background: var(--bg-primary);
+              color: var(--text-primary);
+            }
+
+            .text-primary { color: var(--text-primary); }
           `}</style>
-                </div>
-            )}
-        </AnimatePresence>
-    );
+        </div>
+      )}
+    </AnimatePresence>
+  );
 }
