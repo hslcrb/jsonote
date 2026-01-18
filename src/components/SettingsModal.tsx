@@ -41,6 +41,35 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
     setEditedConfig({ ...editedConfig, provider });
   };
 
+  const [isDiagnosing, setIsDiagnosing] = useState(false);
+
+  const handleDiagnose = async () => {
+    if (!editedConfig.token || !editedConfig.owner || !editedConfig.repo) {
+      alert('토큰, 소유자, 저장소 정보를 모두 입력해주세요.');
+      return;
+    }
+
+    setIsDiagnosing(true);
+    try {
+      const res = await fetch('/api/github/diagnose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editedConfig)
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert(`✅ 연결 성공!\n\n${data.logs.join('\n')}`);
+      } else {
+        alert(`❌ 연결 실패\n\n${data.logs.join('\n')}\n\n오류: ${data.message}`);
+      }
+    } catch (e: any) {
+      alert('진단 요청 중 오류 발생: ' + e.message);
+    } finally {
+      setIsDiagnosing(false);
+    }
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-container">
@@ -106,6 +135,28 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                       onChange={(e) => setEditedConfig({ ...editedConfig, repo: e.target.value })}
                     />
                   </div>
+                  <div className="diagnose-section">
+                    <button
+                      className="diagnose-btn"
+                      onClick={handleDiagnose}
+                      disabled={isDiagnosing}
+                    >
+                      {isDiagnosing ? (
+                        <>
+                          <div className="loader-mini"></div>
+                          진단 중...
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck size={16} />
+                          연결 진단
+                        </>
+                      )}
+                    </button>
+                    <p className="diagnose-desc">
+                      입력된 정보로 저장소에 접근 가능한지 확인합니다.
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -151,7 +202,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                 <p>모든 정보는 브라우저 로컬 스토리지에만 보관됩니다.</p>
               </div>
             </div>
-                      </div>
+          </div>
         </div>
 
         <footer className="modal-footer">
@@ -310,6 +361,49 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           .settings-content { padding: 1.5rem; }
         }
 
+        .diagnose-section {
+          margin-top: 1.5rem;
+          padding-top: 1.5rem;
+          border-top: 1px dashed var(--border-glass);
+        }
+
+        .diagnose-btn {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          background: #2da44e;
+          color: white;
+          border: none;
+          font-weight: 800;
+          font-size: 0.8rem;
+          cursor: pointer;
+          border-radius: 4px;
+        }
+
+        .diagnose-btn:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .diagnose-desc {
+          margin-top: 0.5rem;
+          font-size: 0.75rem;
+          color: var(--text-muted);
+        }
+
+        .loader-mini {
+          width: 14px;
+          height: 14px;
+          border: 2px solid rgba(255,255,255,0.3);
+          border-top-color: white;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
       `}</style>
     </div>
   );
