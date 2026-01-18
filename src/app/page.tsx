@@ -25,7 +25,7 @@ export default function Home() {
 
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [isWarmMode, setIsWarmMode] = useState(false);
-  const [warmIntensity, setWarmIntensity] = useState(0.12);
+  const [warmIntensity, setWarmIntensity] = useState(30);
 
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
@@ -43,7 +43,7 @@ export default function Home() {
     if (savedConfig) setStorageConfig(JSON.parse(savedConfig));
     if (savedTheme) setTheme(savedTheme || 'dark');
     setIsWarmMode(savedWarm);
-    if (savedIntensity) setWarmIntensity(parseFloat(savedIntensity));
+    if (savedIntensity) setWarmIntensity(parseInt(savedIntensity));
 
     if (!savedNotes) {
       const mockNotes: Note[] = [
@@ -380,8 +380,8 @@ export default function Home() {
         <div
           className="warm-overlay"
           style={{
-            backgroundColor: `rgba(255, 140, 0, ${warmIntensity * 0.5})`,
-            filter: `sepia(${warmIntensity * 100}%) brightness(95%)`
+            backgroundColor: `rgba(255, 140, 0, ${(warmIntensity / 100) * 0.3})`,
+            filter: `sepia(${warmIntensity}%) contrast(90%) brightness(95%)`
           }}
         />
       )}
@@ -479,14 +479,17 @@ export default function Home() {
               </button>
             </div>
             <div className={`warm-control-panel ${isWarmMode ? 'active' : ''}`}>
-              <div className="intensity-label">블루라이트 차단 강도</div>
+              <div className="intensity-row">
+                <div className="intensity-label">차단 강도</div>
+                <div className="intensity-value">{warmIntensity}%</div>
+              </div>
               <input
                 type="range"
-                min="0.05"
-                max="0.4"
-                step="0.01"
+                min="1"
+                max="100"
+                step="1"
                 value={warmIntensity}
-                onChange={(e) => setWarmIntensity(parseFloat(e.target.value))}
+                onChange={(e) => setWarmIntensity(parseInt(e.target.value))}
                 className="warm-slider"
               />
             </div>
@@ -1581,12 +1584,24 @@ export default function Home() {
           border: 1px solid var(--border-glass);
         }
 
+        .intensity-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
         .intensity-label {
           font-size: 0.6rem;
           font-weight: 800;
           color: var(--text-muted);
           text-transform: uppercase;
           letter-spacing: 0.05em;
+        }
+
+        .intensity-value {
+          font-size: 0.75rem;
+          font-weight: 800;
+          color: var(--text-primary);
         }
 
         .warm-slider {
