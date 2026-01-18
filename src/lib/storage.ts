@@ -114,8 +114,13 @@ export class GitHubStorage implements IJsonoteStorage {
                         }
                     });
                     sha = data.sha;
-                } catch (e) {
-                    // SHA is undefined if file doesn't exist (new file)
+                } catch (e: any) {
+                    // Only ignore 404 (File not found -> New file)
+                    if (e.status === 404) {
+                        sha = undefined;
+                    } else {
+                        throw e; // Re-throw auth/network errors
+                    }
                 }
 
                 await this.octokit.rest.repos.createOrUpdateFileContents({
@@ -156,48 +161,14 @@ export class GitHubStorage implements IJsonoteStorage {
         const encodedPath = `notes/${encodeURIComponent(baseName)}.json`;
 
         try {
-            // Get SHA from directory listing to handle large files
-            let sha = '';
-            try {
-                const { data } = await this.octokit.rest.repos.getContent({
-                    owner: this.config.owner!,
-                    repo: this.config.repo!,
-                    path: 'notes',
-                    ref: this.config.branch,
-                    headers: { 'Cache-Control': 'no-cache' }
-                });
-
-                if (Array.isArray(data)) {
-                    const targetName = `${baseName}.json`;
-                    const targetPath = `notes/${baseName}.json`;
-
-                    const targetFile = data.find((f: any) => {
-                        const fName = f.name.normalize('NFC');
-                        const fPath = f.path.normalize('NFC');
-                        const tName = targetName.normalize('NFC');
-                        const tPath = targetPath.normalize('NFC');
-                        return fName === tName || fPath === tPath || f.path === encodedPath;
-                    });
-
-                    if (targetFile) {
-                        sha = targetFile.sha;
-                    }
-                }
-            } catch (dirErr) {
-                // If dir list fails, we likely can't delete anyway, but let's try fallback or throw
-            }
-
-            if (!sha) {
-                // Try fallback to direct get if dir list failed or file not found (though direct get fails on large files)
-                // If we don't have SHA, delete will fail.
-                const { data }: any = await this.octokit.rest.repos.getContent({
-                    owner: this.config.owner!,
-                    repo: this.config.repo!,
-                    path: encodedPath,
-                    ref: this.config.branch
-                });
-                sha = data.sha;
-            }
+            const { data }: any = await this.octokit.rest.repos.getContent({
+                owner: this.config.owner!,
+                repo: this.config.repo!,
+                path: encodedPath,
+                ref: this.config.branch,
+                headers: { 'Cache-Control': 'no-cache' }
+            });
+            const sha = data.sha;
 
             await this.octokit.rest.repos.deleteFile({
                 owner: this.config.owner!,
@@ -208,6 +179,11 @@ export class GitHubStorage implements IJsonoteStorage {
                 branch: this.config.branch
             });
         } catch (e: any) {
+            // Only ignore 404 (File not found -> already deleted or never existed)
+            if (e.status === 404) {
+                console.warn(`Note to delete not found: ${encodedPath}. Assuming already deleted.`);
+                return;
+            }
             console.error('GitHub delete failed:', e);
             throw e;
         }
