@@ -103,52 +103,19 @@ export class GitHubStorage implements IJsonoteStorage {
             try {
                 let sha: string | undefined;
                 try {
-                    // 1. Try Directory Listing first (Efficient, handles large files)
-                    const { data } = await this.octokit.rest.repos.getContent({
+                    const { data }: any = await this.octokit.rest.repos.getContent({
                         owner: this.config.owner!,
                         repo: this.config.repo!,
-                        path: 'notes',
+                        path: encodedPath,
                         ref: this.config.branch,
                         headers: {
                             'If-None-Match': '',
                             'Cache-Control': 'no-cache'
                         }
                     });
-
-                    if (Array.isArray(data)) {
-                        const targetName = `${baseName}.json`;
-                        const targetPath = `notes/${baseName}.json`;
-
-                        const targetFile = data.find((f: any) => {
-                            const fName = f.name.normalize('NFC');
-                            const fPath = f.path.normalize('NFC');
-                            const tName = targetName.normalize('NFC');
-                            const tPath = targetPath.normalize('NFC');
-                            return fName === tName || fPath === tPath || f.path === encodedPath;
-                        });
-
-                        if (targetFile) {
-                            sha = targetFile.sha;
-                        }
-                    }
+                    sha = data.sha;
                 } catch (e) {
-                    // Directory list failed, ignore
-                }
-
-                // 2. Fallback: If SHA not found in list, try direct fetch (Safety net)
-                if (!sha) {
-                    try {
-                        const { data }: any = await this.octokit.rest.repos.getContent({
-                            owner: this.config.owner!,
-                            repo: this.config.repo!,
-                            path: encodedPath,
-                            ref: this.config.branch,
-                            headers: { 'If-None-Match': '' }
-                        });
-                        sha = data.sha;
-                    } catch (e) {
-                        // File really doesn't exist (or is too large and wasn't in list -> rare edge case)
-                    }
+                    // SHA is undefined if file doesn't exist (new file)
                 }
 
                 await this.octokit.rest.repos.createOrUpdateFileContents({
