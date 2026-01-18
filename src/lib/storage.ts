@@ -58,7 +58,8 @@ export class GitHubStorage implements IJsonoteStorage {
                 ref: this.config.branch
             });
 
-            const content = Buffer.from(data.content, 'base64').toString();
+            // Browser-compatible Base64 decode (handles UTF-8)
+            const content = decodeURIComponent(escape(window.atob(data.content.replace(/\n/g, ''))));
             return JSON.parse(content);
         } catch (e) {
             return null;
@@ -118,7 +119,8 @@ export class GitHubStorage implements IJsonoteStorage {
                     repo: this.config.repo!,
                     path: encodedPath,
                     message: `Update note: ${note.metadata.title}`,
-                    content: Buffer.from(content).toString('base64'),
+                    // Browser-compatible Base64 encode (handles UTF-8)
+                    content: window.btoa(unescape(encodeURIComponent(content))),
                     branch: this.config.branch,
                     sha
                 });
