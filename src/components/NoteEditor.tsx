@@ -704,7 +704,8 @@ export default function NoteEditor({
           gap: 0.5rem;
         }
 
-        .meta-item select, .meta-item input {
+        .meta-item select, .meta-item > input {
+          width: 100%;
           background: var(--bg-tertiary);
           border: 1px solid var(--border-glass);
           border-radius: 4px;
@@ -713,19 +714,88 @@ export default function NoteEditor({
           font-size: 0.85rem;
           outline: none;
           font-family: inherit;
+          box-sizing: border-box;
         }
 
-        .meta-item select:focus, .meta-item input:focus {
+        .meta-item select:focus, .meta-item > input:focus {
           border-color: var(--text-secondary);
         }
 
-        .tags-input input {
-          background: transparent;
-          border: none;
-          outline: none;
-          color: var(--text-primary);
+        .input-with-icon {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-glass);
+          border-radius: 4px;
+          padding: 0.4rem 0.6rem;
+          color: var(--text-muted);
           width: 100%;
-          font-size: 0.9rem;
+          box-sizing: border-box;
+        }
+
+        .input-with-icon input {
+          background: transparent !important;
+          border: none !important;
+          padding: 0 !important;
+          color: var(--text-primary) !important;
+          font-size: 0.85rem;
+          flex: 1;
+          width: 100%;
+          outline: none;
+        }
+
+        .prop-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.25rem;
+        }
+
+        .add-prop-btn {
+          font-size: 0.65rem;
+          background: var(--bg-tertiary);
+          padding: 0.25rem 0.5rem;
+          border: 1px solid var(--border-glass);
+          border-radius: 4px;
+          color: var(--text-primary);
+          display: flex;
+          align-items: center;
+          gap: 0.2rem;
+          font-weight: 700;
+        }
+
+        .properties-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .prop-row {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          padding: 0.5rem;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-glass);
+          border-radius: 4px;
+        }
+
+        .prop-key {
+          font-size: 0.65rem;
+          font-weight: 800;
+          color: var(--text-muted);
+          text-transform: uppercase;
+        }
+
+        .prop-val {
+          background: transparent !important;
+          border: none !important;
+          padding: 0 !important;
+          font-size: 0.85rem !important;
+          color: var(--text-primary) !important;
+          width: 100% !important;
+          outline: none;
         }
 
         .markdown-editor-wrapper {
