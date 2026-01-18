@@ -494,11 +494,11 @@ export default function Home() {
                   <span>사용 가이드</span>
                 </button>
                 <button
-                  className={`nav-item ${activeTab === 'mcp' ? 'active' : ''}`}
-                  onClick={() => { setActiveTab('mcp'); if (viewMode === 'mobile') setIsSidebarOpen(false); }}
+                  className="nav-item disabled"
+                  title="현재 지능형 공사 중입니다"
                 >
                   <Zap size={16} />
-                  <span>MCP 도구</span>
+                  <span>MCP 도구 (준비 중)</span>
                 </button>
               </div>
 
@@ -922,6 +922,13 @@ export default function Home() {
           color: var(--text-primary);
           background: var(--bg-tertiary);
           text-decoration: underline;
+        }
+
+        .nav-item.disabled {
+          opacity: 0.3;
+          filter: blur(1.5px);
+          cursor: not-allowed;
+          pointer-events: none;
         }
 
         .nav-item-static {
