@@ -180,25 +180,121 @@ export default function NoteEditor({
     return <img src={decodedSrc} alt={alt} className="markdown-img" />;
   };
 
+  // Helper: Mask content for display (Shorten LZ strings)
+  const getMaskedContent = (fullText: string) => {
+    // Pattern: ![alt](lz:PREFIX8...REMAINDER) -> ![alt](lz:PREFIX8...(image)...)
+    // We target lz: followed by at least 28 chars to ensure we don't mask short strings randomly (though improbable)
+    return fullText.replace(/\(lz:([A-Za-z0-9+\-$]{8})([A-Za-z0-9+\-$]{20,})\)/g, '(lz:$1...(image)...)');
+  };
+
+  // Helper: Unmask content (Restore full strings)
+  const getUnmaskedContent = (displayText: string, originalFullText: string) => {
+    // 1. Extract all real blobs from original text
+    const blobs = new Map<string, string>();
+    const regex = /lz:([A-Za-z0-9+\-$]{8})([A-Za-z0-9+\-$]{20,})/g;
+    let match;
+    while ((match = regex.exec(originalFullText)) !== null) {
+      blobs.set(match[1], match[0]); // store "lz:FULLSTRING"
+    }
+
+    // 2. Replace placeholders with real blobs
+    return displayText.replace(/lz:([A-Za-z0-9+\-$]{8})\.\.\.\(image\)\.\.\./g, (placeholder, prefix) => {
+      return blobs.has(prefix) ? blobs.get(prefix)! : placeholder;
+    });
+  };
+
+  // Helper: Map display cursor position to real content position
+  const mapDisplayIndexToRealIndex = (displayIndex: number, displayText: string, fullText: string) => {
+    let realIndex = 0;
+    let currentDisplayIndex = 0;
+
+    // Regex to find placeholders in display text
+    const regex = /\(lz:([A-Za-z0-9+\-$]{8})\.\.\.\(image\)\.\.\.\)/g; // Include Parens for easier math
+    let match;
+    let lastIndex = 0;
+
+    while ((match = regex.exec(displayText)) !== null) {
+      // Length of text before this match
+      const beforeLen = match.index - lastIndex;
+
+      // If our target displayIndex is before this match end
+      if (currentDisplayIndex + beforeLen >= displayIndex) {
+        return realIndex + (displayIndex - currentDisplayIndex);
+      }
+
+      currentDisplayIndex += beforeLen;
+      realIndex += beforeLen;
+
+      // Add match length to display, but Full Blob length to real
+      const placeholderLen = match[0].length;
+
+      // Find the corresponding blob length in fullText
+      // We assume correct order or uniqueness. To be safe, look up by prefix.
+      const prefix = match[1];
+      // Construct exact regex for this blob in fullText starting around realIndex?
+      // Simpler: find the first occurrence of this blob after realIndex in fullText
+      const fullBlobStart = fullText.indexOf(`lz:${prefix}`, realIndex);
+      if (fullBlobStart === -1) {
+        // Fallback (shouldn't happen): treat as 1:1
+        if (currentDisplayIndex + placeholderLen >= displayIndex) {
+          return realIndex + (displayIndex - currentDisplayIndex);
+        }
+        currentDisplayIndex += placeholderLen;
+        realIndex += placeholderLen;
+      } else {
+        // Calculate full blob end
+        // pattern: lz:CHARS... until )
+        const fullBlobEnd = fullText.indexOf(')', fullBlobStart);
+        const fullBlobLen = (fullBlobEnd + 1) - (fullBlobStart - 1); // include parens ( and )
+
+        // Check if target is inside the placeholder (impossible to edit middle of placeholder meaningfully)
+        if (currentDisplayIndex + placeholderLen >= displayIndex) {
+          // If inside, map to END of really blob (user trying to edit placeholder usually means append/delete)
+          // Or map proportionally? No, just return end of blob if at end of placeholder
+          if (displayIndex >= currentDisplayIndex + placeholderLen) return realIndex + fullBlobLen;
+          return realIndex; // Map start to start
+        }
+
+        currentDisplayIndex += placeholderLen;
+        realIndex += fullBlobLen;
+      }
+
+      lastIndex = regex.lastIndex;
+    }
+
+    // Remaining text
+    return realIndex + (displayIndex - currentDisplayIndex);
+  };
+
   const handleInsertMarkdown = (prefix: string, suffix: string = '', defaultText: string = '') => {
     const textarea = document.querySelector('.content-textarea') as HTMLTextAreaElement;
     if (!textarea) return;
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const text = editedNote.content;
-    const selection = text.substring(start, end) || defaultText;
 
-    const before = text.substring(0, start);
-    const after = text.substring(end);
+    // Map visual coordinates to real coordinates
+    const displayVal = textarea.value;
+    const realText = editedNote.content;
+    const realStart = mapDisplayIndexToRealIndex(start, displayVal, realText);
+    const realEnd = mapDisplayIndexToRealIndex(end, displayVal, realText);
+
+    const selection = realText.substring(realStart, realEnd) || defaultText;
+    const before = realText.substring(0, realStart);
+    const after = realText.substring(realEnd);
+
     const newContent = before + (prefix ? prefix : '') + (selection ? selection : '') + (suffix ? suffix : '') + after;
 
     setEditedNote(prev => ({ ...prev, content: newContent }));
 
-    // Correctly restore cursor position or move to end of insertion
+    // Correctly restore cursor position: We calculate the New Display Cursor
+    // New Text -> Masked -> Find position
     setTimeout(() => {
       textarea.focus();
-      textarea.setSelectionRange(start + prefix.length, end + prefix.length);
+      // Simple approximation for standard text insertions (works 99% of time unless inserting masked content)
+      // Since prefix/suffix are usually short and safe:
+      const newCursorPos = start + prefix.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos + (selection === defaultText ? defaultText.length : selection.length));
     }, 0);
   };
 
@@ -608,8 +704,11 @@ export default function NoteEditor({
                 ) : (
                   <textarea
                     className="content-textarea"
-                    value={editedNote.content}
-                    onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
+                    value={getMaskedContent(editedNote.content)}
+                    onChange={(e) => {
+                      const newRealContent = getUnmaskedContent(e.target.value, editedNote.content);
+                      setEditedNote({ ...editedNote, content: newRealContent });
+                    }}
                     onDrop={onEditorDrop}
                     onDragOver={(e) => e.preventDefault()}
                     placeholder="내용(마크다운 지원)을 입력하세요..."
