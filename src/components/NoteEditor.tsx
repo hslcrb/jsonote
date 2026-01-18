@@ -41,6 +41,7 @@ export default function NoteEditor({
   const [isToolLoading, setIsToolLoading] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success'>('idle');
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Fetch tool lists from MCP servers on load / 로드 시 MCP 서버들에서 도구 목록 가져오기
   React.useEffect(() => {
@@ -97,6 +98,91 @@ export default function NoteEditor({
     } finally {
       setIsToolLoading(null);
     }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      showToast?.('이미지 크기는 2MB 이하여야 합니다.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const buffer = event.target?.result as ArrayBuffer;
+      const uint8 = new Uint8Array(buffer);
+
+      showToast?.('이미지 압축 중 (LZMA 최고 압축)...', 'info');
+
+      try {
+        // Dynamic require to prevent SSR issues
+        const LZMA = require('lzma-purejs');
+        const compressed = LZMA.compress(uint8);
+
+        // Convert to Base64 manually to ensure browser compatibility
+        let binary = '';
+        const len = compressed.length;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(compressed[i]);
+        }
+        const base64 = btoa(binary);
+
+        const imageId = Math.random().toString(36).substring(2, 9);
+        const newImages = {
+          ...(editedNote.data?.images || {}),
+          [imageId]: { mime: file.type, data: base64 }
+        };
+
+        setEditedNote(prev => ({
+          ...prev,
+          data: { ...prev.data, images: newImages },
+          content: `${prev.content}\n![${file.name}](img:${imageId})`
+        }));
+
+        showToast?.('이미지가 압축되어 JSON에 삽입되었습니다.', 'success');
+      } catch (err) {
+        console.error('LZMA tool error:', err);
+        showToast?.('LZMA 압축 실패: ' + (err as Error).message, 'error');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // Custom Image component for ReactMarkdown
+  const MarkdownImage = ({ src, alt }: { src?: string, alt?: string }) => {
+    const [decodedSrc, setDecodedSrc] = React.useState<string | null>(null);
+
+    React.useEffect(() => {
+      if (src?.startsWith('img:')) {
+        const id = src.substring(4);
+        const imgData = editedNote.data?.images?.[id];
+        if (imgData) {
+          try {
+            const binary = atob(imgData.data);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+              bytes[i] = binary.charCodeAt(i);
+            }
+
+            const LZMA = require('lzma-purejs');
+            const result = LZMA.decompress(bytes);
+
+            const blob = new Blob([new Uint8Array(result as any)], { type: imgData.mime });
+            const url = URL.createObjectURL(blob);
+            setDecodedSrc(url);
+          } catch (e) {
+            console.error('Decompression failed:', e);
+          }
+        }
+      } else {
+        setDecodedSrc(src || null);
+      }
+    }, [src]);
+
+    if (!decodedSrc) return <span className="image-loading">이미지 복원 중...</span>;
+    return <img src={decodedSrc} alt={alt} className="markdown-img" />;
   };
 
   const handleInsertMarkdown = (prefix: string, suffix: string = '', defaultText: string = '') => {
@@ -459,7 +545,7 @@ export default function NoteEditor({
                   <button
                     draggable
                     onDragStart={(e) => onToolbarDragStart(e, 'code')}
-                    onClick={() => handleInsertMarkdown('```\n', '\n```', '코드 입력')}
+                    onClick={() => handleInsertMarkdown('```\n', '\n```', '코드 블록')}
                     title="코드 블록"
                   ><FileCode size={16} /></button>
                   <div className="toolbar-divider" />
@@ -470,11 +556,16 @@ export default function NoteEditor({
                     title="링크"
                   ><Link size={16} /></button>
                   <button
-                    draggable
-                    onDragStart={(e) => onToolbarDragStart(e, 'image')}
-                    onClick={() => handleInsertMarkdown('![', '](url)', '이미지')}
-                    title="이미지"
+                    onClick={() => fileInputRef.current?.click()}
+                    title="이미지 업로드 (LZMA 압축)"
                   ><Image size={16} /></button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
                 </div>
                 {editedNote.metadata.type === 'todo' ? (
                   <div className="todo-editor-wrapper">
@@ -534,7 +625,12 @@ export default function NoteEditor({
               </div>
             ) : view === 'preview' ? (
               <div className="markdown-preview scroll-area">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    img: (props) => <MarkdownImage src={props.src as string} alt={props.alt as string} />
+                  }}
+                >
                   {editedNote.content || '*내용이 없습니다.*'}
                 </ReactMarkdown>
               </div>
@@ -984,6 +1080,24 @@ export default function NoteEditor({
           font-size: 0.75rem;
           color: var(--text-muted);
           font-style: italic;
+        }
+
+        .image-loading {
+          display: inline-block;
+          padding: 1rem;
+          background: var(--bg-secondary);
+          border: 1px dashed var(--border-glass);
+          color: var(--text-muted);
+          font-size: 0.8rem;
+          margin: 1rem 0;
+        }
+
+        .markdown-img {
+          max-width: 100%;
+          border-radius: 8px;
+          border: 1px solid var(--border-glass);
+          margin: 1rem 0;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
