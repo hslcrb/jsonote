@@ -24,7 +24,8 @@ export default function Home() {
   const [isSyncing, setIsSyncing] = useState(false);
 
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+  const [isWarmMode, setIsWarmMode] = useState(false);
+
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'notes' | 'guide'>('notes');
@@ -34,12 +35,12 @@ export default function Home() {
     const savedNotes = localStorage.getItem('jsonote_notes');
     const savedConfig = localStorage.getItem('jsonote_storage_config');
     const savedTheme = localStorage.getItem('jsonote_theme') as 'dark' | 'light';
-    const savedView = localStorage.getItem('jsonote_view') as 'desktop' | 'mobile';
+    const savedWarm = localStorage.getItem('jsonote_warm') === 'true';
 
     if (savedNotes) setNotes(JSON.parse(savedNotes));
     if (savedConfig) setStorageConfig(JSON.parse(savedConfig));
     if (savedTheme) setTheme(savedTheme || 'dark');
-    if (savedView) setViewMode(savedView || 'desktop');
+    setIsWarmMode(savedWarm);
 
     if (!savedNotes) {
       const mockNotes: Note[] = [
@@ -66,8 +67,8 @@ export default function Home() {
   }, [theme]);
 
   useEffect(() => {
-    localStorage.setItem('jsonote_view', viewMode);
-  }, [viewMode]);
+    localStorage.setItem('jsonote_warm', isWarmMode.toString());
+  }, [isWarmMode]);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -360,7 +361,7 @@ export default function Home() {
   };
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  const toggleViewMode = () => setViewMode(prev => prev === 'desktop' ? 'mobile' : 'desktop');
+  const toggleWarmMode = () => setIsWarmMode(prev => !prev);
 
   const filteredNotes = notes.filter(n => {
     const matchesSearch = n.metadata.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -370,12 +371,13 @@ export default function Home() {
   });
 
   return (
-    <div className={`layout-container ${viewMode}-view`}>
+    <div className={`layout-container`}>
+      {isWarmMode && <div className="warm-overlay" />}
       <div className="app-shell">
         <motion.aside
           initial={false}
           animate={{
-            width: isSidebarOpen ? (viewMode === 'mobile' ? '100%' : '240px') : '0',
+            width: isSidebarOpen ? '240px' : '0',
             opacity: isSidebarOpen ? 1 : 0
           }}
           transition={{ duration: 0.2 }}
@@ -408,14 +410,14 @@ export default function Home() {
                 <label>메뉴</label>
                 <button
                   className={`nav-item ${activeTab === 'notes' && filterType === 'all' ? 'active' : ''}`}
-                  onClick={() => { setActiveTab('notes'); setFilterType('all'); if (viewMode === 'mobile') setIsSidebarOpen(false); }}
+                  onClick={() => { setActiveTab('notes'); setFilterType('all'); }}
                 >
                   <FileText size={16} />
                   <span>모든 노트</span>
                 </button>
                 <button
                   className={`nav-item ${activeTab === 'guide' ? 'active' : ''}`}
-                  onClick={() => { setActiveTab('guide'); if (viewMode === 'mobile') setIsSidebarOpen(false); }}
+                  onClick={() => setActiveTab('guide')}
                 >
                   <Info size={16} />
                   <span>사용 가이드</span>
@@ -433,7 +435,7 @@ export default function Home() {
                 <label>필터</label>
                 <button
                   className={`nav-item ${activeTab === 'notes' && filterType === 'journal' ? 'active' : ''}`}
-                  onClick={() => { setActiveTab('notes'); setFilterType('journal'); if (viewMode === 'mobile') setIsSidebarOpen(false); }}
+                  onClick={() => { setActiveTab('notes'); setFilterType('journal'); }}
                 >
                   <Star size={16} />
                   <span>저널</span>
@@ -457,11 +459,11 @@ export default function Home() {
               <span>설정</span>
             </button>
             <div className="toggle-row">
-              <button onClick={toggleTheme} className="icon-btn-minimal">
+              <button onClick={toggleTheme} className="icon-btn-minimal" title="테마 전환">
                 {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               </button>
-              <button onClick={toggleViewMode} className="icon-btn-minimal">
-                {viewMode === 'desktop' ? <Smartphone size={16} /> : <Monitor size={16} />}
+              <button onClick={toggleWarmMode} className={`icon-btn-minimal ${isWarmMode ? 'active' : ''}`} title="나이트 모드 (블루라이트 차단)">
+                <Zap size={16} />
               </button>
             </div>
           </div>
@@ -1518,6 +1520,23 @@ export default function Home() {
           align-items: center;
           justify-content: center;
           color: var(--text-primary);
+        }
+
+        .warm-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(255, 140, 0, 0.12);
+          pointer-events: none;
+          z-index: 9999;
+          mix-blend-mode: multiply;
+          transition: background 1.5s ease-in-out;
+        }
+
+        .icon-btn-minimal.active {
+          color: #ff8c00;
         }
 
         @media (max-width: 640px) {

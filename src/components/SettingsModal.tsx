@@ -22,7 +22,7 @@ const PROVIDERS: { id: StorageProvider; name: string; icon: any }[] = [
   { id: 'webdav', name: 'WEBDAV', icon: HardDrive },
 ];
 
-type TabType = StorageProvider | 'mcp';
+type TabType = StorageProvider;
 
 export default function SettingsModal({ config, onSave, onClose }: SettingsModalProps) {
   const [editedConfig, setEditedConfig] = useState<StorageConfig>(config || {
@@ -38,34 +38,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
 
   const handleProviderChange = (provider: TabType) => {
     setActiveTab(provider);
-    if (provider !== 'mcp') {
-      setEditedConfig({ ...editedConfig, provider });
-    }
-  };
-
-  const [newMcp, setNewMcp] = useState({ name: '', url: '' });
-
-  const addMcpServer = () => {
-    if (!newMcp.name || !newMcp.url) return;
-    const servers = editedConfig.mcpServers || [];
-    const newServer = {
-      id: Date.now().toString(),
-      name: newMcp.name,
-      url: newMcp.url,
-      enabled: true
-    };
-    setEditedConfig({
-      ...editedConfig,
-      mcpServers: [...servers, newServer]
-    });
-    setNewMcp({ name: '', url: '' });
-  };
-
-  const removeMcpServer = (id: string) => {
-    setEditedConfig({
-      ...editedConfig,
-      mcpServers: editedConfig.mcpServers?.filter(s => s.id !== id)
-    });
+    setEditedConfig({ ...editedConfig, provider });
   };
 
   return (
@@ -73,9 +46,6 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
       <div className="modal-container">
         <header className="modal-header">
           <div className="title-section">
-            <button className="icon-btn mobile-only" onClick={onClose} aria-label="닫기">
-              <ChevronLeft size={20} />
-            </button>
             <Settings size={20} />
             <h3>환경 설정</h3>
           </div>
@@ -92,12 +62,6 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                 <span>{p.name}</span>
               </button>
             ))}
-            <button
-              className={`provider-item ${activeTab === 'mcp' ? 'active' : ''}`}
-              onClick={() => handleProviderChange('mcp')}
-            >
-              <span>AI & MCP</span>
-            </button>
           </aside>
 
           <div className="settings-content scroll-area">
@@ -182,75 +146,12 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                 </div>
               )}
 
-              {activeTab === 'mcp' && (
-                <div className="mcp-settings">
-                  <div className="section-group">
-                    <label className="group-label">내부 MCP 서버 (Exporter)</label>
-                    <div className="status-box">
-                      <div className="status-row">
-                        <span className="dot active"></span>
-                        <span className="label">서버 상태:</span>
-                        <span className="value">Running (Stateless)</span>
-                      </div>
-                      <div className="status-row">
-                        <span className="label">API 엔드포인트:</span>
-                        <code className="value">/api/mcp</code>
-                      </div>
-                      <p className="help-text">Claude Desktop 등에서 jsoNote의 데이터를 읽고 쓸 수 있도록 허용합니다.</p>
-                    </div>
-                  </div>
-
-                  <div className="section-group">
-                    <label className="group-label">외부 MCP 서버 연결 (Client)</label>
-                    <div className="mcp-add-form">
-                      <input
-                        type="text"
-                        placeholder="서버 이름 (예: Google Search)"
-                        value={newMcp.name}
-                        onChange={(e) => setNewMcp({ ...newMcp, name: e.target.value })}
-                      />
-                      <input
-                        type="text"
-                        placeholder="SSE URL (http://.../sse)"
-                        value={newMcp.url}
-                        onChange={(e) => setNewMcp({ ...newMcp, url: e.target.value })}
-                      />
-                      <button className="add-btn" onClick={addMcpServer}>추가</button>
-                    </div>
-
-                    <div className="mcp-list">
-                      {editedConfig.mcpServers && editedConfig.mcpServers.length > 0 ? (
-                        editedConfig.mcpServers.map(server => (
-                          <div key={server.id} className="mcp-item">
-                            <div className="mcp-info">
-                              <span className="mcp-name">{server.name}</span>
-                              <span className="mcp-url">{server.url}</span>
-                            </div>
-                            <button className="del-btn-small" onClick={() => removeMcpServer(server.id)}>삭제</button>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="empty-mcp">연결된 외부 MCP 서버가 없습니다.</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="migration-banner">
-                <LinkIcon size={14} />
-                <div>
-                  <p><strong>마이그레이션 안내</strong></p>
-                  <p>서비스 간 이동(예: GitLab ➔ GitHub) 시, 기존 설정을 유지한 채 동기화를 완료한 뒤 정보를 변경하세요. 로컬의 모든 노트가 새 저장소로 자동 복제됩니다.</p>
-                </div>
-              </div>
-
               <div className="security-info">
                 <ShieldCheck size={16} />
                 <p>모든 정보는 브라우저 로컬 스토리지에만 보관됩니다.</p>
               </div>
             </div>
-          </div>
+                      </div>
         </div>
 
         <footer className="modal-footer">
@@ -370,25 +271,6 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           outline: none;
         }
 
-        .migration-banner {
-          margin-top: 3rem;
-          padding: 1.5rem;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-glass);
-          display: flex;
-          gap: 1rem;
-          align-items: flex-start;
-          color: var(--text-secondary);
-          font-size: 0.85rem;
-          line-height: 1.5;
-        }
-
-        .migration-banner strong {
-          color: var(--text-primary);
-          display: block;
-          margin-bottom: 0.25rem;
-        }
-
         .security-info {
           margin-top: 3rem;
           display: flex;
@@ -427,152 +309,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           .provider-item { border-bottom: none; border-right: 1px solid var(--border-glass); white-space: nowrap; }
           .settings-content { padding: 1.5rem; }
         }
-        .mcp-settings {
-          display: flex;
-          flex-direction: column;
-          gap: 2.5rem;
-        }
 
-        .section-group {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .group-label {
-          font-size: 0.7rem;
-          font-weight: 900;
-          color: var(--text-primary);
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-        }
-
-        .status-box {
-          padding: 1.5rem;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-glass);
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-        }
-
-        .status-row {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          font-size: 0.85rem;
-        }
-
-        .dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          background: var(--text-muted);
-        }
-
-        .dot.active {
-          background: var(--text-primary);
-          border: 1px solid var(--border-glass);
-        }
-
-        .status-row .label {
-          color: var(--text-muted);
-          font-weight: 700;
-        }
-
-        .status-row .value {
-          color: var(--text-primary);
-          font-weight: 700;
-        }
-
-        .help-text {
-          font-size: 0.8rem;
-          color: var(--text-muted);
-          margin-top: 0.5rem;
-          line-height: 1.5;
-        }
-
-        .mcp-add-form {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .mcp-add-form input {
-          flex: 1;
-          padding: 0.75rem;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-glass);
-          color: var(--text-primary);
-          font-size: 0.85rem;
-          outline: none;
-        }
-
-        .add-btn {
-          padding: 0 1.5rem;
-          background: var(--text-primary);
-          color: var(--bg-primary);
-          font-weight: 900;
-          font-size: 0.8rem;
-          text-transform: uppercase;
-        }
-
-        .mcp-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          margin-top: 1rem;
-        }
-
-        .mcp-item {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 1rem;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-glass);
-        }
-
-        .mcp-info {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .mcp-name {
-          font-size: 0.9rem;
-          font-weight: 800;
-          color: var(--text-primary);
-        }
-
-        .mcp-url {
-          font-size: 0.75rem;
-          color: var(--text-muted);
-        }
-
-        .del-btn-small {
-          color: var(--text-muted);
-          font-size: 0.7rem;
-          font-weight: 800;
-          text-transform: uppercase;
-        }
-
-        .del-btn-small:hover {
-          color: var(--text-primary);
-          text-decoration: underline;
-        }
-
-        .empty-mcp {
-          text-align: center;
-          padding: 2rem;
-          border: 1px dashed var(--border-glass);
-          color: var(--text-muted);
-          font-size: 0.85rem;
-          font-weight: 700;
-        }
-
-        @media (max-width: 768px) {
-          .mcp-add-form { flex-direction: column; }
-        }
       `}</style>
     </div>
   );
