@@ -95,9 +95,9 @@ export class GitHubStorage implements IJsonoteStorage {
             }
         }
 
-        // Retry logic for SHA conflicts (max 3) / SHA 충돌 시 재시도 로직 (최대 3회)
+        // Retry logic for SHA conflicts (max 5) / SHA 충돌 시 재시도 로직 (최대 5회)
         let retries = 0;
-        const maxRetries = 3;
+        const maxRetries = 5;
 
         while (retries < maxRetries) {
             try {
@@ -107,7 +107,11 @@ export class GitHubStorage implements IJsonoteStorage {
                         owner: this.config.owner!,
                         repo: this.config.repo!,
                         path: encodedPath,
-                        ref: this.config.branch
+                        ref: this.config.branch,
+                        headers: {
+                            'If-None-Match': '', // Force fresh fetch (bust cache)
+                            'Cache-Control': 'no-cache'
+                        }
                     });
                     sha = data.sha;
                 } catch (e) {
@@ -133,8 +137,9 @@ export class GitHubStorage implements IJsonoteStorage {
                 if (error.message && error.message.includes('does not match')) {
                     retries++;
                     console.warn(`SHA conflict, retrying... (${retries}/${maxRetries})`);
-                    // Wait before retry / 잠시 대기 후 재시도
-                    await new Promise(resolve => setTimeout(resolve, 200 * retries));
+                    // Wait before retry with random jitter to avoid lockstep / 랜덤 지연시간 추가
+                    const delay = 500 * retries + Math.random() * 500;
+                    await new Promise(resolve => setTimeout(resolve, delay));
                     continue;
                 }
                 // Other errors throw immediately / 다른 에러는 바로 throw
