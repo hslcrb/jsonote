@@ -380,8 +380,8 @@ export default function Home() {
         <div
           className="warm-overlay"
           style={{
-            backgroundColor: `rgba(255, 100, 0, ${(warmIntensity / 100) * 0.45})`,
-            filter: `sepia(${warmIntensity * 1.5}%) saturate(${100 + warmIntensity}%) hue-rotate(${-warmIntensity * 0.2}deg) brightness(${100 - warmIntensity * 0.2}%)`
+            backgroundColor: `rgba(255, 190, 0, ${(warmIntensity / 100) * 0.35})`,
+            filter: `sepia(${warmIntensity * 0.6}%) saturate(${100 + warmIntensity * 0.3}%) brightness(${100 - warmIntensity * 0.05}%)`
           }}
         />
       )}
@@ -1557,8 +1557,7 @@ export default function Home() {
           bottom: 0;
           pointer-events: none;
           z-index: 9999;
-          transition: background 0.3s ease-out, filter 0.3s ease-out;
-          mix-blend-mode: multiply;
+          transition: background 0.4s ease-out, filter 0.4s ease-out;
         }
 
         .icon-btn-minimal.active {
