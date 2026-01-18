@@ -200,8 +200,8 @@ export default function NoteEditor({
   };
 
   return (
-    <div className="editor-overlay">
-      <div className={`editor-container ${isFullScreen ? 'fullscreen' : ''}`}>
+    <div className={`editor-root ${isFullScreen ? 'fullscreen' : ''}`}>
+      <div className="editor-container">
         <header className="editor-header">
           <div className="header-left">
             <button className="icon-btn" onClick={onClose} aria-label="닫기">
@@ -307,11 +307,13 @@ export default function NoteEditor({
                   metadata: { ...editedNote.metadata, type: e.target.value as NoteType }
                 })}
               >
-                <option value="general">일반</option>
-                <option value="task">할 일</option>
-                <option value="meeting">회의</option>
-                <option value="journal">저널</option>
-                <option value="code">코드</option>
+                <option value="general">일반 문서</option>
+                <option value="todo">투두 리스트</option>
+                <option value="database">데이터베이스</option>
+                <option value="task">프로젝트 할 일</option>
+                <option value="meeting">회의록</option>
+                <option value="journal">개인 저널</option>
+                <option value="code">기술 코드</option>
               </select>
             </div>
 
@@ -477,15 +479,61 @@ export default function NoteEditor({
                     title="이미지"
                   ><Image size={16} /></button>
                 </div>
-                <textarea
-                  className="content-textarea"
-                  value={editedNote.content}
-                  onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
-                  onDrop={onEditorDrop}
-                  onDragOver={(e) => e.preventDefault()}
-                  placeholder="내용(마크다운 지원)을 입력하세요..."
-                  autoFocus
-                />
+                {editedNote.metadata.type === 'todo' ? (
+                  <div className="todo-editor-wrapper">
+                    <div className="todo-header">
+                      <h3><CheckCircle size={16} /> 체크리스트</h3>
+                      <button className="add-todo-btn" onClick={() => {
+                        const newContent = (editedNote.content || '').trim() + (editedNote.content ? '\n' : '') + '- [ ] ';
+                        setEditedNote({ ...editedNote, content: newContent });
+                      }}>
+                        <Plus size={14} /> 항목 추가
+                      </button>
+                    </div>
+                    <div className="todo-items">
+                      {editedNote.content.split('\n').map((line, idx) => {
+                        const match = line.match(/^\s*-\s*\[([ xX])\]\s*(.*)/);
+                        if (!match) return <div key={idx} className="todo-line-raw">{line}</div>;
+                        const isChecked = match[1].toLowerCase() === 'x';
+                        const text = match[2];
+
+                        return (
+                          <div key={idx} className="todo-item-row">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                const newLines = editedNote.content.split('\n');
+                                newLines[idx] = line.replace(/\[[ xX]\]/, e.target.checked ? '[x]' : '[ ]');
+                                setEditedNote({ ...editedNote, content: newLines.join('\n') });
+                              }}
+                            />
+                            <input
+                              type="text"
+                              className={`todo-text ${isChecked ? 'completed' : ''}`}
+                              value={text}
+                              onChange={(e) => {
+                                const newLines = editedNote.content.split('\n');
+                                newLines[idx] = line.replace(text, e.target.value);
+                                setEditedNote({ ...editedNote, content: newLines.join('\n') });
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <textarea
+                    className="content-textarea"
+                    value={editedNote.content}
+                    onChange={(e) => setEditedNote({ ...editedNote, content: e.target.value })}
+                    onDrop={onEditorDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                    placeholder="내용(마크다운 지원)을 입력하세요..."
+                    autoFocus
+                  />
+                )}
               </div>
             ) : view === 'preview' ? (
               <div className="markdown-preview scroll-area">
@@ -503,32 +551,38 @@ export default function NoteEditor({
       </div>
 
       <style jsx>{`
-        .editor-overlay {
+        .editor-root {
+          width: 100%;
+          height: 100%;
+          background: var(--bg-primary);
+          display: flex;
+          flex-direction: column;
+        }
+
+        .editor-root.fullscreen {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          background: var(--bg-primary);
-          z-index: 1000;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          z-index: 2000;
         }
 
         .editor-container {
-          width: 90%;
-          height: 90%;
+          width: 90%; /* Original width, now relative to editor-root */
+          height: 90%; /* Original height, now relative to editor-root */
           background: var(--bg-primary);
           border: 1px solid var(--border-glass);
           display: flex;
           flex-direction: column;
+          margin: auto; /* Center the container if not fullscreen */
         }
 
-        .editor-container.fullscreen {
+        /* Remove .editor-container.fullscreen as it's handled by .editor-root.fullscreen */
+        /* .editor-container.fullscreen {
           width: 100%;
           height: 100%;
-        }
+        } */
 
         .editor-header {
           padding: 1.5rem 2rem;
@@ -975,6 +1029,80 @@ export default function NoteEditor({
           .editor-content { padding: 1.5rem; }
           .header-left { gap: 0.5rem; }
           .title-input { font-size: 1.25rem; }
+        }
+        .todo-editor-wrapper {
+          padding: 2rem;
+          height: 100%;
+          overflow-y: auto;
+        }
+
+        .todo-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 2rem;
+        }
+
+        .todo-header h3 {
+          font-size: 1.25rem;
+          font-weight: 800;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .add-todo-btn {
+          background: var(--text-primary);
+          color: var(--bg-primary);
+          padding: 0.5rem 1rem;
+          border-radius: var(--radius-sm);
+          font-size: 0.8rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+        }
+
+        .todo-items {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .todo-item-row {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 0.5rem;
+          background: var(--bg-secondary);
+          border-radius: var(--radius-sm);
+          border: 1px solid var(--border-glass);
+        }
+
+        .todo-item-row input[type="checkbox"] {
+          width: 18px;
+          height: 18px;
+          cursor: pointer;
+        }
+
+        .todo-text {
+          flex: 1;
+          background: transparent;
+          border: none;
+          color: var(--text-primary);
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        .todo-text.completed {
+          opacity: 0.5;
+          text-decoration: line-through;
+        }
+
+        .todo-line-raw {
+          padding: 0.25rem 0.5rem;
+          opacity: 0.6;
+          font-size: 0.85rem;
         }
       `}</style>
     </div>

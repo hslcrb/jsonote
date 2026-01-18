@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Plus, Settings, Search, Trash2, Menu, Info, Star, Cloud, Github, HardDrive, Sun, Moon, Monitor, Smartphone, LinkIcon, Zap, X, Table, Layout, ChevronRight, ChevronDown, HardHat } from 'lucide-react';
+import { FileText, Plus, Settings, Search, Trash2, Menu, Info, Star, Cloud, Github, HardDrive, Sun, Moon, Monitor, Smartphone, LinkIcon, Zap, X, Table, Layout, ChevronRight, ChevronDown, HardHat, CheckCircle, Database } from 'lucide-react';
 import { format } from 'date-fns';
 import { Note, NoteType, StorageConfig } from '@/types/note';
 import NoteEditor from '@/components/NoteEditor';
@@ -298,14 +298,14 @@ export default function Home() {
     }
   };
 
-  const createNewNote = () => {
+  const createNewNote = (type: NoteType = 'general') => {
     const newNote: Note = {
       metadata: {
         id: Math.random().toString(36).substr(2, 9),
-        title: '새로운 노트',
+        title: type === 'todo' ? '새 할 일 목록' : type === 'database' ? '새 데이터베이스' : '새로운 노트',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        type: 'general',
+        type: type,
         tags: [],
       },
       content: '',
@@ -389,11 +389,20 @@ export default function Home() {
           </div>
 
           <div className="sidebar-content scroll-area">
-            <button className="new-note-btn" onClick={createNewNote}>
-              <Plus size={18} />
-              <span>새 노트</span>
-            </button>
-
+            <div className="new-actions">
+              <button className="new-note-btn primary" onClick={() => createNewNote('general')}>
+                <Plus size={18} />
+                <span>새 노트</span>
+              </button>
+              <div className="new-grid">
+                <button className="new-sub-btn" onClick={() => createNewNote('todo')}>
+                  <CheckCircle size={14} /> <span>투두</span>
+                </button>
+                <button className="new-sub-btn" onClick={() => createNewNote('database')}>
+                  <Database size={14} /> <span>DB</span>
+                </button>
+              </div>
+            </div>
             <nav className="sidebar-nav">
               <div className="nav-group">
                 <label>메뉴</label>
@@ -579,6 +588,7 @@ export default function Home() {
                             <th style={{ width: '120px' }}>유형</th>
                             <th style={{ width: '200px' }}>태그</th>
                             <th style={{ width: '150px' }}>최종 수정일</th>
+                            <th style={{ width: '100px' }}>작업</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -589,18 +599,29 @@ export default function Home() {
                               <td><span className="type-badge">{note.metadata.type}</span></td>
                               <td><div className="table-tags">{note.metadata.tags.map(t => <span key={t} className="tag">{t}</span>)}</div></td>
                               <td>{format(new Date(note.metadata.updatedAt), 'MM-dd HH:mm')}</td>
+                              <td>
+                                <button className="icon-btn-sm" onClick={(e) => { e.stopPropagation(); deleteNote(note.metadata.id); }}>
+                                  <Trash2 size={14} />
+                                </button>
+                              </td>
                             </tr>
                           ))}
+                          <tr className="add-row" onClick={() => createNewNote('database')}>
+                            <td colSpan={6}>
+                              <Plus size={14} /> 새로운 행 추가
+                            </td>
+                          </tr>
                         </tbody>
                       </table>
                     </div>
                   ) : currentView === 'board' ? (
                     <div className="board-view-container">
-                      {['general', 'task', 'meeting', 'journal', 'code'].map(type => (
+                      {['general', 'todo', 'database', 'task', 'meeting', 'journal', 'code'].map(type => (
                         <div key={type} className="board-column">
                           <div className="column-header">
                             <span className="column-title">{type.toUpperCase()}</span>
                             <span className="column-count">{filteredNotes.filter(n => n.metadata.type === type).length}</span>
+                            <button className="add-board-item" onClick={() => createNewNote(type as NoteType)}><Plus size={14} /></button>
                           </div>
                           <div className="board-cards">
                             {filteredNotes.filter(n => n.metadata.type === type).map(note => (
@@ -608,6 +629,9 @@ export default function Home() {
                                 <h4>{note.metadata.title}</h4>
                                 <div className="card-meta">
                                   {note.metadata.tags.slice(0, 2).map(t => <span key={t} className="tag">{t}</span>)}
+                                </div>
+                                <div className="card-footer">
+                                  <span className="type-badge-mini">{note.metadata.type}</span>
                                 </div>
                               </div>
                             ))}
@@ -628,7 +652,7 @@ export default function Home() {
                   <GuideView />
                 </motion.div>
               ) : null}
-              
+
             </AnimatePresence>
           </div>
         </main>
@@ -639,17 +663,21 @@ export default function Home() {
           <SettingsModal config={storageConfig} onSave={handleSaveSettings} onClose={() => setIsSettingsOpen(false)} />
         )}
         {isEditorOpen && selectedNote && (
-          <NoteEditor
-            note={selectedNote}
-            onSave={handleSaveNote}
-            onDelete={deleteNote}
-            onClose={() => { setIsEditorOpen(false); setSelectedNote(null); }}
-            storageConfig={storageConfig || undefined}
-            allNotes={notes}
-            showToast={showToast}
-            showConfirm={showConfirm}
-            showPrompt={showPrompt}
-          />
+          <div className="inline-editor-backdrop" onClick={() => setIsEditorOpen(false)}>
+            <div className="inline-editor-container" onClick={e => e.stopPropagation()}>
+              <NoteEditor
+                note={selectedNote}
+                onSave={handleSaveNote}
+                onDelete={deleteNote}
+                onClose={() => { setIsEditorOpen(false); setSelectedNote(null); }}
+                storageConfig={storageConfig || undefined}
+                allNotes={notes}
+                showToast={showToast}
+                showConfirm={showConfirm}
+                showPrompt={showPrompt}
+              />
+            </div>
+          </div>
         )}
       </AnimatePresence>
 
@@ -748,9 +776,15 @@ export default function Home() {
           flex-direction: column;
         }
 
+        .new-actions {
+          margin: 0 1rem 2.5rem 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
         .new-note-btn {
-          width: calc(100% - 2rem);
-          margin: 0 1rem 2rem 1rem;
+          width: 100%;
           padding: 0.85rem;
           background: var(--text-primary);
           color: var(--bg-primary);
@@ -770,11 +804,59 @@ export default function Home() {
           transform: translateY(-1px);
         }
 
+        .new-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.5rem;
+        }
+
+        .new-sub-btn {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+          padding: 0.6rem;
+          border-radius: var(--radius-sm);
+          font-size: 0.75rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.4rem;
+          transition: var(--transition-fast);
+        }
+
+        .new-sub-btn:hover {
+          background: var(--text-primary);
+          color: var(--bg-primary);
+        }
+
         .nav-group {
           display: flex;
           flex-direction: column;
           gap: 0.1rem;
           margin-bottom: 2.5rem;
+        }
+
+        .icon-btn-sm {
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 4px;
+          color: var(--text-muted);
+          transition: var(--transition-fast);
+        }
+
+        .icon-btn-sm:hover {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+        }
+
+        .type-badge-mini {
+          font-size: 0.65rem;
+          font-weight: 800;
+          color: var(--text-muted);
+          text-transform: uppercase;
         }
 
         .nav-group label {
@@ -873,6 +955,31 @@ export default function Home() {
           background: var(--bg-primary);
           min-width: 0; /* Critical for flex stability */
           height: 100%;
+          position: relative; /* For inline editor positioning */
+        }
+
+        .inline-editor-backdrop {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(4px);
+          z-index: 100;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+        }
+
+        .inline-editor-container {
+          width: 100%;
+          height: 95%;
+          background: var(--bg-primary);
+          border-top-left-radius: var(--radius-lg);
+          border-top-right-radius: var(--radius-lg);
+          overflow: hidden;
+          box-shadow: 0 -20px 50px rgba(0,0,0,0.4);
         }
 
         .content-header {

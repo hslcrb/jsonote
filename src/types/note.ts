@@ -1,4 +1,4 @@
-export type NoteType = 'general' | 'task' | 'meeting' | 'journal' | 'code' | 'database';
+export type NoteType = 'general' | 'task' | 'todo' | 'meeting' | 'journal' | 'code' | 'database';
 
 export interface PropertyValue {
     type: 'text' | 'number' | 'select' | 'multi_select' | 'date' | 'relation' | 'formula';
