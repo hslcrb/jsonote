@@ -103,7 +103,7 @@ export class GitHubStorage implements IJsonoteStorage {
             try {
                 let sha: string | undefined;
                 try {
-                    // List directory to find SHA without downloading content (Fixes >1MB issue)
+                    // 1. Try Directory Listing first (Efficient, handles large files)
                     const { data } = await this.octokit.rest.repos.getContent({
                         owner: this.config.owner!,
                         repo: this.config.repo!,
@@ -120,12 +120,10 @@ export class GitHubStorage implements IJsonoteStorage {
                         const targetPath = `notes/${baseName}.json`;
 
                         const targetFile = data.find((f: any) => {
-                            // Robust comparison handling normalization and decoding
                             const fName = f.name.normalize('NFC');
                             const fPath = f.path.normalize('NFC');
                             const tName = targetName.normalize('NFC');
                             const tPath = targetPath.normalize('NFC');
-
                             return fName === tName || fPath === tPath || f.path === encodedPath;
                         });
 
@@ -134,7 +132,23 @@ export class GitHubStorage implements IJsonoteStorage {
                         }
                     }
                 } catch (e) {
-                    // Folder doesn't exist or empty, proceed as new file
+                    // Directory list failed, ignore
+                }
+
+                // 2. Fallback: If SHA not found in list, try direct fetch (Safety net)
+                if (!sha) {
+                    try {
+                        const { data }: any = await this.octokit.rest.repos.getContent({
+                            owner: this.config.owner!,
+                            repo: this.config.repo!,
+                            path: encodedPath,
+                            ref: this.config.branch,
+                            headers: { 'If-None-Match': '' }
+                        });
+                        sha = data.sha;
+                    } catch (e) {
+                        // File really doesn't exist (or is too large and wasn't in list -> rare edge case)
+                    }
                 }
 
                 await this.octokit.rest.repos.createOrUpdateFileContents({
@@ -152,11 +166,11 @@ export class GitHubStorage implements IJsonoteStorage {
                 note.metadata.previousFilename = baseName;
                 return;
             } catch (error: any) {
+                console.warn(`Save attempt ${retries + 1} failed:`, error.message);
+
                 // Retry on SHA mismatch error / SHA 불일치 에러인 경우 재시도
-                if (error.message && error.message.includes('does not match')) {
+                if (error.message && (error.message.includes('does not match') || error.message.includes('sha'))) {
                     retries++;
-                    console.warn(`SHA conflict, retrying... (${retries}/${maxRetries})`);
-                    // Wait before retry with random jitter to avoid lockstep / 랜덤 지연시간 추가
                     const delay = 500 * retries + Math.random() * 500;
                     await new Promise(resolve => setTimeout(resolve, delay));
                     continue;
