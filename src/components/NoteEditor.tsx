@@ -219,9 +219,11 @@ export default function NoteEditor({
                   })}
                   placeholder="제목"
                 />
-                <span className={`save-status ${isSaved ? 'saved' : 'saving'}`}>
-                  {isSaved ? '저장됨' : '저장 중...'}
-                </span>
+                {!isSaved && (
+                  <span className="save-status saving">
+                    저장 중...
+                  </span>
+                )}
               </div>
               <div className="filename-wrapper">
                 <span className="label">파일명:</span>
@@ -622,11 +624,6 @@ export default function NoteEditor({
           transition: all 0.3s;
           white-space: nowrap;
           flex-shrink: 0;
-        }
-
-        .save-status.saved {
-          color: var(--text-muted);
-          background: transparent;
         }
 
         .save-status.saving {
