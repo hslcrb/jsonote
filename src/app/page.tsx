@@ -12,7 +12,6 @@ import { getStorage } from '@/lib/storage';
 import Toast, { ToastType } from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import PromptDialog from '@/components/PromptDialog';
-import { mcpClientManager } from '@/lib/mcp/client';
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -27,83 +26,9 @@ export default function Home() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
-  const [activeTab, setActiveTab] = useState<'notes' | 'guide' | 'mcp'>('notes');
-  const [currentView, setCurrentView] = useState<'list' | 'table' | 'board' | 'calendar'>('list');
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
-  const [customMcpName, setCustomMcpName] = useState('');
-  const [customMcpUrl, setCustomMcpUrl] = useState('');
-
-  // MCP Server Examples (Local URLs) / MCP 서버 예시 (로컬에서 실행 시 사용할 URL들)
-  const POPULAR_MCP_SERVERS = [
-    {
-      id: 'notion',
-      name: 'Notion',
-      url: 'https://notion-mcp.example.com',
-      description: '노션 데이터베이스 및 페이지 동기화'
-    },
-    {
-      id: 'github',
-      name: 'GitHub',
-      url: 'https://github-mcp.example.com',
-      description: '저장소, 이슈, PR 등 통합 관리'
-    },
-    {
-      id: 'google-maps',
-      name: 'Google Maps',
-      url: 'https://maps-mcp.example.com',
-      description: '장소 검색 및 지도 데이터 연동'
-    }
-  ];
-
-  const addCustomMcpServer = () => {
-    if (!customMcpName || !customMcpUrl) {
-      showToast('이름과 URL을 모두 입력해주세요.', 'error');
-      return;
-    }
-    const newServer = {
-      id: `custom-${Date.now()}`,
-      name: customMcpName,
-      url: customMcpUrl,
-      enabled: true
-    };
-    const updated = {
-      ...storageConfig!,
-      mcpServers: [...(storageConfig?.mcpServers || []), newServer]
-    };
-    handleSaveSettings(updated);
-    setCustomMcpName('');
-    setCustomMcpUrl('');
-  };
-
-  const addMcpServer = (preset: typeof POPULAR_MCP_SERVERS[0]) => {
-    const existing = storageConfig?.mcpServers?.find(s => s.id === preset.id);
-    if (existing) {
-      const updated = {
-        ...storageConfig!,
-        mcpServers: storageConfig!.mcpServers!.map(s =>
-          s.id === preset.id ? { ...s, enabled: true } : s
-        )
-      };
-      handleSaveSettings(updated);
-    } else {
-      const newServer = { ...preset, enabled: true };
-      const updated = {
-        ...storageConfig!,
-        mcpServers: [...(storageConfig?.mcpServers || []), newServer]
-      };
-      handleSaveSettings(updated);
-    }
-  };
-
-  const toggleMcpServer = (id: string) => {
-    const updated = {
-      ...storageConfig!,
-      mcpServers: storageConfig!.mcpServers!.map(s =>
-        s.id === id ? { ...s, enabled: !s.enabled } : s
-      )
-    };
-    handleSaveSettings(updated);
-  };
+  const [activeTab, setActiveTab] = useState<'notes' | 'guide'>('notes');
+  const [currentView, setCurrentView] = useState<'list' | 'table' | 'board'>('list');
 
   useEffect(() => {
     const savedNotes = localStorage.getItem('jsonote_notes');
@@ -205,13 +130,6 @@ export default function Home() {
   const showToast = (message: string, type: ToastType = 'info') => {
     setToast({ message, type });
   };
-
-  // Guidance toast upon entering MCP tab / MCP 탭 진입 시 안내 토스트
-  useEffect(() => {
-    if (activeTab === 'mcp') {
-      showToast('현재 MCP 기능은 지속적으로 개발 중입니다. (브라우저 환경 최적화 중)', 'info');
-    }
-  }, [activeTab]);
 
   const closeConfirm = () => setConfirmState(prev => ({ ...prev, isOpen: false }));
 
@@ -493,13 +411,6 @@ export default function Home() {
                   <Info size={16} />
                   <span>사용 가이드</span>
                 </button>
-                <button
-                  className="nav-item disabled"
-                  title="현재 지능형 공사 중입니다"
-                >
-                  <Zap size={16} />
-                  <span>MCP 도구 (준비 중)</span>
-                </button>
               </div>
 
               <div className="nav-group">
@@ -716,47 +627,8 @@ export default function Home() {
                 <motion.div key="guide" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                   <GuideView />
                 </motion.div>
-              ) : activeTab === 'mcp' ? (
-                <motion.div key="mcp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mcp-panel construction-mode">
-                  <div className="mcp-content-blurred">
-                    <div className="mcp-section">
-                      <h2>인기 MCP 도구</h2>
-                      <div className="mcp-presets">
-                        {POPULAR_MCP_SERVERS.map(server => (
-                          <div key={server.id} className="mcp-preset-card">
-                            <div className="mcp-preset-header">
-                              <Zap size={20} />
-                              <h3>{server.name}</h3>
-                            </div>
-                            <p>{server.description}</p>
-                            <button className="mcp-add-btn">추가</button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="construction-overlay">
-                    <div className="construction-box">
-                      <motion.div
-                        animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
-                        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                        className="construction-icon"
-                      >
-                        <HardHat size={64} />
-                      </motion.div>
-                      <h2>현재 지능형 공사 중!</h2>
-                      <p>
-                        JSONOTE의 AI 공사팀이 열심히 삽질(?) 아니, 정밀 시공 중입니다.<br />
-                        지능형 소음이 발생할 수 있으니 잠시만 기다려 주세요!
-                      </p>
-                      <div className="construction-hint">
-                        🚧 헬멧 필수 착용 | 먼지 주의 | 데이터 주권 사수 중 🚧
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
               ) : null}
+              
             </AnimatePresence>
           </div>
         </main>
@@ -772,7 +644,6 @@ export default function Home() {
             onSave={handleSaveNote}
             onDelete={deleteNote}
             onClose={() => { setIsEditorOpen(false); setSelectedNote(null); }}
-            mcpServers={storageConfig?.mcpServers}
             storageConfig={storageConfig || undefined}
             allNotes={notes}
             showToast={showToast}
@@ -872,15 +743,15 @@ export default function Home() {
 
         .sidebar-content {
           flex: 1;
-          padding: 1rem;
+          padding: 1rem 0;
           display: flex;
           flex-direction: column;
-          gap: 2.5rem;
         }
 
         .new-note-btn {
-          width: 100%;
-          padding: 1rem;
+          width: calc(100% - 2rem);
+          margin: 0 1rem 2rem 1rem;
+          padding: 0.85rem;
           background: var(--text-primary);
           color: var(--bg-primary);
           font-weight: 800;
@@ -888,47 +759,61 @@ export default function Home() {
           align-items: center;
           justify-content: center;
           gap: 0.5rem;
-          text-transform: uppercase;
-          font-size: 0.85rem;
+          font-size: 0.9rem;
+          border-radius: var(--radius-md);
+          box-shadow: var(--shadow-md);
+          transition: var(--transition-fast);
+        }
+
+        .new-note-btn:hover {
+          opacity: 0.9;
+          transform: translateY(-1px);
         }
 
         .nav-group {
           display: flex;
           flex-direction: column;
-          gap: 0.25rem;
+          gap: 0.1rem;
+          margin-bottom: 2.5rem;
         }
 
         .nav-group label {
-          font-size: 0.6rem;
-          font-weight: 900;
+          font-size: 0.65rem;
+          font-weight: 800;
           color: var(--text-muted);
           margin-bottom: 0.75rem;
           text-transform: uppercase;
-          letter-spacing: 0.1em;
-          padding-left: 0.5rem;
+          letter-spacing: 0.05em;
+          padding-left: 1rem;
         }
 
         .nav-item {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 0.85rem 1rem;
+          padding: 0.75rem 1rem;
+          margin: 0 0.5rem;
           color: var(--text-secondary);
           font-weight: 600;
-          font-size: 0.9rem;
+          font-size: 0.95rem;
+          border-radius: var(--radius-full);
+          transition: var(--transition-fast);
+        }
+
+        .nav-item:hover {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
         }
 
         .nav-item.active {
           color: var(--text-primary);
-          background: var(--bg-tertiary);
-          text-decoration: underline;
+          background: var(--bg-secondary);
+          box-shadow: var(--shadow-sm);
+          font-weight: 800;
         }
 
         .nav-item.disabled {
-          opacity: 0.3;
-          filter: blur(1.5px);
-          cursor: not-allowed;
-          pointer-events: none;
+          display: none;
         }
 
         .nav-item-static {
@@ -971,7 +856,14 @@ export default function Home() {
           align-items: center;
           justify-content: center;
           border: 1px solid var(--border-glass);
+          border-radius: var(--radius-full);
           flex: 1;
+          transition: var(--transition-fast);
+        }
+
+        .icon-btn-minimal:hover {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
         }
 
         .main-content {
@@ -1300,21 +1192,23 @@ export default function Home() {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 0.4rem 0.5rem;
-          border-radius: 4px;
+          padding: 0.5rem 0.75rem;
+          margin: 0.1rem 0.5rem;
+          border-radius: var(--radius-sm);
           cursor: pointer;
           font-size: 0.9rem;
           color: var(--text-secondary);
-          transition: all 0.2s;
+          transition: var(--transition-fast);
         }
         .tree-item:hover {
           background: var(--bg-tertiary);
           color: var(--text-primary);
         }
         .tree-item.active {
-          background: var(--bg-tertiary);
+          background: var(--bg-secondary);
           color: var(--text-primary);
           font-weight: 700;
+          box-shadow: var(--shadow-sm);
         }
         .expander {
           display: flex;
@@ -1454,321 +1348,29 @@ export default function Home() {
           gap: 4px;
         }
 
-        /* MCP Panel Styles */
-        .mcp-panel {
-          padding: 2rem;
-          max-width: 1200px;
-          margin: 0 auto;
-          position: relative;
-        }
-
-        .mcp-panel.construction-mode {
-          height: calc(100vh - 120px);
-          overflow: hidden;
-        }
-
-        .mcp-content-blurred {
-          filter: blur(10px) grayscale(100%);
-          opacity: 0.3;
-          pointer-events: none;
-          user-select: none;
-        }
-
-        .construction-overlay {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10;
-        }
-
-        .construction-box {
-          text-align: center;
-          background: var(--bg-secondary);
-          padding: 3rem;
-          border: 1px solid var(--border-glass);
-          border-radius: var(--radius-lg);
-          max-width: 500px;
-          box-shadow: var(--shadow-lg);
-        }
-
-        .construction-icon {
-          color: var(--text-primary);
-          margin-bottom: 2rem;
-          display: inline-block;
-        }
-
-        .construction-box h2 {
-          font-size: 2rem;
-          font-weight: 900;
-          margin-bottom: 1rem;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-        }
-
-        .construction-box p {
-          color: var(--text-secondary);
-          line-height: 1.6;
-          margin-bottom: 2rem;
-        }
-
-        .construction-hint {
-          font-size: 0.75rem;
-          font-weight: 800;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-        }
-
-        .mcp-section {
-          margin-bottom: 3rem;
-        }
-
-        .mcp-section h2 {
-          font-size: 1.5rem;
-          margin-bottom: 1.5rem;
-          color: var(--text-primary);
-        }
-
-        .mcp-presets {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-          gap: 1rem;
-        }
-
-        .mcp-preset-card {
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-glass);
-          border-radius: var(--radius-md);
-          padding: 1.5rem;
-          transition: all 0.2s;
-        }
-
-        .mcp-preset-card:hover {
-          border-color: var(--text-primary);
-        }
-
-        .mcp-preset-header {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .mcp-preset-header h3 {
-          font-size: 1.1rem;
-          margin: 0;
-        }
-
-        .mcp-preset-card p {
-          color: var(--text-secondary);
-          font-size: 0.9rem;
-          margin-bottom: 1rem;
-        }
-
-        .mcp-add-btn {
-          width: 100%;
-          padding: 0.75rem;
-          background: var(--bg-tertiary);
-          color: var(--text-primary);
-          border: 1px solid var(--border-glass);
-          border-radius: var(--radius-sm);
-          font-weight: 700;
-          transition: all 0.2s;
-        }
-
-        .mcp-add-btn:hover {
-          background: var(--text-primary);
-          color: var(--bg-primary);
-        }
-
-        .mcp-add-btn.active {
-          background: var(--text-primary);
-          border-color: var(--text-primary);
-        }
-
-        .mcp-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-        }
-
-        .mcp-item {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem;
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-glass);
-          border-radius: var(--radius-sm);
-        }
-
-        .mcp-card.active {
-          border-color: var(--text-primary);
-        }
-
-        .mcp-item.enabled {
-          border-color: var(--text-primary);
-        }
-
-        .mcp-info {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .mcp-info strong {
-          font-size: 1rem;
-        }
-
-        .mcp-info small {
-          font-size: 0.8rem;
-          color: var(--text-muted);
-        }
-
-        .mcp-actions {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .mcp-item button {
-          padding: 0.5rem 1rem;
-          background: var(--bg-tertiary);
-          color: var(--text-primary);
-          border: 1px solid var(--border-glass);
-          border-radius: var(--radius-sm);
-          font-weight: 700;
-          transition: all 0.2s;
-          font-size: 0.85rem;
-        }
-
-        .mcp-item button:hover {
-          background: var(--text-primary);
-          color: var(--bg-primary);
-        }
-
-        .mcp-test-btn {
-          background: transparent !important;
-          color: var(--text-muted) !important;
-        }
-
-        .mcp-test-btn:hover {
-          color: var(--text-primary) !important;
-        }
-
-        .mcp-custom-form {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .mcp-custom-form input {
-          padding: 0.75rem;
-          background: var(--bg-tertiary);
-          border: 1px solid var(--border-glass);
-          border-radius: var(--radius-sm);
-          color: var(--text-primary);
-          font-size: 1rem;
-        }
-
-        .mcp-custom-form input:focus {
-          outline: none;
-          border-color: var(--text-primary);
-        }
-
-        .mcp-add-custom-btn {
-          padding: 0.75rem;
-          background: var(--text-primary);
-          color: var(--bg-primary);
-          border: none;
-          border-radius: var(--radius-sm);
-          font-weight: 700;
-          transition: all 0.2s;
-        }
-
-        .mcp-add-custom-btn:hover {
-          opacity: 0.8;
-        }
-
-        .mcp-hint {
-          margin-top: 0.5rem;
-          font-size: 0.85rem;
-          color: var(--text-muted);
-          line-height: 1.5;
-        }
-
-        .mcp-hint a {
-          color: var(--text-primary);
-          text-decoration: underline;
-        }
-
-        .mcp-setup-guide {
-          margin-top: 2rem;
-          padding: 1.5rem;
-          background: var(--bg-secondary);
-          border-radius: var(--radius-md);
-          border: 1px dashed var(--border-glass);
-        }
-
-        .mcp-setup-guide h3 {
-          font-size: 1rem;
-          margin-bottom: 1rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .mcp-setup-guide p {
-          font-size: 0.9rem;
-          color: var(--text-secondary);
-          margin-bottom: 1rem;
-          line-height: 1.6;
-        }
-
-        .command-box {
-          background: var(--bg-primary);
-          color: var(--text-primary);
-          border: 1px solid var(--border-glass);
-          padding: 1rem;
-          border-radius: var(--radius-sm);
-          font-family: 'Fira Code', monospace;
-          font-size: 0.85rem;
-          margin-bottom: 1rem;
-          overflow-x: auto;
-        }
-
-        .command-box code {
-          background: transparent;
-          color: inherit;
-          padding: 0;
-        }
-
         .type-label {
-          font-size: 0.6rem;
-          font-weight: 900;
-          letter-spacing: 0.15em;
+          font-size: 0.65rem;
+          font-weight: 800;
+          letter-spacing: 0.1em;
           color: var(--text-muted);
+          text-transform: uppercase;
         }
 
         .note-card-title {
-          font-size: 1.25rem;
-          font-weight: 900;
-          text-transform: uppercase;
-          line-height: 1.2;
+          font-size: 1.15rem;
+          font-weight: 800;
+          color: var(--text-primary);
+          line-height: 1.3;
         }
 
         .note-card-preview {
-          font-size: 0.95rem;
+          font-size: 0.9rem;
           color: var(--text-secondary);
           display: -webkit-box;
-          -webkit-line-clamp: 3;
+          -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
-          line-height: 1.5;
+          line-height: 1.6;
         }
 
         .note-card-footer {
