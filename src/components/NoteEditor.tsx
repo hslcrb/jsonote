@@ -44,6 +44,7 @@ export default function NoteEditor({
   const [isToolLoading, setIsToolLoading] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success'>('idle');
+  const [isGitGlowing, setIsGitGlowing] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Fetch tool lists from MCP servers on load / 로드 시 MCP 서버들에서 도구 목록 가져오기
@@ -364,6 +365,9 @@ export default function NoteEditor({
     // If manual save, show success state immediately / 수동 저장이면 즉시 성공 상태 표시
     if (isManual) {
       setSaveStatus('success');
+      // Trigger Git Glow Effect
+      setIsGitGlowing(true);
+      setTimeout(() => setIsGitGlowing(false), 1000);
     }
 
     try {
@@ -465,18 +469,35 @@ export default function NoteEditor({
             >
               <Trash2 size={18} />
             </button>
+            {/* GitHub Button (Indicator) */}
             <button
-              className={`save-btn ${saveStatus}`}
-              onClick={saveStatus === 'success' ? openGitHub : () => handleSave(true)}
-              disabled={saveStatus === 'saving'}
+              className={`action-btn github-btn ${isGitGlowing ? 'glow-active' : ''}`}
+              title={storageConfig?.repo ? `GitHub 연동됨: ${storageConfig.owner}/${storageConfig.repo}` : 'GitHub 연동 필요'}
+              onClick={() => {
+                if (storageConfig?.repo) {
+                  window.open(`https://github.com/${storageConfig.owner}/${storageConfig.repo}`, '_blank');
+                } else {
+                  showToast?.('GitHub 저장소가 설정되지 않았습니다.', 'info');
+                }
+              }}
             >
-              {saveStatus === 'saving' ? <Loader2 size={18} className="animate-spin" /> :
-                saveStatus === 'success' ? <ExternalLink size={18} /> :
-                  <Save size={18} />}
-              <span className="desktop-only">
-                {saveStatus === 'saving' ? '저장 중' :
-                  saveStatus === 'success' ? 'GitHub에서 확인' : '저장'}
-              </span>
+              <GitBranch size={16} />
+              <span className="btn-label">GitHub</span>
+            </button>
+
+            {/* Save / Confirm Button */}
+            <button
+              className={`action-btn save-btn ${saveStatus === 'success' ? 'success' : ''}`}
+              onClick={() => handleSave(true)}
+              title="저장 및 확인"
+            >
+              {saveStatus === 'saving' ? <Loader2 size={16} className="animate-spin" /> :
+                saveStatus === 'success' ? <CheckCircle size={16} /> : <Save size={16} />}
+              <span className="btn-label">{saveStatus === 'saving' ? '저장 중...' : '저장'}</span>
+            </button>
+
+            <button className="icon-btn" onClick={onClose} title="닫기">
+              <ChevronRight size={20} />
             </button>
           </div>
         </header>
@@ -746,7 +767,7 @@ export default function NoteEditor({
             )}
           </main>
         </div>
-      </div>
+      </div >
 
       <style jsx>{`
         .editor-root {
@@ -1299,6 +1320,6 @@ export default function NoteEditor({
           font-size: 0.85rem;
         }
       `}</style>
-    </div>
+    </div >
   );
 }
