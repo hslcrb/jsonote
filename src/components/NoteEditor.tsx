@@ -367,7 +367,10 @@ export default function NoteEditor({
       setSaveStatus('success');
       // Trigger Git Glow Effect
       setIsGitGlowing(true);
-      setTimeout(() => setIsGitGlowing(false), 1000);
+      setTimeout(() => {
+        setIsGitGlowing(false);
+        setSaveStatus('idle');
+      }, 1000);
     }
 
     try {
