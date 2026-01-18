@@ -113,28 +113,23 @@ export default function NoteEditor({
     reader.onload = async (event) => {
       const base64String = event.target?.result as string;
 
-      showToast?.('이미지 압축 중 (LZ-String)...', 'info');
+      showToast?.('이미지 압축 및 텍스트 변환 중...', 'info');
 
       try {
         const LZString = require('lz-string');
-        const compressed = LZString.compressToUTF16(base64String);
+        // Use compressToEncodedURIComponent to make it safe for Markdown link () characters
+        const compressed = LZString.compressToEncodedURIComponent(base64String);
 
-        const imageId = Math.random().toString(36).substring(2, 9);
-        const newImages = {
-          ...(editedNote.data?.images || {}),
-          [imageId]: { mime: file.type, data: compressed }
-        };
+        // Insert inline directly into Markdown
+        // ![filename](lz:compressed_data)
+        const markdownImage = `\n![${file.name}](lz:${compressed})`;
 
-        setEditedNote(prev => ({
-          ...prev,
-          data: { ...prev.data, images: newImages },
-          content: `${prev.content}\n![${file.name}](img:${imageId})`
-        }));
+        handleInsertMarkdown('', '', markdownImage);
 
-        showToast?.('이미지가 압축되어 JSON에 삽입되었습니다.', 'success');
+        showToast?.('이미지가 텍스트로 변환되어 삽입되었습니다.', 'success');
       } catch (err) {
         console.error('Compression error:', err);
-        showToast?.('이미지 압축 실패: ' + (err as Error).message, 'error');
+        showToast?.('이미지 변환 실패: ' + (err as Error).message, 'error');
       }
     };
     // Read as DataURL directly (Base64)
@@ -146,13 +141,12 @@ export default function NoteEditor({
     const [decodedSrc, setDecodedSrc] = React.useState<string | null>(null);
 
     React.useEffect(() => {
-      if (src?.startsWith('img:')) {
-        const id = src.substring(4);
-        const imgData = editedNote.data?.images?.[id];
-        if (imgData) {
+      if (src?.startsWith('lz:')) {
+        const compressedData = src.substring(3);
+        if (compressedData) {
           try {
             const LZString = require('lz-string');
-            const decompressed = LZString.decompressFromUTF16(imgData.data);
+            const decompressed = LZString.decompressFromEncodedURIComponent(compressedData);
             if (decompressed) {
               setDecodedSrc(decompressed);
             } else {
@@ -162,6 +156,20 @@ export default function NoteEditor({
             console.error('Decompression failed:', e);
             setDecodedSrc(null);
           }
+        }
+      } else if (src?.startsWith('img:')) {
+        // Legacy support for previous versions
+        const id = src.substring(4);
+        const imgData = editedNote.data?.images?.[id];
+        if (imgData) {
+          try {
+            const LZString = require('lz-string');
+            // Try explicit decompression or fallback (handle previous formats if needed)
+            const decompressed = LZString.decompressFromUTF16(imgData.data);
+            if (decompressed) {
+              setDecodedSrc(decompressed);
+            }
+          } catch (e) { console.error(e); }
         }
       } else {
         setDecodedSrc(src || null);
@@ -183,15 +191,14 @@ export default function NoteEditor({
 
     const before = text.substring(0, start);
     const after = text.substring(end);
-    const newContent = before + prefix + selection + suffix + after;
+    const newContent = before + (prefix ? prefix : '') + (selection ? selection : '') + (suffix ? suffix : '') + after;
 
-    setEditedNote({ ...editedNote, content: newContent });
+    setEditedNote(prev => ({ ...prev, content: newContent }));
 
-    // Re-focus and set selection
+    // Correctly restore cursor position or move to end of insertion
     setTimeout(() => {
       textarea.focus();
-      const newCursorPos = start + prefix.length + selection.length + suffix.length;
-      textarea.setSelectionRange(newCursorPos, newCursorPos);
+      textarea.setSelectionRange(start + prefix.length, end + prefix.length);
     }, 0);
   };
 
