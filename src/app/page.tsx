@@ -380,8 +380,8 @@ export default function Home() {
         <div
           className="warm-overlay"
           style={{
-            backgroundColor: `rgba(255, 190, 0, ${(warmIntensity / 100) * 0.35})`,
-            filter: `sepia(${warmIntensity * 0.6}%) saturate(${100 + warmIntensity * 0.3}%) brightness(${100 - warmIntensity * 0.05}%)`
+            backgroundColor: `rgba(255, 160, 0, ${(warmIntensity / 100) * 0.38})`,
+            filter: `saturate(${100 + warmIntensity * 0.8}%) sepia(${warmIntensity * 0.25}%) brightness(${100 - warmIntensity * 0.03}%)`
           }}
         />
       )}
