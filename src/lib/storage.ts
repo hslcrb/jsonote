@@ -116,8 +116,19 @@ export class GitHubStorage implements IJsonoteStorage {
                     });
 
                     if (Array.isArray(data)) {
-                        const targetName = `${baseName}.json`; // GitHub returns decoded name
-                        const targetFile = data.find((f: any) => f.name === targetName || f.path === encodedPath);
+                        const targetName = `${baseName}.json`;
+                        const targetPath = `notes/${baseName}.json`;
+
+                        const targetFile = data.find((f: any) => {
+                            // Robust comparison handling normalization and decoding
+                            const fName = f.name.normalize('NFC');
+                            const fPath = f.path.normalize('NFC');
+                            const tName = targetName.normalize('NFC');
+                            const tPath = targetPath.normalize('NFC');
+
+                            return fName === tName || fPath === tPath || f.path === encodedPath;
+                        });
+
                         if (targetFile) {
                             sha = targetFile.sha;
                         }
@@ -176,8 +187,17 @@ export class GitHubStorage implements IJsonoteStorage {
                 });
 
                 if (Array.isArray(data)) {
-                    const targetName = `${baseName}.json`; // GitHub returns decoded name
-                    const targetFile = data.find((f: any) => f.name === targetName || f.path === encodedPath);
+                    const targetName = `${baseName}.json`;
+                    const targetPath = `notes/${baseName}.json`;
+
+                    const targetFile = data.find((f: any) => {
+                        const fName = f.name.normalize('NFC');
+                        const fPath = f.path.normalize('NFC');
+                        const tName = targetName.normalize('NFC');
+                        const tPath = targetPath.normalize('NFC');
+                        return fName === tName || fPath === tPath || f.path === encodedPath;
+                    });
+
                     if (targetFile) {
                         sha = targetFile.sha;
                     }
