@@ -104,35 +104,25 @@ export default function NoteEditor({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      showToast?.('이미지 크기는 2MB 이하여야 합니다.', 'error');
+    if (file.size > 5 * 1024 * 1024) { // Increased limit to 5MB
+      showToast?.('이미지 크기는 5MB 이하여야 합니다.', 'error');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = async (event) => {
-      const buffer = event.target?.result as ArrayBuffer;
-      const uint8 = new Uint8Array(buffer);
+      const base64String = event.target?.result as string;
 
-      showToast?.('이미지 압축 중 (LZMA 최고 압축)...', 'info');
+      showToast?.('이미지 압축 중 (LZ-String)...', 'info');
 
       try {
-        // Dynamic require to prevent SSR issues
-        const LZMA = require('lzma-purejs');
-        const compressed = LZMA.compress(uint8);
-
-        // Convert to Base64 manually to ensure browser compatibility
-        let binary = '';
-        const len = compressed.length;
-        for (let i = 0; i < len; i++) {
-          binary += String.fromCharCode(compressed[i]);
-        }
-        const base64 = btoa(binary);
+        const LZString = require('lz-string');
+        const compressed = LZString.compressToUTF16(base64String);
 
         const imageId = Math.random().toString(36).substring(2, 9);
         const newImages = {
           ...(editedNote.data?.images || {}),
-          [imageId]: { mime: file.type, data: base64 }
+          [imageId]: { mime: file.type, data: compressed }
         };
 
         setEditedNote(prev => ({
@@ -143,11 +133,12 @@ export default function NoteEditor({
 
         showToast?.('이미지가 압축되어 JSON에 삽입되었습니다.', 'success');
       } catch (err) {
-        console.error('LZMA tool error:', err);
-        showToast?.('LZMA 압축 실패: ' + (err as Error).message, 'error');
+        console.error('Compression error:', err);
+        showToast?.('이미지 압축 실패: ' + (err as Error).message, 'error');
       }
     };
-    reader.readAsArrayBuffer(file);
+    // Read as DataURL directly (Base64)
+    reader.readAsDataURL(file);
   };
 
   // Custom Image component for ReactMarkdown
@@ -160,20 +151,16 @@ export default function NoteEditor({
         const imgData = editedNote.data?.images?.[id];
         if (imgData) {
           try {
-            const binary = atob(imgData.data);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-              bytes[i] = binary.charCodeAt(i);
+            const LZString = require('lz-string');
+            const decompressed = LZString.decompressFromUTF16(imgData.data);
+            if (decompressed) {
+              setDecodedSrc(decompressed);
+            } else {
+              setDecodedSrc(null);
             }
-
-            const LZMA = require('lzma-purejs');
-            const result = LZMA.decompress(bytes);
-
-            const blob = new Blob([new Uint8Array(result as any)], { type: imgData.mime });
-            const url = URL.createObjectURL(blob);
-            setDecodedSrc(url);
           } catch (e) {
             console.error('Decompression failed:', e);
+            setDecodedSrc(null);
           }
         }
       } else {
@@ -557,7 +544,7 @@ export default function NoteEditor({
                   ><Link size={16} /></button>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    title="이미지 업로드 (LZMA 압축)"
+                    title="이미지 업로드 (LZ-String 압축)"
                   ><Image size={16} /></button>
                   <input
                     type="file"
