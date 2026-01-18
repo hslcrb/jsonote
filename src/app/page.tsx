@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Plus, Settings, Search, Trash2, Menu, Info, Star, Cloud, Github, HardDrive, Sun, Moon, Monitor, Smartphone, LinkIcon, Zap, X, Table, Layout, ChevronRight, ChevronDown } from 'lucide-react';
+import { FileText, Plus, Settings, Search, Trash2, Menu, Info, Star, Cloud, Github, HardDrive, Sun, Moon, Monitor, Smartphone, LinkIcon, Zap, X, Table, Layout, ChevronRight, ChevronDown, HardHat } from 'lucide-react';
 import { format } from 'date-fns';
 import { Note, NoteType, StorageConfig } from '@/types/note';
 import NoteEditor from '@/components/NoteEditor';
@@ -717,101 +717,44 @@ export default function Home() {
                   <GuideView />
                 </motion.div>
               ) : activeTab === 'mcp' ? (
-                <motion.div key="mcp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mcp-panel">
-                  <div className="mcp-section">
-                    <h2>인기 MCP 도구</h2>
-                    <div className="mcp-presets">
-                      {POPULAR_MCP_SERVERS.map(server => {
-                        const isActive = storageConfig?.mcpServers?.some(s => s.id === server.id && s.enabled);
-                        const isAdded = storageConfig?.mcpServers?.some(s => s.id === server.id);
-                        return (
+                <motion.div key="mcp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mcp-panel construction-mode">
+                  <div className="mcp-content-blurred">
+                    <div className="mcp-section">
+                      <h2>인기 MCP 도구</h2>
+                      <div className="mcp-presets">
+                        {POPULAR_MCP_SERVERS.map(server => (
                           <div key={server.id} className="mcp-preset-card">
                             <div className="mcp-preset-header">
                               <Zap size={20} />
                               <h3>{server.name}</h3>
                             </div>
                             <p>{server.description}</p>
-                            <button
-                              className={`mcp-add-btn ${isActive ? 'active' : ''}`}
-                              onClick={() => isAdded ? toggleMcpServer(server.id) : addMcpServer(server)}
-                            >
-                              {isActive ? '활성화됨' : isAdded ? '비활성화됨' : '추가'}
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="mcp-section">
-                    <h2>커스텀 MCP 서버 추가</h2>
-                    <div className="mcp-custom-form">
-                      <input
-                        type="text"
-                        placeholder="서버 이름 (예: My Custom MCP)"
-                        value={customMcpName}
-                        onChange={(e) => setCustomMcpName(e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        placeholder="MCP 서버 URL (예: http://localhost:3000/sse)"
-                        value={customMcpUrl}
-                        onChange={(e) => setCustomMcpUrl(e.target.value)}
-                      />
-                      <button onClick={addCustomMcpServer} className="mcp-add-custom-btn">
-                        추가
-                      </button>
-                    </div>
-                    <div className="mcp-setup-guide">
-                      <h3>💡 MCP 서버를 어떻게 실행하나요?</h3>
-                      <p>
-                        대부분의 MCP 서버(Notion, GitHub 등)는 기본적으로 <code>StdIO</code> 방식으로 작동합니다.
-                        웹 앱인 JSONOTE에서 사용하려면 이를 <code>SSE</code>(HTTP) 방식으로 호스팅해야 합니다.
-                      </p>
-                      <div className="command-box">
-                        <code>npx @modelcontextprotocol/inspector &lt;command&gt;</code>
-                      </div>
-                      <p className="mcp-hint">
-                        <strong>Notion 예시:</strong><br />
-                        1. Notion API 토큰을 발급받습니다.<br />
-                        2. 터미널에서 실행: <code>NOTION_API_KEY=xxx npx @modelcontextprotocol/server-notion</code><br />
-                        3. SSE 브리지(프록시)를 통해 URL을 얻은 후 위 '커스텀 MCP'에 등록하세요.
-                      </p>
-                    </div>
-                  </div>
-                  {storageConfig?.mcpServers && storageConfig.mcpServers.length > 0 && (
-                    <div className="mcp-section">
-                      <h2>내 MCP 도구</h2>
-                      <div className="mcp-list">
-                        {storageConfig.mcpServers.map(server => (
-                          <div key={server.id} className={`mcp-item ${server.enabled ? 'enabled' : ''}`}>
-                            <div className="mcp-info">
-                              <strong>{server.name}</strong>
-                              <small>{server.url}</small>
-                            </div>
-                            <div className="mcp-actions">
-                              <button
-                                className="mcp-test-btn"
-                                onClick={async () => {
-                                  try {
-                                    const tools = await mcpClientManager.listTools(server.url);
-                                    showToast(`${server.name}: 연결 성공! (${tools.length}개의 도구 발견)`, 'success');
-                                  } catch (e) {
-                                    showToast(`${server.name}: 연결 실패 - ${(e as Error).message}`, 'error');
-                                  }
-                                }}
-                              >
-                                테스트
-                              </button>
-                              <button onClick={() => toggleMcpServer(server.id)}>
-                                {server.enabled ? '비활성화' : '활성화'}
-                              </button>
-                            </div>
+                            <button className="mcp-add-btn">추가</button>
                           </div>
                         ))}
                       </div>
                     </div>
-                  )}
+                  </div>
+
+                  <div className="construction-overlay">
+                    <div className="construction-box">
+                      <motion.div
+                        animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
+                        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                        className="construction-icon"
+                      >
+                        <HardHat size={64} />
+                      </motion.div>
+                      <h2>현재 지능형 공사 중!</h2>
+                      <p>
+                        JSONOTE의 AI 공사팀이 열심히 삽질(?) 아니, 정밀 시공 중입니다.<br />
+                        지능형 소음이 발생할 수 있으니 잠시만 기다려 주세요!
+                      </p>
+                      <div className="construction-hint">
+                        🚧 헬멧 필수 착용 | 먼지 주의 | 데이터 주권 사수 중 🚧
+                      </div>
+                    </div>
+                  </div>
                 </motion.div>
               ) : null}
             </AnimatePresence>
@@ -1509,6 +1452,69 @@ export default function Home() {
           padding: 2rem;
           max-width: 1200px;
           margin: 0 auto;
+          position: relative;
+        }
+
+        .mcp-panel.construction-mode {
+          height: calc(100vh - 120px);
+          overflow: hidden;
+        }
+
+        .mcp-content-blurred {
+          filter: blur(10px) grayscale(100%);
+          opacity: 0.3;
+          pointer-events: none;
+          user-select: none;
+        }
+
+        .construction-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+        }
+
+        .construction-box {
+          text-align: center;
+          background: var(--bg-secondary);
+          padding: 3rem;
+          border: 1px solid var(--border-glass);
+          border-radius: var(--radius-lg);
+          max-width: 500px;
+          box-shadow: var(--shadow-lg);
+        }
+
+        .construction-icon {
+          color: var(--text-primary);
+          margin-bottom: 2rem;
+          display: inline-block;
+        }
+
+        .construction-box h2 {
+          font-size: 2rem;
+          font-weight: 900;
+          margin-bottom: 1rem;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
+
+        .construction-box p {
+          color: var(--text-secondary);
+          line-height: 1.6;
+          margin-bottom: 2rem;
+        }
+
+        .construction-hint {
+          font-size: 0.75rem;
+          font-weight: 800;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
         }
 
         .mcp-section {
