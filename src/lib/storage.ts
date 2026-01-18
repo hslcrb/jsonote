@@ -116,7 +116,7 @@ export class GitHubStorage implements IJsonoteStorage {
                     });
 
                     if (Array.isArray(data)) {
-                        const targetName = `${encodeURIComponent(baseName)}.json`;
+                        const targetName = `${baseName}.json`; // GitHub returns decoded name
                         const targetFile = data.find((f: any) => f.name === targetName || f.path === encodedPath);
                         if (targetFile) {
                             sha = targetFile.sha;
@@ -176,7 +176,7 @@ export class GitHubStorage implements IJsonoteStorage {
                 });
 
                 if (Array.isArray(data)) {
-                    const targetName = `${encodeURIComponent(baseName)}.json`;
+                    const targetName = `${baseName}.json`; // GitHub returns decoded name
                     const targetFile = data.find((f: any) => f.name === targetName || f.path === encodedPath);
                     if (targetFile) {
                         sha = targetFile.sha;
