@@ -1,6 +1,8 @@
 # JSONOTE 기여 가이드
 
 [![English](./CONTRIBUTING.md)](./CONTRIBUTING.md)
+[![Version](https://img.shields.io/badge/Version-v1.0-green)](https://github.com/hslcrb/jsonote/releases/latest)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 JSONOTE에 관심을 가져주셔서 감사합니다! 프로젝트가 초기 단계인 만큼 여러분의 기여가 큰 힘이 됩니다.
 

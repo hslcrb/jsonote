@@ -1,6 +1,8 @@
 # 시작 가이드
 
 [![English](./GUIDE.md)](./GUIDE.md)
+[![Version](https://img.shields.io/badge/Version-v1.0-green)](https://github.com/hslcrb/jsonote/releases/latest)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 이 가이드는 JSONOTE의 기본적인 조작법과 고급 기능을 설명합니다.
 

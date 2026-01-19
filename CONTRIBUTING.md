@@ -1,6 +1,8 @@
 # Contributing to JSONOTE
 
 [![Korean](./CONTRIBUTING_ko.md)](./CONTRIBUTING_ko.md)
+[![Version](https://img.shields.io/badge/Version-v1.0-green)](https://github.com/hslcrb/jsonote/releases/latest)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Thank you for your interest in contributing to JSONOTE! As the project is in its early stages, your contributions are highly valuable.
 

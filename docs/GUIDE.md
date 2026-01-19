@@ -1,6 +1,8 @@
 # User Guide
 
 [![Korean](./GUIDE_ko.md)](./GUIDE_ko.md)
+[![Version](https://img.shields.io/badge/Version-v1.0-green)](https://github.com/hslcrb/jsonote/releases/latest)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This guide covers the fundamental operations and advanced features of JSONOTE.
 
