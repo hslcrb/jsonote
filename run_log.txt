@@ -1,0 +1,605 @@
+build-options (ubuntu-latest)	Set up job	﻿2026-01-19T04:38:42.8056459Z Current runner version: '2.331.0'
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8081656Z ##[group]Runner Image Provisioner
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8082496Z Hosted Compute Agent
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8083110Z Version: 20251211.462
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8083733Z Commit: 6cbad8c2bb55d58165063d031ccabf57e2d2db61
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8084383Z Build Date: 2025-12-11T16:28:49Z
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8085123Z Worker ID: {bff9d797-057e-4356-a17c-3dacb9874124}
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8085861Z ##[endgroup]
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8086376Z ##[group]Operating System
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8086988Z Ubuntu
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8087441Z 24.04.3
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8088251Z LTS
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8088706Z ##[endgroup]
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8089326Z ##[group]Runner Image
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8089833Z Image: ubuntu-24.04
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8090358Z Version: 20260111.209.1
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8091491Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260111.209/images/ubuntu/Ubuntu2404-Readme.md
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8092899Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260111.209
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8094169Z ##[endgroup]
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8095222Z ##[group]GITHUB_TOKEN Permissions
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8097422Z Contents: read
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8098144Z Metadata: read
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8098651Z Packages: read
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8099298Z ##[endgroup]
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8101488Z Secret source: Actions
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8102676Z Prepare workflow directory
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8425762Z Prepare all required actions
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:42.8464973Z Getting action download info
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:43.2078541Z Download action repository 'actions/checkout@v3' (SHA:f43a0e5ff2bd294095638e18286ca9a3d1956744)
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:43.5992587Z Download action repository 'actions/setup-node@v3' (SHA:3235b876344d2a9aa001b8d1453c930bba69e610)
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:43.7397499Z Download action repository 'samuelmeuli/action-electron-builder@v1' (SHA:92327c67bc45ff7c38bf55d8aa8c4d75b7ea38e7)
+build-options (ubuntu-latest)	Set up job	2026-01-19T04:38:44.2991198Z Complete job name: build-options (ubuntu-latest)
+build-options (ubuntu-latest)	Checkout Code	﻿2026-01-19T04:38:44.3660455Z ##[group]Run actions/checkout@v3
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3661291Z with:
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3661683Z   repository: hslcrb/jsonote
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3662305Z   token: ***
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3662700Z   ssh-strict: true
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3663104Z   persist-credentials: true
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3663551Z   clean: true
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3663950Z   sparse-checkout-cone-mode: true
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3664437Z   fetch-depth: 1
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3664812Z   fetch-tags: false
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3665209Z   lfs: false
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3665572Z   submodules: false
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3665978Z   set-safe-directory: true
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.3666617Z ##[endgroup]
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.4506788Z Syncing repository: hslcrb/jsonote
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.4508703Z ##[group]Getting Git version info
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.4509404Z Working directory is '/home/runner/work/jsonote/jsonote'
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.4510342Z [command]/usr/bin/git version
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5369259Z git version 2.52.0
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5396897Z ##[endgroup]
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5414453Z Temporarily overriding HOME='/home/runner/work/_temp/4d6e79fd-4247-4a35-af92-aebb3ececbc6' before making global git config changes
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5416797Z Adding repository directory to the temporary git global config as a safe directory
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5419240Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/jsonote/jsonote
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5494194Z Deleting the contents of '/home/runner/work/jsonote/jsonote'
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5498338Z ##[group]Initializing the repository
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5502072Z [command]/usr/bin/git init /home/runner/work/jsonote/jsonote
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5992454Z hint: Using 'master' as the name for the initial branch. This default branch name
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5993793Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5994769Z hint: to use in all of your new repositories, which will suppress this warning,
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5995792Z hint: call:
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5996189Z hint:
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5996677Z hint: 	git config --global init.defaultBranch <name>
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5997246Z hint:
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5998113Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5999028Z hint: 'development'. The just-created branch can be renamed via this command:
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.5999724Z hint:
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6000251Z hint: 	git branch -m <name>
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6000793Z hint:
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6001379Z hint: Disable this message with "git config set advice.defaultBranchName false"
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6030173Z Initialized empty Git repository in /home/runner/work/jsonote/jsonote/.git/
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6041455Z [command]/usr/bin/git remote add origin https://github.com/hslcrb/jsonote
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6114041Z ##[endgroup]
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6114783Z ##[group]Disabling automatic garbage collection
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6116787Z [command]/usr/bin/git config --local gc.auto 0
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6143552Z ##[endgroup]
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6144614Z ##[group]Setting up auth
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6148702Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.6175319Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.7653170Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.7684619Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.7913715Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.7946682Z ##[endgroup]
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.7947706Z ##[group]Fetching the repository
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:44.7955742Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 origin +f9b6eb2cc3ed1b3798e1fefe68bbf5b0ab9e5f68:refs/tags/v1.0
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1225818Z remote: Enumerating objects: 71, done.        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1227193Z remote: Counting objects:   1% (1/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1228331Z remote: Counting objects:   2% (2/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1229038Z remote: Counting objects:   4% (3/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1229797Z remote: Counting objects:   5% (4/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1231104Z remote: Counting objects:   7% (5/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1232158Z remote: Counting objects:   8% (6/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1232945Z remote: Counting objects:   9% (7/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1233761Z remote: Counting objects:  11% (8/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1234566Z remote: Counting objects:  12% (9/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1236259Z remote: Counting objects:  14% (10/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1237409Z remote: Counting objects:  15% (11/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1238393Z remote: Counting objects:  16% (12/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1239427Z remote: Counting objects:  18% (13/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1240245Z remote: Counting objects:  19% (14/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1241079Z remote: Counting objects:  21% (15/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1241874Z remote: Counting objects:  22% (16/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1242652Z remote: Counting objects:  23% (17/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1243426Z remote: Counting objects:  25% (18/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1244237Z remote: Counting objects:  26% (19/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1245035Z remote: Counting objects:  28% (20/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1245888Z remote: Counting objects:  29% (21/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1246735Z remote: Counting objects:  30% (22/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1248449Z remote: Counting objects:  32% (23/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1250244Z remote: Counting objects:  33% (24/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1251529Z remote: Counting objects:  35% (25/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1252476Z remote: Counting objects:  36% (26/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1253351Z remote: Counting objects:  38% (27/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1254225Z remote: Counting objects:  39% (28/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1255108Z remote: Counting objects:  40% (29/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1255972Z remote: Counting objects:  42% (30/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1256878Z remote: Counting objects:  43% (31/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1257953Z remote: Counting objects:  45% (32/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1258974Z remote: Counting objects:  46% (33/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1259953Z remote: Counting objects:  47% (34/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1260908Z remote: Counting objects:  49% (35/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1261875Z remote: Counting objects:  50% (36/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1262823Z remote: Counting objects:  52% (37/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1263774Z remote: Counting objects:  53% (38/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1264703Z remote: Counting objects:  54% (39/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1265645Z remote: Counting objects:  56% (40/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1266577Z remote: Counting objects:  57% (41/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1267512Z remote: Counting objects:  59% (42/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1268654Z remote: Counting objects:  60% (43/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1269620Z remote: Counting objects:  61% (44/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1270560Z remote: Counting objects:  63% (45/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1271466Z remote: Counting objects:  64% (46/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1272389Z remote: Counting objects:  66% (47/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1273314Z remote: Counting objects:  67% (48/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1274249Z remote: Counting objects:  69% (49/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1275205Z remote: Counting objects:  70% (50/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1276165Z remote: Counting objects:  71% (51/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1277361Z remote: Counting objects:  73% (52/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1278399Z remote: Counting objects:  74% (53/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1279309Z remote: Counting objects:  76% (54/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1280221Z remote: Counting objects:  77% (55/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1281137Z remote: Counting objects:  78% (56/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1282052Z remote: Counting objects:  80% (57/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1282947Z remote: Counting objects:  81% (58/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1283856Z remote: Counting objects:  83% (59/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1284756Z remote: Counting objects:  84% (60/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1285673Z remote: Counting objects:  85% (61/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1286573Z remote: Counting objects:  87% (62/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1287493Z remote: Counting objects:  88% (63/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1288488Z remote: Counting objects:  90% (64/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1289413Z remote: Counting objects:  91% (65/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1290317Z remote: Counting objects:  92% (66/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1291219Z remote: Counting objects:  94% (67/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1292128Z remote: Counting objects:  95% (68/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1293032Z remote: Counting objects:  97% (69/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1293935Z remote: Counting objects:  98% (70/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1294829Z remote: Counting objects: 100% (71/71)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1295844Z remote: Counting objects: 100% (71/71), done.        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1296863Z remote: Compressing objects:   1% (1/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1297891Z remote: Compressing objects:   3% (2/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1298872Z remote: Compressing objects:   4% (3/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1299810Z remote: Compressing objects:   6% (4/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1300743Z remote: Compressing objects:   7% (5/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1301843Z remote: Compressing objects:   9% (6/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1302779Z remote: Compressing objects:  10% (7/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1303753Z remote: Compressing objects:  12% (8/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1304715Z remote: Compressing objects:  13% (9/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1419365Z remote: Compressing objects:  15% (10/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1420914Z remote: Compressing objects:  16% (11/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1422393Z remote: Compressing objects:  18% (12/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1423806Z remote: Compressing objects:  20% (13/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1425097Z remote: Compressing objects:  21% (14/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1426056Z remote: Compressing objects:  23% (15/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1427036Z remote: Compressing objects:  24% (16/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1428335Z remote: Compressing objects:  26% (17/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1429304Z remote: Compressing objects:  27% (18/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1430299Z remote: Compressing objects:  29% (19/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1431273Z remote: Compressing objects:  30% (20/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1432244Z remote: Compressing objects:  32% (21/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1433203Z remote: Compressing objects:  33% (22/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1434189Z remote: Compressing objects:  35% (23/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1435160Z remote: Compressing objects:  36% (24/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1436161Z remote: Compressing objects:  38% (25/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1437141Z remote: Compressing objects:  40% (26/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1438365Z remote: Compressing objects:  41% (27/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1439350Z remote: Compressing objects:  43% (28/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1440639Z remote: Compressing objects:  44% (29/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1441675Z remote: Compressing objects:  46% (30/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1442668Z remote: Compressing objects:  47% (31/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1443914Z remote: Compressing objects:  49% (32/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1444890Z remote: Compressing objects:  50% (33/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1445858Z remote: Compressing objects:  52% (34/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1446816Z remote: Compressing objects:  53% (35/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1447971Z remote: Compressing objects:  55% (36/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1448941Z remote: Compressing objects:  56% (37/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1450585Z remote: Compressing objects:  58% (38/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1451585Z remote: Compressing objects:  60% (39/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1452553Z remote: Compressing objects:  61% (40/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1453539Z remote: Compressing objects:  63% (41/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1454513Z remote: Compressing objects:  64% (42/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1455492Z remote: Compressing objects:  66% (43/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1456453Z remote: Compressing objects:  67% (44/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1457454Z remote: Compressing objects:  69% (45/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1458645Z remote: Compressing objects:  70% (46/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1459633Z remote: Compressing objects:  72% (47/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1460603Z remote: Compressing objects:  73% (48/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1461567Z remote: Compressing objects:  75% (49/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1462530Z remote: Compressing objects:  76% (50/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1463492Z remote: Compressing objects:  78% (51/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1464469Z remote: Compressing objects:  80% (52/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1465410Z remote: Compressing objects:  81% (53/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1466371Z remote: Compressing objects:  83% (54/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1467314Z remote: Compressing objects:  84% (55/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1468545Z remote: Compressing objects:  86% (56/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1469520Z remote: Compressing objects:  87% (57/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1470693Z remote: Compressing objects:  89% (58/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1471682Z remote: Compressing objects:  90% (59/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1472638Z remote: Compressing objects:  92% (60/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1473610Z remote: Compressing objects:  93% (61/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1474576Z remote: Compressing objects:  95% (62/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1475545Z remote: Compressing objects:  96% (63/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1476499Z remote: Compressing objects:  98% (64/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1477456Z remote: Compressing objects: 100% (65/65)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.1478713Z remote: Compressing objects: 100% (65/65), done.        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2294860Z remote: Total 71 (delta 3), reused 39 (delta 0), pack-reused 0 (from 0)        
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2544136Z From https://github.com/hslcrb/jsonote
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2546108Z  * [new ref]         f9b6eb2cc3ed1b3798e1fefe68bbf5b0ab9e5f68 -> v1.0
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2618902Z ##[endgroup]
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2620593Z ##[group]Determining the checkout info
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2622525Z ##[endgroup]
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2623899Z ##[group]Checking out the ref
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2625842Z [command]/usr/bin/git checkout --progress --force refs/tags/v1.0
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2785754Z Note: switching to 'refs/tags/v1.0'.
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2786735Z 
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2787465Z You are in 'detached HEAD' state. You can look around, make experimental
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2789208Z changes and commit them, and you can discard any commits you make in this
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2790724Z state without impacting any branches by switching back to a branch.
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2792231Z 
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2793182Z If you want to create a new branch to retain commits you create, you may
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2795496Z do so (now or later) by using -c with the switch command. Example:
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2796901Z 
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2797318Z   git switch -c <new-branch-name>
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2798442Z 
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2799136Z Or undo this operation with:
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2799940Z 
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2800285Z   git switch -
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2800793Z 
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2801796Z Turn off this advice by setting config variable advice.detachedHead to false
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2803414Z 
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2805691Z HEAD is now at f9b6eb2 문서 전체 업데이트: Node.js 20 요구사항 및 연결 진단 도구 상세 사용법 추가 / Docs: Final update for Node 20 requirement & Connection Diagnosis tool
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2808913Z ##[endgroup]
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2832486Z [command]/usr/bin/git log -1 --format='%H'
+build-options (ubuntu-latest)	Checkout Code	2026-01-19T04:38:45.2854964Z 'f9b6eb2cc3ed1b3798e1fefe68bbf5b0ab9e5f68'
+build-options (ubuntu-latest)	Setup Node.js	﻿2026-01-19T04:38:45.3135107Z ##[group]Run actions/setup-node@v3
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:45.3135827Z with:
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:45.3136232Z   node-version: 20
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:45.3136745Z   always-auth: false
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:45.3137262Z   check-latest: false
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:45.3138171Z   token: ***
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:45.3138611Z ##[endgroup]
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:45.5251803Z Found in cache @ /opt/hostedtoolcache/node/20.19.6/x64
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:45.5259585Z ##[group]Environment details
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:47.5976994Z node: v20.19.6
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:47.5978120Z npm: 10.8.2
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:47.5978573Z yarn: 1.22.22
+build-options (ubuntu-latest)	Setup Node.js	2026-01-19T04:38:47.5980503Z ##[endgroup]
+build-options (ubuntu-latest)	Install Dependencies	﻿2026-01-19T04:38:47.6174316Z ##[group]Run npm ci
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:47.6174649Z [36;1mnpm ci[0m
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:47.6218484Z shell: /usr/bin/bash -e {0}
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:47.6218819Z ##[endgroup]
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:49.4819681Z npm warn EBADENGINE Unsupported engine {
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:49.4820339Z npm warn EBADENGINE   package: '@electron/rebuild@4.0.1',
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:49.4820839Z npm warn EBADENGINE   required: { node: '>=22.12.0' },
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:49.4821363Z npm warn EBADENGINE   current: { node: 'v20.19.6', npm: '10.8.2' }
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:49.4851089Z npm warn EBADENGINE }
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:49.4851509Z npm warn EBADENGINE Unsupported engine {
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:49.4852027Z npm warn EBADENGINE   package: 'node-abi@4.25.0',
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:49.4852991Z npm warn EBADENGINE   required: { node: '>=22.12.0' },
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:49.4853576Z npm warn EBADENGINE   current: { node: 'v20.19.6', npm: '10.8.2' }
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:49.4854187Z npm warn EBADENGINE }
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:51.8693123Z npm warn deprecated rimraf@2.6.3: Rimraf versions prior to v4 are no longer supported
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:52.3169590Z npm warn deprecated tar@6.2.1: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exhorbitant rates) by contacting i@izs.me
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:52.9127250Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:53.0335482Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:38:54.0324416Z npm warn deprecated boolean@3.2.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4029739Z 
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4030604Z added 871 packages, and audited 872 packages in 22s
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4031082Z 
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4031379Z 289 packages are looking for funding
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4031854Z   run `npm fund` for details
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4234668Z 
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4235684Z 6 high severity vulnerabilities
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4237433Z 
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4238231Z To address issues that do not require attention, run:
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4238840Z   npm audit fix
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4239076Z 
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4239522Z To address all issues (including breaking changes), run:
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4240149Z   npm audit fix --force
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4240398Z 
+build-options (ubuntu-latest)	Install Dependencies	2026-01-19T04:39:09.4240609Z Run `npm audit` for details.
+build-options (ubuntu-latest)	Build Next.js	﻿2026-01-19T04:39:09.4716961Z ##[group]Run npm run build
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:09.4717263Z [36;1mnpm run build[0m
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:09.4750299Z shell: /usr/bin/bash -e {0}
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:09.4750546Z ##[endgroup]
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:09.5881542Z 
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:09.5881900Z > jsonote@0.1.0 build
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:09.5882303Z > next build
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:09.5882482Z 
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:10.3140525Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:10.4185181Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:10.4186050Z This information is used to shape Next.js' roadmap and prioritize features.
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:10.4186961Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:10.4187560Z https://nextjs.org/telemetry
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:10.4187731Z 
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:10.4316705Z ▲ Next.js 16.1.3 (Turbopack)
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:10.4317162Z 
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:10.5016582Z   Creating an optimized production build ...
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:18.7290082Z ✓ Compiled successfully in 7.8s
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:18.7364430Z   Skipping validation of types
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:18.8814435Z   Collecting page data using 3 workers ...
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:19.7285901Z   Generating static pages using 3 workers (0/8) ...
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:19.7668905Z   Generating static pages using 3 workers (2/8) 
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:19.7833121Z   Generating static pages using 3 workers (4/8) 
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:19.9370480Z   Generating static pages using 3 workers (6/8) 
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:19.9376724Z ✓ Generating static pages using 3 workers (8/8) in 209.1ms
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:19.9434007Z   Finalizing page optimization ...
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1591069Z 
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1610674Z Route (app)
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1611260Z ┌ ○ /
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1611620Z ├ ○ /_not-found
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1612044Z ├ ƒ /api/github/diagnose
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1612438Z ├ ƒ /api/mcp
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1612874Z ├ ƒ /api/mcp-proxy/call-tool
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1613720Z └ ƒ /api/mcp-proxy/list-tools
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1613970Z 
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1613990Z 
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1614341Z ○  (Static)   prerendered as static content
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1615032Z ƒ  (Dynamic)  server-rendered on demand
+build-options (ubuntu-latest)	Build Next.js	2026-01-19T04:39:20.1615332Z 
+build-options (ubuntu-latest)	Build Electron App	﻿2026-01-19T04:39:20.2240969Z ##[group]Run samuelmeuli/action-electron-builder@v1
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2241311Z with:
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2241854Z   github_token: ***
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2242054Z   release: true
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2242254Z   args: --linux
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2242543Z   package_root: .
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2242740Z   build_script_name: build
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2242958Z   skip_build: false
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2243137Z   use_vue_cli: false
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2243329Z   max_attempts: 1
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2243507Z ##[endgroup]
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2483412Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2483941Z Will run NPM commands in directory "."
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2488077Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.2488552Z Installing dependencies using NPM…
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.9108609Z npm warn EBADENGINE Unsupported engine {
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.9109260Z npm warn EBADENGINE   package: '@electron/rebuild@4.0.1',
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.9109809Z npm warn EBADENGINE   required: { node: '>=22.12.0' },
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.9110363Z npm warn EBADENGINE   current: { node: 'v20.19.6', npm: '10.8.2' }
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.9110853Z npm warn EBADENGINE }
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.9153245Z npm warn EBADENGINE Unsupported engine {
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.9153905Z npm warn EBADENGINE   package: 'node-abi@4.25.0',
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.9154342Z npm warn EBADENGINE   required: { node: '>=22.12.0' },
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.9154808Z npm warn EBADENGINE   current: { node: 'v20.19.6', npm: '10.8.2' }
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:20.9155168Z npm warn EBADENGINE }
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7527071Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7527956Z up to date, audited 872 packages in 1s
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7533746Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7534053Z 289 packages are looking for funding
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7534512Z   run `npm fund` for details
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7700150Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7700521Z 6 high severity vulnerabilities
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7700822Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7701237Z To address issues that do not require attention, run:
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7701578Z   npm audit fix
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7701697Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7701918Z To address all issues (including breaking changes), run:
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7702249Z   npm audit fix --force
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7702386Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7702523Z Run `npm audit` for details.
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7823222Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.7824241Z Running the build script…
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.8889731Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.8890263Z > jsonote@0.1.0 build
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.8890561Z > next build
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:21.8890682Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:22.6971966Z ▲ Next.js 16.1.3 (Turbopack)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:22.6973901Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:22.7604253Z   Creating an optimized production build ...
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:31.1187193Z ✓ Compiled successfully in 7.9s
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:31.1223244Z   Skipping validation of types
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:31.2447075Z   Collecting page data using 3 workers ...
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.0895667Z   Generating static pages using 3 workers (0/8) ...
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.1288339Z   Generating static pages using 3 workers (2/8) 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.1325075Z   Generating static pages using 3 workers (4/8) 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.2940453Z   Generating static pages using 3 workers (6/8) 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.2945056Z ✓ Generating static pages using 3 workers (8/8) in 204.9ms
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.2995327Z   Finalizing page optimization ...
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5109969Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5126768Z Route (app)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5127502Z ┌ ○ /
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5128106Z ├ ○ /_not-found
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5128589Z ├ ƒ /api/github/diagnose
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5129074Z ├ ƒ /api/mcp
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5129617Z ├ ƒ /api/mcp-proxy/call-tool
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5130164Z └ ƒ /api/mcp-proxy/list-tools
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5130462Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5130486Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5130892Z ○  (Static)   prerendered as static content
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5131990Z ƒ  (Dynamic)  server-rendered on demand
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5132339Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5745821Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:32.5746671Z Building and releasing the Electron app…
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:33.3398460Z   • electron-builder  version=26.4.0 os=6.11.0-1018-azure
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:33.3457542Z   • loaded configuration  file=package.json ("build" field)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:33.6069078Z   • executing @electron/rebuild  electronVersion=40.0.0 arch=x64 buildFromSource=false workspaceRoot=/home/runner/work/jsonote/jsonote projectDir=./ appDir=./
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:33.6070352Z   • installing native dependencies  arch=x64
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:33.8729612Z   • completed installing native dependencies
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:33.8801650Z   • packaging       platform=linux arch=x64 electron=40.0.0 appOutDir=dist/linux-unpacked
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:34.1222563Z   • downloading     url=https://github.com/electron/electron/releases/download/v40.0.0/electron-v40.0.0-linux-x64.zip size=115 MB parts=8
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:34.4165802Z   • downloaded      url=https://github.com/electron/electron/releases/download/v40.0.0/electron-v40.0.0-linux-x64.zip duration=529ms
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:39:36.6517246Z   • cannot find path for dependency  name=undefined reference=undefined
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:40:01.4922108Z   • building        target=AppImage arch=x64 file=dist/JSONOTE-0.1.0.AppImage
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:40:01.4926188Z   • building        target=zip arch=x64 file=dist/jsonote-0.1.0.zip
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:40:01.5091716Z   • default Electron icon is used  reason=application icon is not set
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:40:01.9870228Z   • downloading     url=https://github.com/electron-userland/electron-builder-binaries/releases/download/appimage-12.0.1/appimage-12.0.1.7z size=1.6 MB parts=1
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:40:02.1041396Z   • downloaded      url=https://github.com/electron-userland/electron-builder-binaries/releases/download/appimage-12.0.1/appimage-12.0.1.7z duration=582ms
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:40:45.4929051Z   • publishing      publisher=Github (owner: hslcrb, project: jsonote, version: 0.1.0)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:40:45.5008834Z   • uploading       file=JSONOTE-0.1.0.AppImage provider=github
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:40:45.7816957Z   • creating GitHub release  reason=release doesn't exist tag=v0.1.0 version=0.1.0
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9539732Z   • uploading       file=jsonote-0.1.0.zip provider=github
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9813810Z   ⨯ Cannot cleanup: 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9814097Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9814607Z Error #1 --------------------------------------------------------------------------------
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9815256Z HttpError: 403 Forbidden
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9817526Z "method: post url: https://api.github.com/repos/hslcrb/jsonote/releases\n\n          Data:\n          {\"message\":\"Resource not accessible by integration\",\"documentation_url\":\"https://docs.github.com/rest/releases/releases#create-a-release\",\"status\":\"403\"}\n          "
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9819168Z Headers: {
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9819393Z   "date": "Mon, 19 Jan 2026 04:40:45 GMT",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9819720Z   "content-type": "application/json; charset=utf-8",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9820029Z   "content-length": "153",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9820302Z   "x-github-media-type": "github.v3; format=json",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9820764Z   "x-accepted-github-permissions": "contents=write; contents=write,workflows=write",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9821569Z   "x-github-api-version-selected": "2022-11-28",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9822033Z   "x-ratelimit-limit": "5000",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9822450Z   "x-ratelimit-remaining": "4986",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9822910Z   "x-ratelimit-reset": "1768799364",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9823339Z   "x-ratelimit-used": "14",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9823762Z   "x-ratelimit-resource": "core",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9826102Z   "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9828474Z   "access-control-allow-origin": "*",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9828922Z   "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9829313Z   "x-frame-options": "deny",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9829567Z   "x-content-type-options": "nosniff",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9830013Z   "x-xss-protection": "0",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9830409Z   "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9830873Z   "content-security-policy": "default-src 'none'",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9831220Z   "vary": "Accept-Encoding, Accept, X-Requested-With",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9831621Z   "x-github-request-id": "6808:132847:4BF3071:15885436:696DB5CD",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9831934Z   "server": "github.com"
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9832135Z }
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9832640Z     at createHttpError (/home/runner/work/jsonote/jsonote/node_modules/builder-util-runtime/src/httpExecutor.ts:31:10)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9833561Z     at IncomingMessage.<anonymous> (/home/runner/work/jsonote/jsonote/node_modules/builder-util-runtime/src/httpExecutor.ts:202:13)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9834206Z     at IncomingMessage.emit (node:events:536:35)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9834574Z     at endReadableNT (node:internal/streams/readable:1698:12)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9835029Z     at processTicksAndRejections (node:internal/process/task_queues:82:21)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9835447Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9835853Z Error #2 --------------------------------------------------------------------------------
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9836449Z HttpError: 403 Forbidden
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9838852Z "method: post url: https://api.github.com/repos/hslcrb/jsonote/releases\n\n          Data:\n          {\"message\":\"Resource not accessible by integration\",\"documentation_url\":\"https://docs.github.com/rest/releases/releases#create-a-release\",\"status\":\"403\"}\n          "
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9840609Z Headers: {
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9840950Z   "date": "Mon, 19 Jan 2026 04:40:45 GMT",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9841489Z   "content-type": "application/json; charset=utf-8",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9841985Z   "content-length": "153",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9842443Z   "x-github-media-type": "github.v3; format=json",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9843271Z   "x-accepted-github-permissions": "contents=write; contents=write,workflows=write",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9844093Z   "x-github-api-version-selected": "2022-11-28",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9844605Z   "x-ratelimit-limit": "5000",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9845029Z   "x-ratelimit-remaining": "4986",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9845475Z   "x-ratelimit-reset": "1768799364",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9845881Z   "x-ratelimit-used": "14",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9846286Z   "x-ratelimit-resource": "core",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9848923Z   "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9851232Z   "access-control-allow-origin": "*",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9851967Z   "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9852581Z   "x-frame-options": "deny",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9852989Z   "x-content-type-options": "nosniff",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9853403Z   "x-xss-protection": "0",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9854040Z   "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9854808Z   "content-security-policy": "default-src 'none'",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9855362Z   "vary": "Accept-Encoding, Accept, X-Requested-With",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9855977Z   "x-github-request-id": "6808:132847:4BF3071:15885436:696DB5CD",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9856482Z   "server": "github.com"
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9856775Z }
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9857577Z     at createHttpError (/home/runner/work/jsonote/jsonote/node_modules/builder-util-runtime/src/httpExecutor.ts:31:10)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9859233Z     at IncomingMessage.<anonymous> (/home/runner/work/jsonote/jsonote/node_modules/builder-util-runtime/src/httpExecutor.ts:202:13)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9860421Z     at IncomingMessage.emit (node:events:536:35)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9860999Z     at endReadableNT (node:internal/streams/readable:1698:12)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9862218Z     at processTicksAndRejections (node:internal/process/task_queues:82:21)  failedTask=build stackTrace=Error: Cannot cleanup: 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9876845Z                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   Error #1 --------------------------------------------------------------------------------
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9887516Z HttpError: 403 Forbidden
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9889827Z "method: post url: https://api.github.com/repos/hslcrb/jsonote/releases\n\n          Data:\n          {\"message\":\"Resource not accessible by integration\",\"documentation_url\":\"https://docs.github.com/rest/releases/releases#create-a-release\",\"status\":\"403\"}\n          "
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9891455Z Headers: {
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9891798Z   "date": "Mon, 19 Jan 2026 04:40:45 GMT",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9892336Z   "content-type": "application/json; charset=utf-8",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9892831Z   "content-length": "153",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9893288Z   "x-github-media-type": "github.v3; format=json",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9894110Z   "x-accepted-github-permissions": "contents=write; contents=write,workflows=write",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9894917Z   "x-github-api-version-selected": "2022-11-28",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9895413Z   "x-ratelimit-limit": "5000",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9895827Z   "x-ratelimit-remaining": "4986",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9896247Z   "x-ratelimit-reset": "1768799364",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9896624Z   "x-ratelimit-used": "14",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9897000Z   "x-ratelimit-resource": "core",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9899500Z   "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9901686Z   "access-control-allow-origin": "*",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9902356Z   "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9902973Z   "x-frame-options": "deny",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9903365Z   "x-content-type-options": "nosniff",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9903774Z   "x-xss-protection": "0",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9904417Z   "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9905174Z   "content-security-policy": "default-src 'none'",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9905756Z   "vary": "Accept-Encoding, Accept, X-Requested-With",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9906377Z   "x-github-request-id": "6808:132847:4BF3071:15885436:696DB5CD",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9906877Z   "server": "github.com"
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9907181Z }
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9908141Z     at createHttpError (/home/runner/work/jsonote/jsonote/node_modules/builder-util-runtime/src/httpExecutor.ts:31:10)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9909664Z     at IncomingMessage.<anonymous> (/home/runner/work/jsonote/jsonote/node_modules/builder-util-runtime/src/httpExecutor.ts:202:13)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9910688Z     at IncomingMessage.emit (node:events:536:35)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9911279Z     at endReadableNT (node:internal/streams/readable:1698:12)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9912064Z     at processTicksAndRejections (node:internal/process/task_queues:82:21)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9925915Z                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   Error #2 --------------------------------------------------------------------------------
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9936600Z HttpError: 403 Forbidden
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9938987Z "method: post url: https://api.github.com/repos/hslcrb/jsonote/releases\n\n          Data:\n          {\"message\":\"Resource not accessible by integration\",\"documentation_url\":\"https://docs.github.com/rest/releases/releases#create-a-release\",\"status\":\"403\"}\n          "
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9940946Z Headers: {
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9941421Z   "date": "Mon, 19 Jan 2026 04:40:45 GMT",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9941910Z   "content-type": "application/json; charset=utf-8",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9942377Z   "content-length": "153",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9942799Z   "x-github-media-type": "github.v3; format=json",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9943642Z   "x-accepted-github-permissions": "contents=write; contents=write,workflows=write",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9944418Z   "x-github-api-version-selected": "2022-11-28",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9944889Z   "x-ratelimit-limit": "5000",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9945288Z   "x-ratelimit-remaining": "4986",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9945706Z   "x-ratelimit-reset": "1768799364",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9946094Z   "x-ratelimit-used": "14",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9946492Z   "x-ratelimit-resource": "core",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9948690Z   "access-control-expose-headers": "ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO, X-GitHub-Request-Id, Deprecation, Sunset",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9950551Z   "access-control-allow-origin": "*",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9951257Z   "strict-transport-security": "max-age=31536000; includeSubdomains; preload",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9951901Z   "x-frame-options": "deny",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9952342Z   "x-content-type-options": "nosniff",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9952784Z   "x-xss-protection": "0",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9953461Z   "referrer-policy": "origin-when-cross-origin, strict-origin-when-cross-origin",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9954325Z   "content-security-policy": "default-src 'none'",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9955003Z   "vary": "Accept-Encoding, Accept, X-Requested-With",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9955733Z   "x-github-request-id": "6808:132847:4BF3071:15885436:696DB5CD",
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9956297Z   "server": "github.com"
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9956649Z }
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9957530Z     at createHttpError (/home/runner/work/jsonote/jsonote/node_modules/builder-util-runtime/src/httpExecutor.ts:31:10)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9959409Z     at IncomingMessage.<anonymous> (/home/runner/work/jsonote/jsonote/node_modules/builder-util-runtime/src/httpExecutor.ts:202:13)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9960475Z     at IncomingMessage.emit (node:events:536:35)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9961113Z     at endReadableNT (node:internal/streams/readable:1698:12)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9961967Z     at processTicksAndRejections (node:internal/process/task_queues:82:21)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9963198Z     at throwError (/home/runner/work/jsonote/jsonote/node_modules/builder-util/src/asyncTaskManager.ts:88:11)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9964577Z     at checkErrors (/home/runner/work/jsonote/jsonote/node_modules/builder-util/src/asyncTaskManager.ts:53:9)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9966213Z     at AsyncTaskManager.awaitTasks (/home/runner/work/jsonote/jsonote/node_modules/builder-util/src/asyncTaskManager.ts:58:5)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9968111Z     at PublishManager.awaitTasks (/home/runner/work/jsonote/jsonote/node_modules/app-builder-lib/src/publish/PublishManager.ts:246:28)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9969577Z     at /home/runner/work/jsonote/jsonote/node_modules/app-builder-lib/src/index.ts:132:32
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:24.9970842Z     at executeFinally (/home/runner/work/jsonote/jsonote/node_modules/builder-util/src/promise.ts:23:9)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0065075Z /home/runner/work/_actions/samuelmeuli/action-electron-builder/v1/index.js:144
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0065811Z 				throw err;
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0066099Z 				^
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0066257Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0066857Z Error: Command failed: npx --no-install electron-builder --linux --publish always --linux
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0067598Z     at genericNodeError (node:internal/errors:984:15)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0068449Z     at wrappedFn (node:internal/errors:538:14)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0068801Z     at checkExecSyncError (node:child_process:891:11)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0069137Z     at execSync (node:child_process:963:15)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0069629Z     at run (/home/runner/work/_actions/samuelmeuli/action-electron-builder/v1/index.js:21:27)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0070425Z     at runAction (/home/runner/work/_actions/samuelmeuli/action-electron-builder/v1/index.js:132:4)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0071116Z     at Object.<anonymous> (/home/runner/work/_actions/samuelmeuli/action-electron-builder/v1/index.js:150:1)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0071681Z     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0072120Z     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0072548Z     at Module.load (node:internal/modules/cjs/loader:1266:32) {
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0072844Z   status: 1,
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0073004Z   signal: null,
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0073204Z   output: [ null, null, null ],
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0073420Z   pid: 2463,
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0073577Z   stdout: null,
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0073733Z   stderr: null
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0073898Z }
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0073983Z 
+build-options (ubuntu-latest)	Build Electron App	2026-01-19T04:42:25.0074058Z Node.js v20.19.6
+build-options (ubuntu-latest)	Post Checkout Code	﻿2026-01-19T04:42:25.0159087Z Post job cleanup.
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.0876286Z [command]/usr/bin/git version
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.0910437Z git version 2.52.0
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.0955180Z Temporarily overriding HOME='/home/runner/work/_temp/05c8a47d-694b-433b-9c14-179164fcd2dd' before making global git config changes
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.0956713Z Adding repository directory to the temporary git global config as a safe directory
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.0960070Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/jsonote/jsonote
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.0992862Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.1023297Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.1310638Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.1356073Z http.https://github.com/.extraheader
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.1358120Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+build-options (ubuntu-latest)	Post Checkout Code	2026-01-19T04:42:25.1375934Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+build-options (ubuntu-latest)	Complete job	﻿2026-01-19T04:42:25.1711194Z Cleaning up orphan processes
