@@ -1,11 +1,39 @@
-# JSONOTE (v0.1.0)
+# JSONOTE (v1.0)
 
 [![Korean](https://img.shields.io/badge/Language-Korean-red)](./README_ko.md)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 > **The Ultimate JSON-based Note-taking Application with GitHub Integration & MCP Support.**
 
-⚠️ **Status: Under Active Development**  
-This project is currently in the early stages of development. The first official release has not yet been published. Expect frequent updates and potential breaking changes.
+**Official First Release: Monday, January 19, 2026 (KST)**
+
+---
+
+## 🛠️ Installation & Setup (How to Start)
+
+### 1. 💻 Desktop App (Windows, Mac, Linux) - **Recommended**
+Download the official standalone client from our [Releases Page](../../releases).
+- **Windows**: `JSONOTE-Setup-1.0.exe` (Installer) or `.zip` (Portable)
+- **Mac**: `JSONOTE-1.0.dmg` (Installer) or `.zip` (App Bundle)
+- **Linux**: `JSONOTE-1.0.AppImage` (Executable) or `.zip`
+
+### 2. 🐳 Docker (GitHub Container Registry)
+Run the application instantly using Docker:
+```bash
+docker pull ghcr.io/hslcrb/jsonote:latest
+docker run -p 3000:3000 ghcr.io/hslcrb/jsonote:latest
+```
+Access the app at `http://localhost:3000`.
+
+### 3. 🏗️ Build from Source (Developers)
+Requires Node.js **v20.9.0** or higher.
+```bash
+git clone https://github.com/hslcrb/jsonote.git
+cd jsonote
+npm install
+npm run build
+npm run start
+```
 
 ---
 
@@ -17,65 +45,36 @@ This project is currently in the early stages of development. The first official
 - Real-time sync with **visual feedback** (Saving... -> Saved!).
 
 ### 2. Notion-Inspired Workspace
-- **Infinite Hierarchy**: Nest pages within pages to build a comprehensive knowledge base.
-- **Database Views**: Switching between **List**, **Table**, and **Board** views.
-- **Custom Properties**: Add metadata fields (Text, Number, Date) to any note.
+- **Infinite Hierarchy**: Nest pages within pages to build a knowledge base.
+- **Database Views**: Switch between **List**, **Table**, and **Board** views.
+- **Custom Properties**: Add metadata fields (Text, Number, Date, etc.) to any note.
 
 ### 3. MCP (Model Context Protocol) Integration
-- Connect to external AI tools (Notion MCP, GitHub MCP, etc.).
-- Call AI tools directly within the editor to process your note content.
-- Server-side proxy implementation to bypass browser CORS limits.
+- Connect to external AI tools (Notion, GitHub, etc.) directly within the editor.
 
 ### 4. Developer-Friendly UI
 - **Glassmorphism Design**: Premium obsidian-dark aesthetic.
-- **Nanum Gothic Typography**: Clean and professional local font rendering.
-- **Markdown Support**: Syntax highlighting, standard URL-based images, and easy formatting tools.
+- **Markdown Support**: Syntax highlighting, standard URL images, and easy formatting.
 
 ---
 
-## 🛠️ Quick Start
-
-### Installation
-```bash
-npm install
-npm run dev
-```
-
-### 💻 Desktop App (Windows, Mac, Linux)
-Prefer a standalone app? Download the official desktop client from our [Releases Page](../../releases).
-- **Windows**: `Setup.exe` (Installer) or `.zip` (Portable)
-- **Mac**: `.dmg` (Installer) or `.zip` (App Bundle)
-- **Linux**: `.AppImage` (Executable) or `.zip`
-
-### Configuration
-1. Go to **Settings** in the app.
-2. Enter your **GitHub Personal Access Token** (Fine-grained or Classic).
+## ⚙️ Post-Installation Setup
+1. Open **Settings** in the app.
+2. Enter your **GitHub Personal Access Token** (Repo permissions required).
 3. Specify your `Owner`, `Repo`, and `Branch`.
-4. Click **Test Connection (연결 진단)** to verify your token and permissions instantly.
-5. Your notes will automatically sync upon saving.
-
-### Troubleshooting
-If you encounter synchronization errors (e.g., "SHA not supplied" or "Bad Credentials"):
-1. Open **Settings**.
-2. Click the **Test Connection** button.
-3. The tool will diagnose:
-   - Token validity (Auth)
-   - Repository access (Read)
-   - Write permissions (Push)
-4. Follow the on-screen logs to resolve specific permission issues.
+4. Click **Test Connection (연결 진단)** to verify.
+5. Everything is ready! Your notes will sync automatically.
 
 ---
 
 ## 📝 Documentations
-
-Explore more about JSONOTE through our detailed documentation:
-
-- 📘 **[Getting Started Guide](./docs/GUIDE.md)** ([Korean](./docs/GUIDE_ko.md)): Learn the basics.
-- ⚙️ **[MCP Setup Guide](./docs/MCP_SETUP.md)** ([Korean](./docs/MCP_SETUP_ko.md)): Configure AI tools.
-- 🛡️ **[Security & Privacy](./docs/SECURITY.md)** ([Korean](./docs/SECURITY_ko.md)): How we handle your data.
-- 🤝 **[Contributing Guide](./CONTRIBUTING.md)** ([Korean](./CONTRIBUTING_ko.md)): Help us improve JSONOTE.
+- 📘 [Getting Started Guide](./docs/GUIDE.md)
+- ⚙️ [MCP Setup Guide](./docs/MCP_SETUP.md)
+- 🛡️ [Security & Privacy](./docs/SECURITY.md)
+- 🤝 [Contributing Guide](./CONTRIBUTING.md)
 
 ---
 
 ## ⚖️ License
+Licensed under the **Apache License 2.0**.
 Copyright (c) 2026 JSONOTE Team. All rights reserved.
