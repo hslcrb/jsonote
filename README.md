@@ -41,6 +41,12 @@ npm install
 npm run dev
 ```
 
+### 💻 Desktop App (Windows, Mac, Linux)
+Prefer a standalone app? Download the official desktop client from our [Releases Page](../../releases).
+- **Windows**: `Setup.exe` (Installer) or `.zip` (Portable)
+- **Mac**: `.dmg` (Installer) or `.zip` (App Bundle)
+- **Linux**: `.AppImage` (Executable) or `.zip`
+
 ### Configuration
 1. Go to **Settings** in the app.
 2. Enter your **GitHub Personal Access Token** (Fine-grained or Classic).
