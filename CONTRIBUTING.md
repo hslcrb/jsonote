@@ -5,9 +5,10 @@
 Thank you for your interest in contributing to JSONOTE! As the project is in its early stages, your contributions are highly valuable.
 
 ## 🛠️ Development Environment
-1. Clone the repository.
-2. Install dependencies: `npm install`.
-3. Start the dev server: `npm run dev`.
+1. Node.js: **v20.9.0 or higher** (Required for Next.js 16).
+2. Clone the repository.
+3. Install dependencies: `npm install`.
+4. Start the dev server: `npm run dev`.
 
 ## 📜 Contribution Rules
 - **Code Quality**: Ensure your code follows the existing style and is properly linted.
