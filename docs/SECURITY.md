@@ -14,4 +14,4 @@ This application serves all fonts locally to prevent external tracking and ensur
 JSONOTE does not have a backend database for notes. Everything is stored in **your** GitHub repository.
 
 ---
-Copyright (c) 2026 JSONOTE Team.
+Copyright 2008-2026 Rheehose (Rhee Creative).

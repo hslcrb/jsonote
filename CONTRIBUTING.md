@@ -24,4 +24,4 @@ Thank you for your interest in contributing to JSONOTE! As the project is in its
 4. Push to the branch and open a Pull Request.
 
 ---
-Copyright (c) 2026 JSONOTE Team.
+Copyright 2008-2026 Rheehose (Rhee Creative).

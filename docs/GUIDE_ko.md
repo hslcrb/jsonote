@@ -36,4 +36,4 @@ JSONOTE의 각 노트는 다음과 같이 구성됩니다:
 모든 과정은 상세 로그로 표시되어 문제 원인을 바로 파악할 수 있습니다.
 
 ---
-Copyright (c) 2026 JSONOTE Team.
+Copyright 2008-2026 Rheehose (Rhee Creative).

@@ -25,4 +25,4 @@ Model Context Protocol (MCP)은 JSONOTE 내에서 AI 연동을 가능하게 합�
 4. 연결된 도구들이 노트 에디터 우측 사이드바에 나타납니다.
 
 ---
-Copyright (c) 2026 JSONOTE Team.
+Copyright 2008-2026 Rheehose (Rhee Creative).

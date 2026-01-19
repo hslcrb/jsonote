@@ -81,4 +81,4 @@ npm run start
 
 ## ⚖️ License
 Licensed under the **Apache License 2.0**.
-Copyright (c) 2026 JSONOTE Team. All rights reserved.
+Copyright 2008-2026 Rheehose (Rhee Creative). All rights reserved.

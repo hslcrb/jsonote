@@ -24,4 +24,4 @@ JSONOTE에 관심을 가져주셔서 감사합니다! 프로젝트가 초기 단
 4. 브랜치에 푸시한 뒤 Pull Request를 생성합니다.
 
 ---
-Copyright (c) 2026 JSONOTE Team.
+Copyright 2008-2026 Rheehose (Rhee Creative).

@@ -78,4 +78,4 @@ npm run start
 
 ## ⚖️ 라이선스
 **Apache License 2.0** 조건에 따라 라이선스가 부여됩니다.
-Copyright (c) 2026 JSONOTE Team. All rights reserved.
+Copyright 2008-2026 Rheehose (Rhee Creative). All rights reserved.

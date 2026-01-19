@@ -36,4 +36,4 @@ If your notes aren't saving, go to **Settings** and click **Test Connection**. T
 Any errors will be displayed in a detailed log.
 
 ---
-Copyright (c) 2026 JSONOTE Team.
+Copyright 2008-2026 Rheehose (Rhee Creative).

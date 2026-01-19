@@ -25,4 +25,4 @@ To connect a local MCP server:
 4. Tools will now appear in your Note Editor's right sidebar.
 
 ---
-Copyright (c) 2026 JSONOTE Team.
+Copyright 2008-2026 Rheehose (Rhee Creative).
