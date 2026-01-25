@@ -1,4 +1,4 @@
-# JSONOTE (v1.0.4)
+# JSONOTE (v1.0.5)
 
 [![English](https://img.shields.io/badge/Language-English-blue)](./README.md) [![Korean](https://img.shields.io/badge/Language-Korean-red)](./README_ko.md)
 [![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
@@ -13,13 +13,13 @@
 
 ---
 
-## 🛠️ インストールとセットアップ (v1.0.4)
+## 🛠️ インストールとセットアップ (v1.0.5)
 
 ### 1. 💻 デスクトップアプリ (Windows, macOS, Linux) - **推奨**
 JSONOTEをデスクトップアプリとして利用する、最も安定した方法です。[リリースページ](../../releases)からダウンロードしてください。
-- **Windows**: `JSONOTE-Setup-1.0.4.exe` (インストーラー) または `.zip` (ポータブル)
-- **macOS**: `JSONOTE-1.0.4.dmg` (Intel/Apple Silicon 両対応) または `.zip`
-- **Linux**: `JSONOTE-1.0.4.AppImage` (ユニバーサルパッケージ) または `.tar.gz`
+- **Windows**: `JSONOTE-Setup-1.0.5.exe` (インストーラー) または `.zip` (ポータブル)
+- **macOS**: `JSONOTE-1.0.5.dmg` (Intel/Apple Silicon 両対応) または `.zip`
+- **Linux**: `JSONOTE-1.0.5.AppImage` (ユニバーサルパッケージ) または `.tar.gz`
 
 ### 2. 🐳 Docker (コンテナ)
 Docker環境で即座に実行可能です:

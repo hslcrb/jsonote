@@ -1,4 +1,4 @@
-# JSONOTE (v1.0.4)
+# JSONOTE (v1.0.5)
 
 [![English](https://img.shields.io/badge/Language-English-blue)](./README.md) [![Japanese](https://i.namu.wiki/i/-6zD4tIyEplQ_Q44rBjydwhDQ1pOaig6biAKN_MiK01bU7T0_4iZg5IVcNyOzzUolTyLp8aAFKrjJhqutcQx74i37kT2DzzsROquAUrnNy7VFmpFuQTccFJT552leCkTpg9LDJgd2xNwWOv5NYZ15g.svg)](./README_ja.md)
 [![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
@@ -13,13 +13,13 @@
 
 ---
 
-## 🛠️ 시작하기 (v1.0.4)
+## 🛠️ 시작하기 (v1.0.5)
 
 ### 1. 💻 데스크탑 앱 (Windows, macOS, Linux) - **권장**
 가장 빠르고 안정적인 방법입니다. [릴리즈 페이지](../../releases)에서 공식 데스크탑 클라이언트를 다운로드하세요.
-- **Windows**: `JSONOTE-Setup-1.0.4.exe` (설치형) 또는 `.zip` (무설치 포터블)
-- **macOS**: `JSONOTE-1.0.4.dmg` (Intel/Apple Silicon 공용) 또는 `.zip`
-- **Linux**: `JSONOTE-1.0.4.AppImage` (범용 실행 파일) 또는 `.tar.gz`
+- **Windows**: `JSONOTE-Setup-1.0.5.exe` (설치형) 또는 `.zip` (무설치 포터블)
+- **macOS**: `JSONOTE-1.0.5.dmg` (Intel/Apple Silicon 공용) 또는 `.zip`
+- **Linux**: `JSONOTE-1.0.5.AppImage` (범용 실행 파일) 또는 `.tar.gz`
 
 ### 2. 🐳 Docker (컨테이너 배포)
 Docker 환경에서 즉시 실행이 가능합니다:
