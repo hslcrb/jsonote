@@ -28,10 +28,10 @@ Thank you for your interest in contributing to JSONOTE! As the project is in its
 We use a fully automated CI/CD pipeline enabled by GitHub Actions.
 - **Just push to the `main` branch**.
 - The system automatically:
-  1. Bumps the **patch version** (e.g., v1.0.0 -> v1.0.1).
+  1. Bumps the **patch version** (e.g., v1.0.3 -> v1.0.4).
   2. Creates a **GitHub Release** tag.
   3. Builds and pushes the **Docker image** to GHCR.
-  4. Builds and uploads **Desktop apps** (Windows .exe, macOS .dmg, Linux .AppImage).
+  4. Builds and uploads **Desktop apps** (Windows .exe, macOS JSONOTE-1.0.4.dmg, Linux JSONOTE-1.0.4.AppImage).
 
 Do not manually create tags or releases.
 

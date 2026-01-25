@@ -1,4 +1,4 @@
-# JSONOTE (v1.0)
+# JSONOTE (v1.0.4)
 
 [![Korean](https://i.namu.wiki/i/sWPT7gp9y6RDK_9IVVHmBDwc-JIlzbRbxyS_Jy2TUAFm3O97u34B3Y-vJXWbGOAS0aXzDXDLsRP5PffCMB5hdKdrLLZ_TZZlA3WdKP_xgmtX_QZaLZNuMc7tHM1CZBjBGrtlF7numCKhlOQFRN7IaA.svg)](./README_ko.md) [![Japanese](https://i.namu.wiki/i/-6zD4tIyEplQ_Q44rBjydwhDQ1pOaig6biAKN_MiK01bU7T0_4iZg5IVcNyOzzUolTyLp8aAFKrjJhqutcQx74i37kT2DzzsROquAUrnNy7VFmpFuQTccFJT552leCkTpg9LDJgd2xNwWOv5NYZ15g.svg)](./README_ja.md)
 [![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
@@ -13,28 +13,38 @@
 
 ---
 
-## 🛠️ Installation & Setup (How to Start)
+## 🛠️ Installation & Setup (v1.0.4)
 
-### 1. 💻 Desktop App (Windows, Mac, Linux) - **Recommended**
-Download the official standalone client from our [Releases Page](../../releases).
-- **Windows**: `JSONOTE-Setup-1.0.exe` (Installer) or `.zip` (Portable)
-- **Mac**: `JSONOTE-1.0.dmg` (Installer) or `.zip` (App Bundle)
-- **Linux**: `JSONOTE-1.0.AppImage` (Executable) or `.zip`
+### 1. 💻 Desktop App (Windows, macOS, Linux) - **Recommended**
+The fastest and most stable way to use JSONOTE as a native application. Download from our [Releases Page](../../releases).
+- **Windows**: `JSONOTE-Setup-1.0.4.exe` (Installer) or `.zip` (Portable)
+- **macOS**: `JSONOTE-1.0.4.dmg` (Universal Intel/Apple Silicon) or `.zip`
+- **Linux**: `JSONOTE-1.0.4.AppImage` (Universal Package) or `.tar.gz`
 
-### 2. 🐳 Docker (GitHub Container Registry)
-Run the application instantly using Docker:
+### 2. 🐳 Docker (Containerized Deployment)
+Perfect for hosting your own instance or running instantly:
 ```bash
+# Pull and Run
 docker pull ghcr.io/hslcrb/jsonote:latest
-docker run -p 3000:3000 ghcr.io/hslcrb/jsonote:latest
+docker run -d -p 3000:3000 --name jsonote-instance ghcr.io/hslcrb/jsonote:latest
 ```
-Access the app at `http://localhost:3000`.
+Visit `http://localhost:3000` to start.
 
-### 3. 🏗️ Build from Source (Developers)
+### 3. 🏗️ Developer Quick Start (Native Build)
 Requires Node.js **v20.9.0** or higher.
 ```bash
+# 1. Clone
 git clone https://github.com/hslcrb/jsonote.git
 cd jsonote
+
+# 2. Setup
 npm install
+
+# 3. Execution (Choose one)
+npm run dev          # Start Web Development Server
+npm run electron:dev # Start Electron Desktop in Dev Mode
+
+# 4. Production Build
 npm run build
 npm run start
 ```

@@ -1,4 +1,4 @@
-# JSONOTE (v1.0)
+# JSONOTE (v1.0.4)
 
 [![English](https://img.shields.io/badge/Language-English-blue)](./README.md) [![Japanese](https://i.namu.wiki/i/-6zD4tIyEplQ_Q44rBjydwhDQ1pOaig6biAKN_MiK01bU7T0_4iZg5IVcNyOzzUolTyLp8aAFKrjJhqutcQx74i37kT2DzzsROquAUrnNy7VFmpFuQTccFJT552leCkTpg9LDJgd2xNwWOv5NYZ15g.svg)](./README_ja.md)
 [![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
@@ -13,28 +13,38 @@
 
 ---
 
-## 🛠️ 시작하기 (설치 및 실행 방법)
+## 🛠️ 시작하기 (v1.0.4)
 
-### 1. 💻 데스크탑 앱 (Windows, Mac, Linux) - **권장**
-[릴리즈 페이지](../../releases)에서 공식 데스크탑 클라이언트를 다운로드하세요.
-- **Windows**: `Setup.exe` (설치 관리자) 또는 `.zip` (무설치 포터블)
-- **Mac**: `.dmg` (설치 이미지) 또는 `.zip` (앱 번들)
-- **Linux**: `.AppImage` (실행 파일) 또는 `.zip`
+### 1. 💻 데스크탑 앱 (Windows, macOS, Linux) - **권장**
+가장 빠르고 안정적인 방법입니다. [릴리즈 페이지](../../releases)에서 공식 데스크탑 클라이언트를 다운로드하세요.
+- **Windows**: `JSONOTE-Setup-1.0.4.exe` (설치형) 또는 `.zip` (무설치 포터블)
+- **macOS**: `JSONOTE-1.0.4.dmg` (Intel/Apple Silicon 공용) 또는 `.zip`
+- **Linux**: `JSONOTE-1.0.4.AppImage` (범용 실행 파일) 또는 `.tar.gz`
 
-### 2. 🐳 Docker (GitHub 컨테이너 레지스트리)
-Docker를 사용해 즉시 실행할 수 있습니다:
+### 2. 🐳 Docker (컨테이너 배포)
+Docker 환경에서 즉시 실행이 가능합니다:
 ```bash
+# 이미지 가져오기 및 실행
 docker pull ghcr.io/hslcrb/jsonote:latest
-docker run -p 3000:3000 ghcr.io/hslcrb/jsonote:latest
+docker run -d -p 3000:3000 --name jsonote-local ghcr.io/hslcrb/jsonote:latest
 ```
-`http://localhost:3000`으로 접속하세요.
+`http://localhost:3000`으로 접속하여 시작하세요.
 
-### 3. 🏗️ 소스에서 빌드 (개발자용)
-Node.js **v20.9.0** 이상이 필요합니다.
+### 3. 🏗️ 개발자 가이드 (소스 빌드)
+Node.js **v20.9.0** 이상 환경에서 작동합니다.
 ```bash
+# 1. 소스 가져오기
 git clone https://github.com/hslcrb/jsonote.git
 cd jsonote
+
+# 2. 패키지 설치
 npm install
+
+# 3. 실행 모드 선택
+npm run dev          # 웹 개발 모드
+npm run electron:dev # 데스크탑 개발 모드
+
+# 4. 상용 빌드
 npm run build
 npm run start
 ```
@@ -77,5 +87,5 @@ npm run start
 ---
 
 ## ⚖️ 라이선스
-**Apache License 2.0** 조건에 따라 라이선스가 부여됩니다.
+Licensed under the **Apache License 2.0**.
 Copyright 2008-2026 Rheehose (Rhee Creative). All rights reserved.

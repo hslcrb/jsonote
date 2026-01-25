@@ -28,10 +28,10 @@ JSONOTE에 관심을 가져주셔서 감사합니다! 프로젝트가 초기 단
 우리는 GitHub Actions를 통한 완전 자동화된 CI/CD 파이프라인을 사용합니다.
 - **`main` 브랜치에 푸시하기만 하면 됩니다.**
 - 시스템이 자동으로 다음을 수행합니다:
-  1. **Patch 버전**을 증가시킵니다 (예: v1.0.0 -> v1.0.1).
+  1. **Patch 버전**을 증가시킵니다 (예: v1.0.3 -> v1.0.4).
   2. **GitHub Release** 태그를 생성합니다.
   3. **Docker 이미지**를 빌드하여 GHCR에 푸시합니다.
-  4. **데스크탑 앱**을 빌드하여 업로드합니다 (Windows .exe, macOS .dmg, Linux .AppImage).
+  4. **데스크탑 앱**을 빌드하여 업로드합니다 (Windows .exe, macOS JSONOTE-1.0.4.dmg, Linux JSONOTE-1.0.4.AppImage).
 
 수동으로 태그나 릴리즈를 생성하지 마십시오.
 

@@ -1,4 +1,4 @@
-# JSONOTE (v1.0)
+# JSONOTE (v1.0.4)
 
 [![English](https://img.shields.io/badge/Language-English-blue)](./README.md) [![Korean](https://img.shields.io/badge/Language-Korean-red)](./README_ko.md)
 [![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
@@ -7,34 +7,44 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](https://github.com/hslcrb/jsonote/releases/latest)
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue)](https://github.com/hslcrb/jsonote/pkgs/container/jsonote)
 
-> **Github統合とMCPサポートを備えた究極のJSONベースのノート作成アプリケーション。**
+> **GitHub統合とMCPサポートを備えた究極のJSONベースのノート作成アプリケーション。**
 
 **公式初回リリース: 2026年1月19日 月曜日 (KST)**
 
 ---
 
-## 🛠️ インストールとセットアップ（開始方法）
+## 🛠️ インストールとセットアップ (v1.0.4)
 
-### 1. 💻 デスクトップアプリ (Windows, Mac, Linux) - **推奨**
-[リリースページ](../../releases)から公式スタンドアロンクライアントをダウンロードしてください。
-- **Windows**: `JSONOTE-Setup-1.0.exe` (インストーラー) または `.zip` (ポータブル)
-- **Mac**: `JSONOTE-1.0.dmg` (インストーラー) または `.zip` (アプリバンドル)
-- **Linux**: `JSONOTE-1.0.AppImage` (実行ファイル) または `.zip`
+### 1. 💻 デスクトップアプリ (Windows, macOS, Linux) - **推奨**
+JSONOTEをデスクトップアプリとして利用する、最も安定した方法です。[リリースページ](../../releases)からダウンロードしてください。
+- **Windows**: `JSONOTE-Setup-1.0.4.exe` (インストーラー) または `.zip` (ポータブル)
+- **macOS**: `JSONOTE-1.0.4.dmg` (Intel/Apple Silicon 両対応) または `.zip`
+- **Linux**: `JSONOTE-1.0.4.AppImage` (ユニバーサルパッケージ) または `.tar.gz`
 
-### 2. 🐳 Docker (GitHub Container Registry)
-Dockerを使用してアプリケーションを即座に実行できます:
+### 2. 🐳 Docker (コンテナ)
+Docker環境で即座に実行可能です:
 ```bash
+# イメージのプルと実行
 docker pull ghcr.io/hslcrb/jsonote:latest
-docker run -p 3000:3000 ghcr.io/hslcrb/jsonote:latest
+docker run -d -p 3000:3000 --name jsonote-local ghcr.io/hslcrb/jsonote:latest
 ```
-`http://localhost:3000` でアプリにアクセスします。
+`http://localhost:3000` でアクセスして開始します。
 
-### 3. 🏗️ ソースからビルド (開発者向け)
+### 3. 🏗️ 開発者向けクイックスタート (ビルド)
 Node.js **v20.9.0** 以上が必要です。
 ```bash
+# 1. クローン
 git clone https://github.com/hslcrb/jsonote.git
 cd jsonote
+
+# 2. セットアップ
 npm install
+
+# 3. 実行モード選択
+npm run dev          # Web開発モード
+npm run electron:dev # Electronデスクトップ開発モード
+
+# 4. プロダクションビルド
 npm run build
 npm run start
 ```
@@ -80,5 +90,5 @@ npm run start
 ---
 
 ## ⚖️ ライセンス
-**Apache License 2.0** の下でライセンスされています。
+Licensed under the **Apache License 2.0**.
 Copyright 2008-2026 Rheehose (Rhee Creative). All rights reserved.
