@@ -23,5 +23,17 @@ Thank you for your interest in contributing to JSONOTE! As the project is in its
 3. Commit your changes.
 4. Push to the branch and open a Pull Request.
 
+
+## 🚀 Deployment Process (Auto-CD)
+We use a fully automated CI/CD pipeline enabled by GitHub Actions.
+- **Just push to the `main` branch**.
+- The system automatically:
+  1. Bumps the **patch version** (e.g., v1.0.0 -> v1.0.1).
+  2. Creates a **GitHub Release** tag.
+  3. Builds and pushes the **Docker image** to GHCR.
+  4. Builds and uploads **Desktop apps** (Windows .exe, macOS .dmg, Linux .AppImage).
+
+Do not manually create tags or releases.
+
 ---
-Copyright 2008-2026 Rheehose (Rhee Creative).
+Copyright 2008-2026 Rheehose (Rhee Creative). All rights reserved.
