@@ -1,0 +1,112 @@
+name: Auto CD (Bump, Docker, Desktop)
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  version-bump:
+    # 커밋 메시지에 [skip ci]가 포함되어 있으면 실행하지 않음 (무한 루프 방지)
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.bump.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump Version & Push Tag
+        id: bump
+        run: |
+          # Patch 버전 증가 (package.json 수정 및 태그 생성)
+          # [skip ci]를 메시지에 포함하여 이 커밋이 다시 워크플로우를 트리거하지 않도록 함
+          npm version patch -m "chore(release): %s [skip ci]"
+          
+          # 변경사항 및 태그 푸시
+          git push origin main
+          git push origin --tags
+          
+          # 생성된 버전 확인
+          VERSION=$(node -p "require('./package.json').version")
+          echo "new_tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ steps.bump.outputs.new_tag }} \
+            --title "${{ steps.bump.outputs.new_tag }}" \
+            --notes "Automated release for commit ${{ github.sha }}. Includes Docker images and Desktop apps."
+
+  docker-build:
+    needs: version-bump
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version-bump.outputs.new_tag }}
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ needs.version-bump.outputs.new_tag }}
+            ghcr.io/${{ github.repository }}:latest
+
+  desktop-build:
+    needs: version-bump
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version-bump.outputs.new_tag }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Build & Upload Electron App
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release: true
+          # OS별 빌드 타겟 자동 지정 (--linux, --win, --mac)
+          args: ${{ matrix.os == 'ubuntu-latest' && '--linux' || matrix.os == 'windows-latest' && '--win' || '--mac' }}
