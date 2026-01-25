@@ -1,7 +1,7 @@
 # ユーザーガイド
 
 [![English](./GUIDE.md)](./GUIDE.md) [![Korean](./GUIDE_ko.md)](./GUIDE_ko.md)
-[![Version](https://img.shields.io/badge/Version-v1.0-green)](https://github.com/hslcrb/jsonote/releases/latest)
+[![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 このガイドでは、JSONOTEの基本操作と高度な機能について説明します。

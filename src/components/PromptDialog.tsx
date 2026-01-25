@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PromptDialogProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export default function PromptDialog({
   onConfirm,
   onCancel
 }: PromptDialogProps) {
+  const { t } = useLanguage();
   const [value, setValue] = useState(defaultValue);
 
   useEffect(() => {
@@ -59,10 +61,10 @@ export default function PromptDialog({
 
               <div className="dialog-footer">
                 <button type="button" className="dialog-btn cancel" onClick={onCancel}>
-                  취소
+                  {t('settings.cancel')}
                 </button>
                 <button type="submit" className="dialog-btn confirm">
-                  확인
+                  {t('settings.save')}
                 </button>
               </div>
             </form>
@@ -152,6 +154,8 @@ export default function PromptDialog({
               border-radius: var(--radius-md);
               transition: var(--transition-fast);
               font-family: 'Nanum Gothic', sans-serif;
+              border: none;
+              cursor: pointer;
             }
 
             .cancel {

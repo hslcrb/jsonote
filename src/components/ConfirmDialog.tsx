@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -21,10 +22,14 @@ export default function ConfirmDialog({
   message,
   onConfirm,
   onCancel,
-  confirmText = '확인',
-  cancelText = '취소',
+  confirmText,
+  cancelText,
   isDanger = false
 }: ConfirmDialogProps) {
+  const { t } = useLanguage();
+  const resConfirmText = confirmText || t('settings.save');
+  const resCancelText = cancelText || t('settings.cancel');
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -42,13 +47,13 @@ export default function ConfirmDialog({
             <p className="dialog-message">{message}</p>
             <div className="dialog-footer">
               <button className="dialog-btn cancel" onClick={onCancel}>
-                {cancelText}
+                {resCancelText}
               </button>
               <button
                 className="dialog-btn confirm"
                 onClick={onConfirm}
               >
-                {confirmText}
+                {resConfirmText}
               </button>
             </div>
           </motion.div>
@@ -116,6 +121,8 @@ export default function ConfirmDialog({
               text-transform: uppercase;
               border-radius: var(--radius-md);
               transition: var(--transition-fast);
+              border: none;
+              cursor: pointer;
             }
 
             .cancel {

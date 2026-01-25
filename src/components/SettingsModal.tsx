@@ -4,9 +4,10 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Save, Github, Key, ChevronLeft, ShieldCheck,
-  Database, Cloud, Globe, HardDrive, Settings, Link as LinkIcon
+  Database, Cloud, Globe, HardDrive, Settings, Link as LinkIcon, Languages
 } from 'lucide-react';
 import { StorageConfig, StorageProvider } from '@/types/note';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SettingsModalProps {
   config: StorageConfig | null;
@@ -22,9 +23,10 @@ const PROVIDERS: { id: StorageProvider; name: string; icon: any }[] = [
   { id: 'webdav', name: 'WEBDAV', icon: HardDrive },
 ];
 
-type TabType = StorageProvider;
+type TabType = StorageProvider | 'language';
 
 export default function SettingsModal({ config, onSave, onClose }: SettingsModalProps) {
+  const { t, language, setLanguage } = useLanguage();
   const [editedConfig, setEditedConfig] = useState<StorageConfig>(config || {
     provider: 'github',
     enabled: true,
@@ -36,7 +38,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
 
   const [activeTab, setActiveTab] = useState<TabType>(editedConfig.provider);
 
-  const handleProviderChange = (provider: TabType) => {
+  const handleProviderChange = (provider: StorageProvider) => {
     setActiveTab(provider);
     setEditedConfig({ ...editedConfig, provider });
   };
@@ -45,7 +47,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
 
   const handleDiagnose = async () => {
     if (!editedConfig.token || !editedConfig.owner || !editedConfig.repo) {
-      alert('토큰, 소유자, 저장소 정보를 모두 입력해주세요.');
+      alert(t('settings.fail') + ': ' + t('settings.token') + ', ' + t('settings.owner') + ', ' + t('settings.repo'));
       return;
     }
 
@@ -59,12 +61,12 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
       const data = await res.json();
 
       if (data.success) {
-        alert(`✅ 연결 성공!\n\n${data.logs.join('\n')}`);
+        alert(`✅ ${t('settings.success')}\n\n${data.logs.join('\n')}`);
       } else {
-        alert(`❌ 연결 실패\n\n${data.logs.join('\n')}\n\n오류: ${data.message}`);
+        alert(`❌ ${t('settings.fail')}\n\n${data.logs.join('\n')}\n\nError: ${data.message}`);
       }
     } catch (e: any) {
-      alert('진단 요청 중 오류 발생: ' + e.message);
+      alert(t('settings.fail') + ': ' + e.message);
     } finally {
       setIsDiagnosing(false);
     }
@@ -76,7 +78,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
         <header className="modal-header">
           <div className="title-section">
             <Settings size={20} />
-            <h3>환경 설정</h3>
+            <h3>{t('settings.title')}</h3>
           </div>
         </header>
 
@@ -91,11 +93,22 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                 <span>{p.name}</span>
               </button>
             ))}
+            <button
+              className={`provider-item ${activeTab === 'language' ? 'active' : ''}`}
+              onClick={() => setActiveTab('language')}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Languages size={14} />
+                <span>{t('settings.language')}</span>
+              </div>
+            </button>
           </aside>
 
           <div className="settings-content scroll-area">
             <div className="form-section">
-              <div className="section-title">{activeTab.toUpperCase()} 설정</div>
+              <div className="section-title">
+                {activeTab === 'language' ? t('settings.language') : `${activeTab.toUpperCase()} ${t('settings.github')}`}
+              </div>
 
               {(activeTab === 'github' || activeTab === 'gitlab' || activeTab === 'gitea') && (
                 <div className="inputs-grid">
@@ -109,30 +122,39 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                     />
                   </div>
                   <div className="input-group">
-                    <label>액세스 토큰</label>
+                    <label>{t('settings.token')}</label>
                     <input
                       type="password"
-                      placeholder="토큰 입력..."
+                      placeholder="..."
                       value={editedConfig.token || ''}
                       onChange={(e) => setEditedConfig({ ...editedConfig, token: e.target.value })}
                     />
                   </div>
                   <div className="input-group">
-                    <label>소유자 (OWNER)</label>
+                    <label>{t('settings.owner')}</label>
                     <input
                       type="text"
-                      placeholder="사용자명"
+                      placeholder="owner"
                       value={editedConfig.owner || ''}
                       onChange={(e) => setEditedConfig({ ...editedConfig, owner: e.target.value })}
                     />
                   </div>
                   <div className="input-group">
-                    <label>저장소 (REPO)</label>
+                    <label>{t('settings.repo')}</label>
                     <input
                       type="text"
                       placeholder="my-notes"
                       value={editedConfig.repo || ''}
                       onChange={(e) => setEditedConfig({ ...editedConfig, repo: e.target.value })}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <label>{t('settings.branch')}</label>
+                    <input
+                      type="text"
+                      placeholder="main"
+                      value={editedConfig.branch || ''}
+                      onChange={(e) => setEditedConfig({ ...editedConfig, branch: e.target.value })}
                     />
                   </div>
                   <div className="diagnose-section">
@@ -144,17 +166,17 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                       {isDiagnosing ? (
                         <>
                           <div className="loader-mini"></div>
-                          진단 중...
+                          ...
                         </>
                       ) : (
                         <>
                           <ShieldCheck size={16} />
-                          연결 진단
+                          {t('settings.test_conn')}
                         </>
                       )}
                     </button>
                     <p className="diagnose-desc">
-                      입력된 정보로 저장소에 접근 가능한지 확인합니다.
+                      Check connection to the repository.
                     </p>
                   </div>
                 </div>
@@ -197,18 +219,40 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                 </div>
               )}
 
+              {activeTab === 'language' && (
+                <div className="inputs-grid">
+                  <div className="language-selector-grid">
+                    {[
+                      { id: 'en', name: 'English', flag: '🇺🇸' },
+                      { id: 'ko', name: '한국어', flag: '🇰🇷' },
+                      { id: 'ja', name: '日本語', flag: '🇯🇵' }
+                    ].map((lang) => (
+                      <button
+                        key={lang.id}
+                        className={`lang-option ${language === lang.id ? 'selected' : ''}`}
+                        onClick={() => setLanguage(lang.id as any)}
+                      >
+                        <span className="lang-flag">{lang.flag}</span>
+                        <span className="lang-name">{lang.name}</span>
+                        {language === lang.id && <div className="selected-dot" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="security-info">
                 <ShieldCheck size={16} />
-                <p>모든 정보는 브라우저 로컬 스토리지에만 보관됩니다.</p>
+                <p>Data stored locally in your browser.</p>
               </div>
             </div>
           </div>
         </div>
 
         <footer className="modal-footer">
-          <button className="text-btn" onClick={onClose}>취소</button>
+          <button className="text-btn" onClick={onClose}>{t('settings.cancel')}</button>
           <button className="save-btn" onClick={() => onSave(editedConfig)}>
-            설정 저장
+            {t('settings.save')}
           </button>
         </footer>
       </div>
@@ -273,6 +317,15 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           font-weight: 800;
           color: var(--text-muted);
           border-bottom: 1px solid var(--border-glass);
+          background: none;
+          border-left: none;
+          border-right: none;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .provider-item:hover {
+          background: var(--bg-secondary);
         }
 
         .provider-item.active {
@@ -293,6 +346,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           color: var(--text-muted);
           margin-bottom: 2rem;
           letter-spacing: 0.1em;
+          text-transform: uppercase;
         }
 
         .inputs-grid {
@@ -345,6 +399,13 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           color: var(--bg-primary);
           font-weight: 900;
           text-transform: uppercase;
+          border: none;
+          cursor: pointer;
+          transition: opacity 0.2s;
+        }
+
+        .save-btn:hover {
+          opacity: 0.9;
         }
 
         .text-btn {
@@ -352,6 +413,9 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           color: var(--text-muted);
           text-transform: uppercase;
           font-size: 0.85rem;
+          background: none;
+          border: none;
+          cursor: pointer;
         }
 
         @media (max-width: 768px) {
@@ -403,6 +467,54 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
 
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+
+        .language-selector-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+          gap: 1rem;
+        }
+
+        .lang-option {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 1rem;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          color: var(--text-primary);
+          transition: all 0.2s;
+          position: relative;
+          cursor: pointer;
+        }
+
+        .lang-option:hover {
+          border-color: var(--text-primary);
+        }
+
+        .lang-option.selected {
+          background: var(--text-primary);
+          color: var(--bg-primary);
+          border-color: var(--text-primary);
+        }
+
+        .lang-flag {
+          font-size: 1.25rem;
+        }
+
+        .lang-name {
+          font-size: 0.85rem;
+          font-weight: 800;
+        }
+
+        .selected-dot {
+          position: absolute;
+          top: 0.5rem;
+          right: 0.5rem;
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--bg-primary);
         }
       `}</style>
     </div>

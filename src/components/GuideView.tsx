@@ -11,16 +11,19 @@ import {
   Code
 } from 'lucide-react';
 
+import { useLanguage } from '@/contexts/LanguageContext';
+
 interface GuideViewProps {
   onClose?: () => void;
 }
 
 const GuideView: React.FC<GuideViewProps> = () => {
+  const { t } = useLanguage();
   return (
     <div className="guide-container">
       <header className="guide-header">
-        <h1>제이소노트 가이드</h1>
-        <p>데이터 주권과 영구적인 기록을 위한 시작</p>
+        <h1>{t('sidebar.guide')}</h1>
+        <p>Data Sovereignty and Permanent Records</p>
       </header>
 
       <div className="guide-content">

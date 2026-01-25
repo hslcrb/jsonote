@@ -1,7 +1,7 @@
 # JSONOTE 기여 가이드
 
 [![English](./CONTRIBUTING.md)](./CONTRIBUTING.md) [![Japanese](https://i.namu.wiki/i/-6zD4tIyEplQ_Q44rBjydwhDQ1pOaig6biAKN_MiK01bU7T0_4iZg5IVcNyOzzUolTyLp8aAFKrjJhqutcQx74i37kT2DzzsROquAUrnNy7VFmpFuQTccFJT552leCkTpg9LDJgd2xNwWOv5NYZ15g.svg)](./CONTRIBUTING_ja.md)
-[![Version](https://img.shields.io/badge/Version-v1.0-green)](https://github.com/hslcrb/jsonote/releases/latest)
+[![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 JSONOTE에 관심을 가져주셔서 감사합니다! 프로젝트가 초기 단계인 만큼 여러분의 기여가 큰 힘이 됩니다.

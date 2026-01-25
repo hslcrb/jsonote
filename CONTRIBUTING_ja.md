@@ -1,7 +1,7 @@
 # JSONOTE 貢献ガイド
 
 [![English](./CONTRIBUTING.md)](./CONTRIBUTING.md) [![Korean](./CONTRIBUTING_ko.md)](./CONTRIBUTING_ko.md)
-[![Version](https://img.shields.io/badge/Version-v1.0-green)](https://github.com/hslcrb/jsonote/releases/latest)
+[![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 JSONOTEへの貢献に関心をお寄せいただきありがとうございます！プロジェクトは初期段階にあるため、皆様の貢献は非常に貴重です。

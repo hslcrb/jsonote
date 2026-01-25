@@ -8,6 +8,7 @@ import { mcpClientManager } from '@/lib/mcp/client';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ToastType } from './Toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface NoteEditorProps {
   note: Note;
@@ -35,6 +36,7 @@ export default function NoteEditor({
   showConfirm,
   showPrompt
 }: NoteEditorProps) {
+  const { t } = useLanguage();
   const [editedNote, setEditedNote] = useState<Note>({ ...note });
   const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -229,11 +231,11 @@ export default function NoteEditor({
                     ...editedNote,
                     metadata: { ...editedNote.metadata, title: e.target.value }
                   })}
-                  placeholder="제목"
+                  placeholder={t('editor.untitled')}
                 />
               </div>
               <div className="filename-wrapper">
-                <span className="label">파일명:</span>
+                <span className="label">{t('editor.filename')}:</span>
                 <input
                   type="text"
                   className="filename-input"
@@ -258,21 +260,21 @@ export default function NoteEditor({
                 onClick={() => setView('edit')}
               >
                 <Edit3 size={14} />
-                편집
+                {t('editor.edit')}
               </button>
               <button
                 className={view === 'preview' ? 'active' : ''}
                 onClick={() => setView('preview')}
               >
                 <Eye size={14} />
-                미리보기
+                {t('editor.preview')}
               </button>
               <button
                 className={view === 'json' ? 'active' : ''}
                 onClick={() => setView('json')}
               >
                 <FileCode size={14} />
-                JSON
+                {t('editor.json')}
               </button>
             </div>
             <button
@@ -313,7 +315,7 @@ export default function NoteEditor({
             >
               {saveStatus === 'saving' ? <Loader2 size={16} className="animate-spin" /> :
                 saveStatus === 'success' ? <CheckCircle size={16} /> : <Save size={16} />}
-              <span className="btn-label">{saveStatus === 'saving' ? '저장 중...' : '저장'}</span>
+              <span className="btn-label">{saveStatus === 'saving' ? t('editor.save_status.saving') : t('settings.save')}</span>
             </button>
 
             <button className="icon-btn" onClick={onClose} title="닫기">
@@ -325,7 +327,7 @@ export default function NoteEditor({
         <div className="editor-body">
           <aside className="editor-meta desktop-only">
             <div className="meta-item">
-              <label><Layers size={12} /> 유형</label>
+              <label><Layers size={12} /> {t('editor.type')}</label>
               <select
                 value={editedNote.metadata.type}
                 onChange={(e) => setEditedNote({
@@ -344,12 +346,12 @@ export default function NoteEditor({
             </div>
 
             <div className="meta-item">
-              <label>태그 (쉼표로 구분)</label>
+              <label>{t('editor.tags')}</label>
               <div className="input-with-icon">
                 <Tag size={14} />
                 <input
                   type="text"
-                  placeholder="태그..."
+                  placeholder={t('editor.tags') + "..."}
                   value={editedNote.metadata.tags.join(', ')}
                   onChange={(e) => setEditedNote({
                     ...editedNote,
@@ -363,7 +365,7 @@ export default function NoteEditor({
             </div>
 
             <div className="meta-item">
-              <label><GitBranch size={12} /> 상위 페이지</label>
+              <label><GitBranch size={12} /> {t('editor.parent')}</label>
               <select
                 value={editedNote.metadata.parentId || ''}
                 onChange={(e) => setEditedNote({
@@ -371,7 +373,7 @@ export default function NoteEditor({
                   metadata: { ...editedNote.metadata, parentId: e.target.value || undefined }
                 })}
               >
-                <option value="">없음 (최상위)</option>
+                <option value="">{t('editor.none')}</option>
                 {allNotes.filter(n => n.metadata.id !== editedNote.metadata.id).map(n => (
                   <option key={n.metadata.id} value={n.metadata.id}>{n.metadata.title}</option>
                 ))}
@@ -380,9 +382,9 @@ export default function NoteEditor({
 
             <div className="meta-item">
               <div className="prop-header">
-                <label><Database size={12} /> 속성</label>
+                <label><Database size={12} /> {t('props.title')}</label>
                 <button className="add-prop-btn" onClick={() => {
-                  showPrompt?.('새 속성', '속성 이름을 입력하세요', '', (key) => {
+                  showPrompt?.(t('props.add'), t('props.name'), '', (key) => {
                     if (key) {
                       setEditedNote({
                         ...editedNote,
@@ -396,7 +398,7 @@ export default function NoteEditor({
                       });
                     }
                   });
-                }}><Plus size={12} /> 추가</button>
+                }}><Plus size={12} /> {t('mcp.add')}</button>
               </div>
               <div className="properties-list">
                 {Object.entries(editedNote.metadata.properties || {}).map(([key, prop]) => (
@@ -424,7 +426,7 @@ export default function NoteEditor({
               </div>
             </div>
             <div className="meta-item">
-              <label><Sparkles size={12} /> AI 어시스턴트 (MCP)</label>
+              <label><Sparkles size={12} /> {t('editor.mcp_assistant')}</label>
               <div className="mcp-tools-list">
                 {availableTools.length > 0 ? (
                   availableTools.map(group => (
@@ -444,7 +446,7 @@ export default function NoteEditor({
                     </div>
                   ))
                 ) : (
-                  <p className="empty-tools">연결된 MCP 도구가 없습니다.</p>
+                  <p className="empty-tools">{t('editor.empty_mcp')}</p>
                 )}
               </div>
             </div>
@@ -457,61 +459,61 @@ export default function NoteEditor({
                   <button
                     draggable
                     onDragStart={(e) => onToolbarDragStart(e, 'bold')}
-                    onClick={() => handleInsertMarkdown('**', '**', '굵은 텍스트')}
-                    title="굵게 (Drag 가능)"
+                    onClick={() => handleInsertMarkdown('**', '**', t('editor.syntax.bold'))}
+                    title={t('editor.syntax.bold')}
                   ><Bold size={16} /></button>
                   <button
                     draggable
                     onDragStart={(e) => onToolbarDragStart(e, 'italic')}
-                    onClick={() => handleInsertMarkdown('*', '*', '기울임')}
-                    title="기울임"
+                    onClick={() => handleInsertMarkdown('*', '*', t('editor.syntax.italic'))}
+                    title={t('editor.syntax.italic')}
                   ><Italic size={16} /></button>
                   <button
                     draggable
                     onDragStart={(e) => onToolbarDragStart(e, 'heading')}
-                    onClick={() => handleInsertMarkdown('# ', '', '제목')}
-                    title="제목"
+                    onClick={() => handleInsertMarkdown('# ', '', t('editor.syntax.heading'))}
+                    title={t('editor.syntax.heading')}
                   ><Heading1 size={16} /></button>
                   <div className="toolbar-divider" />
                   <button
                     draggable
                     onDragStart={(e) => onToolbarDragStart(e, 'list')}
-                    onClick={() => handleInsertMarkdown('- ', '', '리스트')}
-                    title="불렛 리스트"
+                    onClick={() => handleInsertMarkdown('- ', '', t('editor.syntax.list'))}
+                    title={t('editor.syntax.list')}
                   ><List size={16} /></button>
                   <button
                     draggable
                     onDragStart={(e) => onToolbarDragStart(e, 'quote')}
-                    onClick={() => handleInsertMarkdown('> ', '', '인용')}
-                    title="인용문"
+                    onClick={() => handleInsertMarkdown('> ', '', t('editor.syntax.quote'))}
+                    title={t('editor.syntax.quote')}
                   ><Quote size={16} /></button>
                   <button
                     draggable
                     onDragStart={(e) => onToolbarDragStart(e, 'code')}
-                    onClick={() => handleInsertMarkdown('```\n', '\n```', '코드 블록')}
-                    title="코드 블록"
+                    onClick={() => handleInsertMarkdown('```\n', '\n```', t('editor.syntax.code'))}
+                    title={t('editor.syntax.code')}
                   ><FileCode size={16} /></button>
                   <div className="toolbar-divider" />
                   <button
                     draggable
                     onDragStart={(e) => onToolbarDragStart(e, 'link')}
-                    onClick={() => handleInsertMarkdown('[', '](url)', '링크')}
-                    title="링크"
+                    onClick={() => handleInsertMarkdown('[', '](url)', t('editor.syntax.link'))}
+                    title={t('editor.syntax.link')}
                   ><Link size={16} /></button>
                   <button
-                    onClick={() => handleInsertMarkdown('![', '](https://)', '이미지 설명')}
-                    title="이미지 추가 (URL)"
+                    onClick={() => handleInsertMarkdown('![', '](https://)', t('editor.syntax.image'))}
+                    title={t('editor.syntax.image')}
                   ><Image size={16} /></button>
                 </div>
                 {editedNote.metadata.type === 'todo' ? (
                   <div className="todo-editor-wrapper">
                     <div className="todo-header">
-                      <h3><CheckCircle size={16} /> 체크리스트</h3>
+                      <h3><CheckCircle size={16} /> {t('editor.syntax.todo')}</h3>
                       <button className="add-todo-btn" onClick={() => {
                         const newContent = (editedNote.content || '').trim() + (editedNote.content ? '\n' : '') + '- [ ] ';
                         setEditedNote({ ...editedNote, content: newContent });
                       }}>
-                        <Plus size={14} /> 항목 추가
+                        <Plus size={14} /> {t('editor.syntax.add_item')}
                       </button>
                     </div>
                     <div className="todo-items">
@@ -556,7 +558,7 @@ export default function NoteEditor({
                     }}
                     onDrop={onEditorDrop}
                     onDragOver={(e) => e.preventDefault()}
-                    placeholder="내용(마크다운 지원)을 입력하세요..."
+                    placeholder={t('editor.placeholder')}
                     autoFocus
                   />
                 )}
@@ -566,7 +568,7 @@ export default function NoteEditor({
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                 >
-                  {editedNote.content || '*내용이 없습니다.*'}
+                  {editedNote.content || `*${t('sidebar.no_results')}*`}
                 </ReactMarkdown>
               </div>
             ) : (

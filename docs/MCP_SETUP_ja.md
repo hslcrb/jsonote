@@ -1,7 +1,7 @@
 # MCP セットアップガイド
 
 [![English](./MCP_SETUP.md)](./MCP_SETUP.md) [![Korean](./MCP_SETUP_ko.md)](./MCP_SETUP_ko.md)
-[![Version](https://img.shields.io/badge/Version-v1.0-green)](https://github.com/hslcrb/jsonote/releases/latest)
+[![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Model Context Protocol (MCP) は、JSONOTE内でのAI統合を可能にします。

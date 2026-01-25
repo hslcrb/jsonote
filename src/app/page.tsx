@@ -12,6 +12,7 @@ import { getStorage } from '@/lib/storage';
 import Toast, { ToastType } from '@/components/Toast';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import PromptDialog from '@/components/PromptDialog';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -31,6 +32,7 @@ export default function Home() {
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'notes' | 'guide'>('notes');
   const [currentView, setCurrentView] = useState<'list' | 'table' | 'board'>('list');
+  const { t, language, setLanguage } = useLanguage();
 
   useEffect(() => {
     const savedNotes = localStorage.getItem('jsonote_notes');
@@ -307,7 +309,7 @@ export default function Home() {
     const newNote: Note = {
       metadata: {
         id: Math.random().toString(36).substr(2, 9),
-        title: type === 'todo' ? '새 할 일 목록' : type === 'database' ? '새 데이터베이스' : '새로운 노트',
+        title: type === 'todo' ? t('editor.syntax.todo') : type === 'database' ? t('views.table') : t('editor.untitled'),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         type: type,
@@ -347,10 +349,10 @@ export default function Home() {
       localStorage.setItem('jsonote_notes', JSON.stringify(remoteNotes));
 
       console.log('Sync complete: Local state reconciled with remote.');
-      if (!silent) showToast('동기화가 완료되었습니다.', 'success');
+      if (!silent) showToast(t('settings.success'), 'success');
     } catch (error) {
       console.error('Sync failed:', error);
-      if (!silent) showToast('동기화에 실패했습니다. 설정을 확인해주세요.', 'error');
+      if (!silent) showToast(t('settings.fail'), 'error');
     } finally {
       if (!silent || isSyncing) setIsSyncing(false);
     }
@@ -406,7 +408,7 @@ export default function Home() {
             <div className="new-actions">
               <button className="new-note-btn primary" onClick={() => createNewNote('general')}>
                 <Plus size={18} />
-                <span>새 노트</span>
+                <span>{t('sidebar.new_page')}</span>
               </button>
               <div className="new-grid">
                 <button className="new-sub-btn" onClick={() => createNewNote('todo')}>
@@ -425,14 +427,14 @@ export default function Home() {
                   onClick={() => { setActiveTab('notes'); setFilterType('all'); }}
                 >
                   <FileText size={16} />
-                  <span>모든 노트</span>
+                  <span>{t('sidebar.notes')}</span>
                 </button>
                 <button
                   className={`nav-item ${activeTab === 'guide' ? 'active' : ''}`}
                   onClick={() => setActiveTab('guide')}
                 >
                   <Info size={16} />
-                  <span>사용 가이드</span>
+                  <span>{t('sidebar.guide')}</span>
                 </button>
               </div>
 
@@ -468,9 +470,20 @@ export default function Home() {
           <div className="sidebar-footer">
             <button className="nav-item-minimal" onClick={() => setIsSettingsOpen(true)}>
               <Settings size={16} />
-              <span>설정</span>
+              <span>{t('sidebar.settings')}</span>
             </button>
             <div className="toggle-row">
+              <div className="language-switcher-mini">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value as any)}
+                  className="lang-select-minimal"
+                >
+                  <option value="en">🇺🇸 EN</option>
+                  <option value="ko">🇰🇷 KO</option>
+                  <option value="ja">🇯🇵 JA</option>
+                </select>
+              </div>
               <button onClick={toggleTheme} className="icon-btn-minimal" title="테마 전환">
                 {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               </button>
@@ -503,7 +516,7 @@ export default function Home() {
                 <Menu size={20} />
               </button>
               <div className="breadcrumb desktop-only">
-                <span className="current">{activeTab === 'notes' ? '노트 목록' : '사용 가이드'}</span>
+                <span className="current">{activeTab === 'notes' ? t('sidebar.notes') : t('sidebar.guide')}</span>
               </div>
             </div>
 
@@ -513,7 +526,7 @@ export default function Home() {
                   <Search size={16} />
                   <input
                     type="text"
-                    placeholder="검색..."
+                    placeholder={`${t('sidebar.search')}...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -541,7 +554,7 @@ export default function Home() {
               {isSyncing && (
                 <div className="sync-indicator">
                   <Cloud size={14} className="animate-spin" />
-                  <span className="desktop-only">동기화 중...</span>
+                  <span className="desktop-only">{t('editor.save_status.saving')}</span>
                 </div>
               )}
             </div>
@@ -559,9 +572,9 @@ export default function Home() {
                 >
                   <div className="view-header">
                     <div className="view-switcher">
-                      <button className={currentView === 'list' ? 'active' : ''} onClick={() => setCurrentView('list')}><Menu size={14} /> 리스트</button>
-                      <button className={currentView === 'table' ? 'active' : ''} onClick={() => setCurrentView('table')}><Table size={14} /> 테이블</button>
-                      <button className={currentView === 'board' ? 'active' : ''} onClick={() => setCurrentView('board')}><Layout size={14} /> 보드</button>
+                      <button className={currentView === 'list' ? 'active' : ''} onClick={() => setCurrentView('list')}><Menu size={14} /> {t('views.list')}</button>
+                      <button className={currentView === 'table' ? 'active' : ''} onClick={() => setCurrentView('table')}><Table size={14} /> {t('views.table')}</button>
+                      <button className={currentView === 'board' ? 'active' : ''} onClick={() => setCurrentView('board')}><Layout size={14} /> {t('views.board')}</button>
                     </div>
                   </div>
 
@@ -613,11 +626,11 @@ export default function Home() {
                         <thead>
                           <tr>
                             <th style={{ width: '40px' }}><div className="custom-checkbox" /></th>
-                            <th style={{ width: '300px' }}>이름</th>
-                            <th style={{ width: '120px' }}>유형</th>
-                            <th style={{ width: '200px' }}>태그</th>
-                            <th style={{ width: '150px' }}>최종 수정일</th>
-                            <th style={{ width: '100px' }}>작업</th>
+                            <th style={{ width: '300px' }}>{t('table.name')}</th>
+                            <th style={{ width: '120px' }}>{t('table.type')}</th>
+                            <th style={{ width: '200px' }}>{t('table.tags')}</th>
+                            <th style={{ width: '150px' }}>{t('table.updated')}</th>
+                            <th style={{ width: '100px' }}>{t('table.actions')}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -637,7 +650,7 @@ export default function Home() {
                           ))}
                           <tr className="add-row" onClick={() => createNewNote('database')}>
                             <td colSpan={6}>
-                              <Plus size={14} /> 새로운 행 추가
+                              <Plus size={14} /> {t('table.add_row')}
                             </td>
                           </tr>
                         </tbody>
@@ -672,7 +685,7 @@ export default function Home() {
 
                   {filteredNotes.length === 0 && (
                     <div className="empty-state">
-                      <p>노트가 없습니다.</p>
+                      <p>{t('sidebar.no_results')}</p>
                     </div>
                   )}
                 </motion.section>
@@ -1627,6 +1640,35 @@ export default function Home() {
         @media (max-width: 640px) {
           .header-center { margin: 0 0.5rem; }
           .main-scroll-area { padding: 1.5rem 1rem; }
+        }
+
+        .language-switcher-mini {
+          display: flex;
+          align-items: center;
+        }
+
+        .lang-select-minimal {
+          background: transparent;
+          border: 1px solid var(--border-glass);
+          color: var(--text-muted);
+          font-size: 0.65rem;
+          font-weight: 800;
+          padding: 0.2rem 0.4rem;
+          border-radius: 4px;
+          outline: none;
+          cursor: pointer;
+          font-family: inherit;
+          text-transform: uppercase;
+        }
+
+        .lang-select-minimal:hover {
+          border-color: var(--text-secondary);
+          color: var(--text-primary);
+        }
+
+        .lang-select-minimal option {
+          background: var(--bg-primary);
+          color: var(--text-primary);
         }
       `}</style>
     </div>
