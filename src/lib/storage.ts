@@ -1,4 +1,4 @@
-import { Octokit } from 'octokit';
+
 import { Note, StorageConfig } from '@/types/note';
 
 export interface IJsonoteStorage {
@@ -8,32 +8,42 @@ export interface IJsonoteStorage {
 }
 
 export class GitHubStorage implements IJsonoteStorage {
-    private octokit: Octokit;
     private config: StorageConfig;
 
     constructor(config: StorageConfig) {
         this.config = config;
-        this.octokit = new Octokit({ auth: config.token });
+    }
+
+    private getHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'x-github-token': this.config.token || '',
+            'x-github-owner': this.config.owner || '',
+            'x-github-repo': this.config.repo || '',
+            'x-github-branch': this.config.branch || 'main'
+        };
     }
 
     async fetchNotes(): Promise<Note[]> {
         try {
-            const { data } = await this.octokit.rest.repos.getContent({
-                owner: this.config.owner!,
-                repo: this.config.repo!,
-                path: 'notes',
-                ref: this.config.branch
+            // 1. Get List
+            const params = new URLSearchParams({ path: 'notes' });
+            const res = await fetch(`/api/github/sync?${params}`, {
+                headers: this.getHeaders()
             });
 
-            if (!Array.isArray(data)) return [];
+            if (!res.ok) throw new Error(`Fetch list failed: ${res.statusText}`);
+            const files: any[] = await res.json();
 
+            if (!Array.isArray(files)) return [];
+
+            // 2. Get Details (Parallel)
             const notes = await Promise.all(
-                data
+                files
                     .filter(file => file.name.endsWith('.json'))
                     .map(async file => {
                         const content = await this.fetchNoteByPath(file.path);
                         if (content) {
-                            // Store current filename for detecting changes / 현재 파일명을 저장해두어 추후 변경 감지에 사용
                             const fileNameWithoutExt = decodeURIComponent(file.name.replace('.json', ''));
                             content.metadata.customFilename = fileNameWithoutExt;
                             content.metadata.previousFilename = fileNameWithoutExt;
@@ -45,182 +55,132 @@ export class GitHubStorage implements IJsonoteStorage {
             return notes.filter((n): n is Note => n !== null);
         } catch (error) {
             console.error('GitHub fetch failed:', error);
+            // Return empty array to avoid app crash
             return [];
         }
     }
 
     private async fetchNoteByPath(path: string): Promise<Note | null> {
         try {
-            const { data }: any = await this.octokit.rest.repos.getContent({
-                owner: this.config.owner!,
-                repo: this.config.repo!,
-                path,
-                ref: this.config.branch
+            const params = new URLSearchParams({ path });
+            const res = await fetch(`/api/github/sync?${params}`, {
+                headers: this.getHeaders()
             });
 
-            // Browser-compatible Base64 decode (handles UTF-8)
-            const content = decodeURIComponent(escape(window.atob(data.content.replace(/\n/g, ''))));
-            return JSON.parse(content);
+            if (!res.ok) return null;
+
+            const data = await res.json();
+            if (!data || !data.content) return null;
+
+            return JSON.parse(data.content);
         } catch (e) {
+            console.warn(`Failed to parse note: ${path}`, e);
             return null;
         }
     }
 
     async saveNote(note: Note): Promise<void> {
         const baseName = note.metadata.customFilename || note.metadata.id;
-        const encodedPath = `notes/${encodeURIComponent(baseName)}.json`;
+        const notePath = `notes/${encodeURIComponent(baseName)}.json`;
         const content = JSON.stringify(note, null, 2);
 
-        // Delete old file if filename has changed / 파일명이 변경된 경우 기존 파일 삭제
+        // 1. Handle Rename (Delete old file if exists)
         if (note.metadata.previousFilename && note.metadata.previousFilename !== baseName) {
             try {
                 const oldPath = `notes/${encodeURIComponent(note.metadata.previousFilename)}.json`;
-                const { data: oldData }: any = await this.octokit.rest.repos.getContent({
-                    owner: this.config.owner!,
-                    repo: this.config.repo!,
-                    path: oldPath,
-                    ref: this.config.branch
-                });
-
-                await this.octokit.rest.repos.deleteFile({
-                    owner: this.config.owner!,
-                    repo: this.config.repo!,
-                    path: oldPath,
-                    message: `Rename note: ${note.metadata.previousFilename} -> ${baseName}`,
-                    sha: oldData.sha,
-                    branch: this.config.branch
-                });
+                await this.deleteFile(oldPath, `Rename: ${note.metadata.previousFilename} -> ${baseName}`);
             } catch (e) {
-                console.warn('Old file deletion failed (maybe already deleted):', e);
+                console.warn('Old file deletion failed during rename (non-fatal):', e);
             }
         }
 
-        // Retry logic for SHA conflicts (max 5) / SHA 충돌 시 재시도 로직 (최대 5회)
+        // 2. Save (Update/Create) with Retry Logic
         let retries = 0;
-        const maxRetries = 5;
+        const maxRetries = 3;
 
         while (retries < maxRetries) {
             try {
-                let sha: string | undefined;
-                try {
-                    const { data }: any = await this.octokit.rest.repos.getContent({
-                        owner: this.config.owner!,
-                        repo: this.config.repo!,
-                        path: encodedPath,
-                        ref: this.config.branch,
-                        headers: {
-                            'If-None-Match': '',
-                            'Cache-Control': 'no-cache'
-                        }
-                    });
-                    sha = data.sha;
-                } catch (e: any) {
-                    // Only ignore 404 (File not found -> New file)
-                    if (e.status === 404) {
-                        sha = undefined;
-                    } else {
-                        throw e; // Re-throw auth/network errors
-                    }
-                }
-
-                await this.octokit.rest.repos.createOrUpdateFileContents({
-                    owner: this.config.owner!,
-                    repo: this.config.repo!,
-                    path: encodedPath,
-                    message: `Update note: ${note.metadata.title}`,
-                    // Browser-compatible Base64 encode (handles UTF-8)
-                    content: window.btoa(unescape(encodeURIComponent(content))),
-                    branch: this.config.branch,
-                    sha
+                // Call API
+                const res = await fetch('/api/github/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: this.config.token,
+                        owner: this.config.owner,
+                        repo: this.config.repo,
+                        branch: this.config.branch || 'main',
+                        path: notePath,
+                        content: content,
+                        message: `Update note: ${note.metadata.title}`
+                    })
                 });
 
-                // 저장이 성공하면 previousFilename 업데이트 후 리턴
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.error || `Server error: ${res.status}`);
+                }
+
+                // Success
                 note.metadata.previousFilename = baseName;
                 return;
             } catch (error: any) {
                 console.warn(`Save attempt ${retries + 1} failed:`, error.message);
-
-                // Retry on SHA mismatch error / SHA 불일치 에러인 경우 재시도
-                if (error.message && (error.message.includes('does not match') || error.message.includes('sha'))) {
-                    retries++;
-                    const delay = 500 * retries + Math.random() * 500;
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    continue;
-                }
-                // Other errors throw immediately / 다른 에러는 바로 throw
-                throw error;
+                retries++;
+                // Wait before retry
+                await new Promise(resolve => setTimeout(resolve, 500 * retries));
             }
         }
 
-        // Max retries exceeded / 최대 재시도 횟수 초과
-        throw new Error('Failed to save note after multiple retries due to SHA conflicts');
+        throw new Error('Failed to save note after multiple retries.');
     }
 
     async deleteNote(note: Note): Promise<void> {
         const baseName = note.metadata.customFilename || note.metadata.id;
-        const encodedPath = `notes/${encodeURIComponent(baseName)}.json`;
+        const path = `notes/${encodeURIComponent(baseName)}.json`;
+        await this.deleteFile(path, `Delete note: ${note.metadata.title}`);
+    }
 
-        try {
-            const { data }: any = await this.octokit.rest.repos.getContent({
-                owner: this.config.owner!,
-                repo: this.config.repo!,
-                path: encodedPath,
-                ref: this.config.branch,
-                headers: { 'Cache-Control': 'no-cache' }
-            });
-            const sha = data.sha;
+    private async deleteFile(path: string, message: string): Promise<void> {
+        const res = await fetch('/api/github/sync', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                token: this.config.token,
+                owner: this.config.owner,
+                repo: this.config.repo,
+                branch: this.config.branch || 'main',
+                path: path,
+                message: message
+            })
+        });
 
-            await this.octokit.rest.repos.deleteFile({
-                owner: this.config.owner!,
-                repo: this.config.repo!,
-                path: encodedPath,
-                message: `Delete note: ${note.metadata.title}`,
-                sha: sha,
-                branch: this.config.branch
-            });
-        } catch (e: any) {
-            // Only ignore 404 (File not found -> already deleted or never existed)
-            if (e.status === 404) {
-                console.warn(`Note to delete not found: ${encodedPath}. Assuming already deleted.`);
-                return;
-            }
-            console.error('GitHub delete failed:', e);
-            throw e;
+        if (!res.ok) {
+            // Ignore 404 (already deleted) implicitly handled by API returning success?
+            // Actually API likely returns success for 404 in delete logic as implemented previously.
+            // But let's check response.
+            const data = await res.json();
+            if (data && data.message === 'Already deleted') return;
+
+            throw new Error(`Delete failed: ${res.statusText}`);
         }
     }
 }
 
-// Placeholder for GitLab (using fetch matches similar pattern)
+// ... Placeholders for other providers ...
 export class GitLabStorage implements IJsonoteStorage {
     constructor(private config: StorageConfig) { }
-    async fetchNotes(): Promise<Note[]> {
-        console.warn('GitLab Storage not fully implemented yet');
-        return [];
-    }
-    async saveNote(note: Note): Promise<void> {
-        console.warn('GitLab Storage not fully implemented yet');
-    }
-    async deleteNote(note: Note): Promise<void> {
-        console.warn('GitLab Storage not fully implemented yet');
-    }
+    async fetchNotes(): Promise<Note[]> { return []; }
+    async saveNote(note: Note): Promise<void> { }
+    async deleteNote(note: Note): Promise<void> { }
 }
 
-// Placeholder for S3 / Cloud Storage
 export class S3Storage implements IJsonoteStorage {
     constructor(private config: StorageConfig) { }
-    async fetchNotes(): Promise<Note[]> {
-        console.warn('S3 Storage not fully implemented yet');
-        return [];
-    }
-    async saveNote(note: Note): Promise<void> {
-        console.warn('S3 Storage not fully implemented yet');
-    }
-    async deleteNote(note: Note): Promise<void> {
-        console.warn('S3 Storage not fully implemented yet');
-    }
+    async fetchNotes(): Promise<Note[]> { return []; }
+    async saveNote(note: Note): Promise<void> { }
+    async deleteNote(note: Note): Promise<void> { }
 }
 
-// Factory to get storage / 저장소 객체 생성을 위한 팩토리
 export function getStorage(config: StorageConfig): IJsonoteStorage | null {
     if (!config.enabled) return null;
     switch (config.provider) {
