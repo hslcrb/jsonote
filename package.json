@@ -1,6 +1,6 @@
 {
   "name": "jsonote",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "The Ultimate JSON-based Note-taking Application",
   "author": "Rheehose <admin@rheehose.com>",
