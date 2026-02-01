@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1, CheckCircle, ExternalLink, Plus, Layers, GitBranch, Database, ChevronDown, ChevronRight, Search } from 'lucide-react';
+import { Save, Tag, Maximize2, ChevronLeft, Eye, Edit3, FileCode, Trash2, Sparkles, Loader2, Bold, Italic, List, Code, Link, Image, Quote, Heading1, CheckCircle, ExternalLink, Plus, Layers, GitBranch, Database, ChevronDown, ChevronRight, Search, Table } from 'lucide-react';
 import { Note, NoteType } from '@/types/note';
 import { mcpClientManager } from '@/lib/mcp/client';
 import ReactMarkdown from 'react-markdown';
@@ -40,11 +40,48 @@ export default function NoteEditor({
   const [editedNote, setEditedNote] = useState<Note>({ ...note });
   const [view, setView] = useState<'edit' | 'preview' | 'json'>('edit');
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [availableTools, setAvailableTools] = useState<{ serverId: string, serverName: string, serverUrl: string, tools: any[] }[]>([]);
+  const [availableTools, setAvailableTools] = useState<{ serverId: string, serverName: string, serverUrl: string, tools: { name: string }[] }[]>([]);
   const [isToolLoading, setIsToolLoading] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success'>('idle');
   const [isGitGlowing, setIsGitGlowing] = useState(false);
+
+  type Block = { type: 'text'; content: string } | { type: 'table'; content: string };
+
+  const parseBlocks = (text: string): Block[] => {
+    const lines = text.split('\n');
+    const blocks: Block[] = [];
+    let currentBlock: Block | null = null;
+
+    lines.forEach((line) => {
+      const isTableLine = line.trim().startsWith('|') && line.trim().endsWith('|');
+
+      if (isTableLine) {
+        if (currentBlock?.type === 'table') {
+          currentBlock.content += '\n' + line;
+        } else {
+          if (currentBlock) blocks.push(currentBlock);
+          currentBlock = { type: 'table', content: line };
+        }
+      } else {
+        if (currentBlock?.type === 'text') {
+          currentBlock.content += '\n' + line;
+        } else {
+          if (currentBlock) blocks.push(currentBlock);
+          currentBlock = { type: 'text', content: line };
+        }
+      }
+    });
+
+    if (currentBlock) blocks.push(currentBlock);
+    return blocks;
+  };
+
+  const updateBlock = (index: number, newContent: string) => {
+    const blocks = parseBlocks(editedNote.content);
+    blocks[index].content = newContent;
+    setEditedNote(prev => ({ ...prev, content: blocks.map(b => b.content).join('\n') }));
+  };
 
   // Fetch tool lists from MCP servers on load / 로드 시 MCP 서버들에서 도구 목록 가져오기
   React.useEffect(() => {
@@ -205,13 +242,6 @@ export default function NoteEditor({
     }
   };
 
-  const openGitHub = () => {
-    if (!storageConfig?.owner || !storageConfig?.repo) return;
-    const filename = editedNote.metadata.customFilename || editedNote.metadata.id;
-    const branch = storageConfig.branch || 'main';
-    const url = `https://github.com/${storageConfig.owner}/${storageConfig.repo}/blob/${branch}/notes/${encodeURIComponent(filename)}.json`;
-    window.open(url, '_blank');
-  };
 
   return (
     <div className={`editor-root ${isFullScreen ? 'fullscreen' : ''}`}>
@@ -432,7 +462,7 @@ export default function NoteEditor({
                   availableTools.map(group => (
                     <div key={group.serverId} className="tool-group">
                       <div className="tool-group-name">{group.serverName}</div>
-                      {group.tools.map((tool: any) => (
+                      {group.tools.map((tool: { name: string }) => (
                         <button
                           key={tool.name}
                           className="tool-btn"
@@ -504,6 +534,10 @@ export default function NoteEditor({
                     onClick={() => handleInsertMarkdown('![', '](https://)', t('editor.syntax.image'))}
                     title={t('editor.syntax.image')}
                   ><Image size={16} /></button>
+                  <button
+                    onClick={() => handleInsertMarkdown('| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |\n| Cell 3 | Cell 4 |', '', '')}
+                    title="Table"
+                  ><Table size={16} /></button>
                 </div>
                 {editedNote.metadata.type === 'todo' ? (
                   <div className="todo-editor-wrapper">
@@ -550,17 +584,68 @@ export default function NoteEditor({
                     </div>
                   </div>
                 ) : (
-                  <textarea
-                    className="content-textarea"
-                    value={editedNote.content}
-                    onChange={(e) => {
-                      setEditedNote({ ...editedNote, content: e.target.value });
-                    }}
-                    onDrop={onEditorDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                    placeholder={t('editor.placeholder')}
-                    autoFocus
-                  />
+                  <div className="blocks-editor scroll-area">
+                    {parseBlocks(editedNote.content).map((block, idx) => (
+                      block.type === 'table' ? (
+                        <div key={idx} className="table-block-editor">
+                          <div className="table-actions">
+                            <span className="label">TABLE BLOCK</span>
+                            <button className="del-btn-card" onClick={() => {
+                              const b = parseBlocks(editedNote.content);
+                              b.splice(idx, 1);
+                              setEditedNote({ ...editedNote, content: b.map(x => x.content).join('\n') });
+                            }}><Trash2 size={12} /></button>
+                          </div>
+                          <div className="table-grid-container">
+                            <table className="interactive-table">
+                              <tbody>
+                                {block.content.split('\n').filter(l => !l.includes('---')).map((line, rowIdx) => {
+                                  const lineCells = line.split('|').filter((_, cidx, arr) => cidx > 0 && cidx < arr.length - 1);
+                                  return (
+                                    <tr key={rowIdx}>
+                                      {lineCells.map((cell, cellIdx) => (
+                                        <td key={cellIdx}>
+                                          <input
+                                            className="cell-input"
+                                            value={cell.trim()}
+                                            onChange={(e) => {
+                                              const lines = block.content.split('\n');
+                                              const filteredIndices = lines.map((l, i) => l.includes('---') ? -1 : i).filter(i => i !== -1);
+                                              const originalIdx = filteredIndices[rowIdx];
+
+                                              const cells = lines[originalIdx].split('|');
+                                              cells[cellIdx + 1] = ` ${e.target.value} `;
+                                              lines[originalIdx] = cells.join('|');
+
+                                              updateBlock(idx, lines.join('\n'));
+                                            }}
+                                          />
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ) : (
+                        <textarea
+                          key={idx}
+                          className="content-textarea block-text"
+                          value={block.content}
+                          onChange={(e) => updateBlock(idx, e.target.value)}
+                          onDrop={onEditorDrop}
+                          onDragOver={(e) => e.preventDefault()}
+                          placeholder={t('editor.placeholder')}
+                          style={{ minHeight: '100px', height: 'auto' }}
+                        />
+                      )
+                    ))}
+                    <button className="add-block-btn" onClick={() => handleInsertMarkdown('\n\n| Header | Header |\n| --- | --- |\n| Cell | Cell |\n', '', '')}>
+                      <Plus size={14} /> Add Table
+                    </button>
+                  </div>
                 )}
               </div>
             ) : view === 'preview' ? (
@@ -1047,6 +1132,108 @@ export default function NoteEditor({
         .icon-btn[title="삭제"]:hover {
           background: var(--text-primary);
           color: var(--bg-primary);
+        }
+
+        .blocks-editor {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          padding: 2rem;
+          overflow-y: auto;
+          height: 100%;
+        }
+
+        .table-block-editor {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-glass);
+          border-radius: var(--radius-md);
+          overflow: hidden;
+          box-shadow: var(--shadow-sm);
+        }
+
+        .table-actions {
+          padding: 0.5rem 1rem;
+          background: rgba(0,0,0,0.1);
+          border-bottom: 1px solid var(--border-glass);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .table-actions .label {
+          font-size: 0.6rem;
+          font-weight: 900;
+          color: var(--text-muted);
+          letter-spacing: 0.1em;
+        }
+
+        .table-grid-container {
+          padding: 1rem;
+          overflow-x: auto;
+        }
+
+        .interactive-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.9rem;
+        }
+
+        .interactive-table td {
+          border: 1px solid var(--border-glass);
+          padding: 0;
+          min-width: 100px;
+        }
+
+        .cell-input {
+          width: 100%;
+          border: none;
+          background: transparent;
+          color: var(--text-primary);
+          padding: 0.6rem 0.8rem;
+          outline: none;
+          font-family: inherit;
+        }
+
+        .cell-input:focus {
+          background: rgba(255,255,255,0.05);
+          box-shadow: inset 0 0 0 1px var(--text-secondary);
+        }
+
+        .content-textarea.block-text {
+          background: transparent;
+          border: none;
+          resize: none;
+          min-height: 50px !important;
+          padding: 0;
+          line-height: 1.6;
+          width: 100%;
+          outline: none;
+          color: var(--text-primary);
+          font-family: inherit;
+        }
+
+        .add-block-btn {
+          align-self: center;
+          padding: 0.5rem 1.5rem;
+          background: var(--bg-tertiary);
+          border: 1px dashed var(--border-glass);
+          color: var(--text-muted);
+          border-radius: 99px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          transition: all 0.2s;
+          margin-top: 1rem;
+          cursor: pointer;
+        }
+
+        .add-block-btn:hover {
+          background: var(--bg-secondary);
+          border-color: var(--text-muted);
+          color: var(--text-primary);
+          transform: scale(1.02);
         }
 
         @media (max-width: 768px) {
