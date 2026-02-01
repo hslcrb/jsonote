@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Save, Github, Key, ChevronLeft, ShieldCheck,
-  Database, Cloud, Globe, HardDrive, Settings, Link as LinkIcon, Languages
+  Database, Cloud, Globe, HardDrive, Settings, Link as LinkIcon, Languages, Folder
 } from 'lucide-react';
 import { StorageConfig, StorageProvider } from '@/types/note';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -21,6 +20,7 @@ const PROVIDERS: { id: StorageProvider; name: string; icon: any }[] = [
   { id: 'gitea', name: 'GITEA', icon: Database },
   { id: 's3', name: 'S3', icon: Cloud },
   { id: 'webdav', name: 'WEBDAV', icon: HardDrive },
+  { id: 'local', name: 'LOCAL', icon: Folder },
 ];
 
 type TabType = StorageProvider | 'language';
@@ -72,6 +72,25 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
     }
   };
 
+  const handleSelectDirectory = async () => {
+    if (typeof window !== 'undefined' && window.electron) {
+      const path = await window.electron.selectDirectory();
+      if (path) {
+        setEditedConfig({ ...editedConfig, path });
+      }
+    }
+  };
+
+  const isElectron = typeof window !== 'undefined' && !!window.electron;
+
+  useEffect(() => {
+    if (activeTab === 'local' && isElectron && !editedConfig.path) {
+      window.electron!.getDefaultPath().then(path => {
+        setEditedConfig(prev => ({ ...prev, path }));
+      });
+    }
+  }, [activeTab, isElectron]);
+
   return (
     <div className="modal-overlay">
       <div className="modal-container">
@@ -107,7 +126,9 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           <div className="settings-content scroll-area">
             <div className="form-section">
               <div className="section-title">
-                {activeTab === 'language' ? t('settings.language') : `${activeTab.toUpperCase()} ${t('settings.github')}`}
+                {activeTab === 'language' ? t('settings.language') :
+                  activeTab === 'local' ? t('settings.local') :
+                    `${activeTab.toUpperCase()} ${t('settings.github')}`}
               </div>
 
               {(activeTab === 'github' || activeTab === 'gitlab' || activeTab === 'gitea') && (
@@ -216,6 +237,33 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                       onChange={(e) => setEditedConfig({ ...editedConfig, bucket: e.target.value })}
                     />
                   </div>
+                </div>
+              )}
+
+              {activeTab === 'local' && (
+                <div className="inputs-grid">
+                  {!isElectron ? (
+                    <div className="alert-box">
+                      {language === 'ko' ? '로컬 폴더 저장소는 데스크톱 앱에서만 사용 가능합니다.' : 'Local folder storage is only available in the desktop app.'}
+                    </div>
+                  ) : (
+                    <div className="input-group">
+                      <label>{t('settings.path')}</label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="text"
+                          readOnly
+                          placeholder="/path/to/notes"
+                          value={editedConfig.path || ''}
+                          style={{ flex: 1 }}
+                        />
+                        <button className="diagnose-btn" onClick={handleSelectDirectory}>
+                          <Folder size={14} />
+                          {t('settings.select_folder')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -515,6 +563,15 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
           height: 6px;
           border-radius: 50%;
           background: var(--bg-primary);
+        }
+        .alert-box {
+          padding: 1rem;
+          background: rgba(255, 0, 0, 0.1);
+          border: 1px solid rgba(255, 0, 0, 0.2);
+          color: #ff4444;
+          font-size: 0.85rem;
+          font-weight: 800;
+          text-align: center;
         }
       `}</style>
     </div>

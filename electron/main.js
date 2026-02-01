@@ -1,8 +1,9 @@
 
-const { app, BrowserWindow, protocol } = require('electron');
+const { app, BrowserWindow, protocol, ipcMain, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const http = require('http');
+const fs = require('fs').promises;
 
 let mainWindow;
 let nextServerProcess;
@@ -106,6 +107,74 @@ async function loadProduction() {
         // Fallback or error display
     }
 }
+
+
+// Local Storage Handlers
+ipcMain.handle('local-storage:select-directory', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+        properties: ['openDirectory', 'createDirectory']
+    });
+    if (result.canceled) return null;
+    return result.filePaths[0];
+});
+
+ipcMain.handle('local-storage:read-notes', async (event, dirPath) => {
+    try {
+        if (!dirPath) return [];
+        await fs.mkdir(dirPath, { recursive: true });
+        const files = await fs.readdir(dirPath);
+        const jsonFiles = files.filter(f => f.endsWith('.json'));
+        const notes = [];
+        for (const file of jsonFiles) {
+            try {
+                const content = await fs.readFile(path.join(dirPath, file), 'utf-8');
+                const note = JSON.parse(content);
+                const baseName = file.replace('.json', '');
+                note.metadata.customFilename = decodeURIComponent(baseName);
+                note.metadata.previousFilename = decodeURIComponent(baseName);
+                notes.push(note);
+            } catch (e) {
+                console.error(`Failed to read/parse ${file}:`, e);
+            }
+        }
+        return notes;
+    } catch (e) {
+        console.error('Failed to read notes directory:', e);
+        return [];
+    }
+});
+
+ipcMain.handle('local-storage:save-note', async (event, dirPath, fileName, content) => {
+    try {
+        if (!dirPath) throw new Error('No directory path provided');
+        await fs.mkdir(dirPath, { recursive: true });
+        const filePath = path.join(dirPath, fileName);
+        await fs.writeFile(filePath, content, 'utf-8');
+        return { success: true };
+    } catch (e) {
+        console.error('Failed to save note:', e);
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('local-storage:delete-note', async (event, dirPath, fileName) => {
+    try {
+        if (!dirPath) throw new Error('No directory path provided');
+        const filePath = path.join(dirPath, fileName);
+        try {
+            await fs.access(filePath);
+            await fs.unlink(filePath);
+        } catch (e) { }
+        return { success: true };
+    } catch (e) {
+        console.error('Failed to delete note:', e);
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('local-storage:get-default-path', () => {
+    return path.join(app.getPath('documents'), 'jsonote');
+});
 
 app.whenReady().then(() => {
     createWindow();

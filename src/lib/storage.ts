@@ -1,5 +1,17 @@
-
 import { Note, StorageConfig } from '@/types/note';
+
+declare global {
+    interface Window {
+        electron?: {
+            selectDirectory(): Promise<string | null>;
+            readNotes(path: string): Promise<Note[]>;
+            saveNote(path: string, fileName: string, content: string): Promise<{ success: boolean; error?: string }>;
+            deleteNote(path: string, fileName: string): Promise<{ success: boolean; error?: string }>;
+            getDefaultPath(): Promise<string>;
+            isElectron: boolean;
+        }
+    }
+}
 
 export interface IJsonoteStorage {
     fetchNotes(): Promise<Note[]>;
@@ -166,6 +178,56 @@ export class GitHubStorage implements IJsonoteStorage {
     }
 }
 
+export class LocalStorage implements IJsonoteStorage {
+    private config: StorageConfig;
+
+    constructor(config: StorageConfig) {
+        this.config = config;
+    }
+
+    async fetchNotes(): Promise<Note[]> {
+        if (!this.config.path || typeof window === 'undefined' || !window.electron) return [];
+        try {
+            const notes = await window.electron.readNotes(this.config.path);
+            return notes.map(n => {
+                const baseName = n.metadata.customFilename || n.metadata.id;
+                n.metadata.previousFilename = baseName;
+                return n;
+            });
+        } catch (e) {
+            console.error('Local fetch failed:', e);
+            return [];
+        }
+    }
+
+    async saveNote(note: Note): Promise<void> {
+        if (!this.config.path || typeof window === 'undefined' || !window.electron) return;
+        const baseName = note.metadata.customFilename || note.metadata.id;
+        const fileName = `${encodeURIComponent(baseName)}.json`;
+
+        // Handle rename
+        if (note.metadata.previousFilename && note.metadata.previousFilename !== baseName) {
+            try {
+                await window.electron.deleteNote(this.config.path, `${encodeURIComponent(note.metadata.previousFilename)}.json`);
+            } catch (e) {
+                console.warn('Old file deletion failed (non-fatal):', e);
+            }
+        }
+
+        const result = await window.electron.saveNote(this.config.path, fileName, JSON.stringify(note, null, 2));
+        if (!result.success) {
+            throw new Error(result.error || 'Failed to save locally');
+        }
+        note.metadata.previousFilename = baseName;
+    }
+
+    async deleteNote(note: Note): Promise<void> {
+        if (!this.config.path || typeof window === 'undefined' || !window.electron) return;
+        const baseName = note.metadata.customFilename || note.metadata.id;
+        await window.electron.deleteNote(this.config.path, `${encodeURIComponent(baseName)}.json`);
+    }
+}
+
 // ... Placeholders for other providers ...
 export class GitLabStorage implements IJsonoteStorage {
     constructor(private config: StorageConfig) { }
@@ -187,6 +249,7 @@ export function getStorage(config: StorageConfig): IJsonoteStorage | null {
         case 'github': return new GitHubStorage(config);
         case 'gitlab': return new GitLabStorage(config);
         case 's3': return new S3Storage(config);
+        case 'local': return new LocalStorage(config);
         default: return null;
     }
 }

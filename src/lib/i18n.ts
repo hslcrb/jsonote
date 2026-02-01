@@ -67,6 +67,9 @@ export const translations = {
         'settings.test_conn': 'Test Connection',
         'settings.save': 'Save',
         'settings.cancel': 'Cancel',
+        'settings.local': 'Local Folder',
+        'settings.path': 'Storage Path',
+        'settings.select_folder': 'Select Folder',
         'settings.success': 'Connected successfully!',
         'settings.fail': 'Connection failed',
 
@@ -152,6 +155,9 @@ export const translations = {
         'settings.test_conn': '연결 진단',
         'settings.save': '저장',
         'settings.cancel': '취소',
+        'settings.local': '로컬 폴더',
+        'settings.path': '저장 경로',
+        'settings.select_folder': '폴더 선택',
         'settings.success': '성공적으로 연결되었습니다!',
         'settings.fail': '연결 실패',
 
@@ -237,6 +243,9 @@ export const translations = {
         'settings.test_conn': '接続診断',
         'settings.save': '保存',
         'settings.cancel': 'キャンセル',
+        'settings.local': 'ローカルフォルダー',
+        'settings.path': '保存パス',
+        'settings.select_folder': 'フォルダー選択',
         'settings.success': '接続に成功しました！',
         'settings.fail': '接続失敗',
 
