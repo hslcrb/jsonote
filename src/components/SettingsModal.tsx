@@ -9,6 +9,7 @@ import {
 import { StorageConfig, StorageProvider } from '@/types/note';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Language } from '@/lib/i18n';
+import { setWebDirectoryHandle } from '@/lib/storage';
 
 interface SettingsModalProps {
   config: StorageConfig | null;
@@ -75,10 +76,24 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
   };
 
   const handleSelectDirectory = async () => {
-    if (typeof window !== 'undefined' && window.electron) {
-      const path = await window.electron.selectDirectory();
-      if (path) {
-        setEditedConfig({ ...editedConfig, path });
+    if (typeof window !== 'undefined') {
+      if (window.electron) {
+        const path = await window.electron.selectDirectory();
+        if (path) {
+          setEditedConfig({ ...editedConfig, path });
+        }
+      } else if (window.showDirectoryPicker) {
+        try {
+          const handle = await window.showDirectoryPicker({
+            mode: 'readwrite'
+          });
+          if (handle) {
+            setWebDirectoryHandle(handle);
+            setEditedConfig({ ...editedConfig, path: handle.name });
+          }
+        } catch (e) {
+          console.error('Directory picker failed:', e);
+        }
       }
     }
   };
@@ -244,9 +259,9 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
 
               {activeTab === 'local' && (
                 <div className="inputs-grid">
-                  {!isElectron ? (
+                  {!isElectron && !window.showDirectoryPicker ? (
                     <div className="alert-box">
-                      {language === 'ko' ? '로컬 폴더 저장소는 데스크톱 앱에서만 사용 가능합니다.' : 'Local folder storage is only available in the desktop app.'}
+                      {language === 'ko' ? '이 브라우저는 로컬 폴더 접근 기능을 지원하지 않습니다. 데스크톱 앱이나 최신 크롬 브라우저를 사용해 주세요.' : 'This browser does not support local folder access. Please use the desktop app or a modern Chrome-based browser.'}
                     </div>
                   ) : (
                     <div className="input-group">
@@ -255,7 +270,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                         <input
                           type="text"
                           readOnly
-                          placeholder="/path/to/notes"
+                          placeholder={isElectron ? "/path/to/notes" : "Select a folder to sync"}
                           value={editedConfig.path || ''}
                           style={{ flex: 1 }}
                         />

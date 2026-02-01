@@ -9,9 +9,15 @@ declare global {
             deleteNote(path: string, fileName: string): Promise<{ success: boolean; error?: string }>;
             getDefaultPath(): Promise<string>;
             isElectron: boolean;
-        }
+        };
+        showDirectoryPicker?: (options?: any) => Promise<FileSystemDirectoryHandle>;
     }
 }
+
+// Singleton for Web File System Access API handle
+let webDirectoryHandle: FileSystemDirectoryHandle | null = null;
+export function getWebDirectoryHandle() { return webDirectoryHandle; }
+export function setWebDirectoryHandle(handle: FileSystemDirectoryHandle | null) { webDirectoryHandle = handle; }
 
 export interface IJsonoteStorage {
     fetchNotes(): Promise<Note[]>;
@@ -186,73 +192,137 @@ export class LocalStorage implements IJsonoteStorage {
     }
 
     async fetchNotes(): Promise<Note[]> {
-        if (!this.config.path && typeof window !== 'undefined' && !window.electron) {
-            // Web fallback: use browser localStorage
+        // 1. Electron Native FS
+        if (typeof window !== 'undefined' && window.electron && this.config.path) {
+            try {
+                const notes = await window.electron.readNotes(this.config.path);
+                return notes.map(n => {
+                    const baseName = n.metadata.customFilename || n.metadata.id;
+                    n.metadata.previousFilename = baseName;
+                    return n;
+                });
+            } catch (e) {
+                console.error('Electron native fetch failed:', e);
+            }
+        }
+
+        // 2. Web File System Access API
+        if (typeof window !== 'undefined' && !window.electron && webDirectoryHandle) {
+            try {
+                const notes: Note[] = [];
+                // Check if we still have permission
+                const status = await (webDirectoryHandle as any).queryPermission({ mode: 'readwrite' });
+                if (status !== 'granted') return [];
+
+                for await (const entry of (webDirectoryHandle as any).values()) {
+                    if (entry.kind === 'file' && entry.name.endsWith('.json')) {
+                        const file = await entry.getFile();
+                        const content = await file.text();
+                        try {
+                            const note = JSON.parse(content);
+                            const baseName = note.metadata.customFilename || note.metadata.id;
+                            note.metadata.previousFilename = baseName;
+                            notes.push(note);
+                        } catch (e) {
+                            console.warn(`Failed to parse ${entry.name}`, e);
+                        }
+                    }
+                }
+                return notes;
+            } catch (e) {
+                console.error('Web FSA API fetch failed:', e);
+            }
+        }
+
+        // 3. Fallback: Browser LocalStorage (Legacy / Pure Web)
+        if (typeof window !== 'undefined' && !window.electron) {
             const saved = localStorage.getItem('jsonote_web_storage_notes');
             return saved ? JSON.parse(saved) : [];
         }
 
-        if (!this.config.path || typeof window === 'undefined' || !window.electron) return [];
-        try {
-            const notes = await window.electron.readNotes(this.config.path);
-            return notes.map(n => {
-                const baseName = n.metadata.customFilename || n.metadata.id;
-                n.metadata.previousFilename = baseName;
-                return n;
-            });
-        } catch (e) {
-            console.error('Local fetch failed:', e);
-            return [];
-        }
+        return [];
     }
 
     async saveNote(note: Note): Promise<void> {
-        if (!this.config.path && typeof window !== 'undefined' && !window.electron) {
-            // Web fallback
+        const baseName = note.metadata.customFilename || note.metadata.id;
+        const fileName = `${encodeURIComponent(baseName)}.json`;
+
+        // 1. Electron Native
+        if (typeof window !== 'undefined' && window.electron && this.config.path) {
+            // Handle rename
+            if (note.metadata.previousFilename && note.metadata.previousFilename !== baseName) {
+                try {
+                    await window.electron.deleteNote(this.config.path, `${encodeURIComponent(note.metadata.previousFilename)}.json`);
+                } catch (e) { }
+            }
+
+            const result = await window.electron.saveNote(this.config.path, fileName, JSON.stringify(note, null, 2));
+            if (!result.success) throw new Error(result.error || 'Failed to save locally');
+            note.metadata.previousFilename = baseName;
+            return;
+        }
+
+        // 2. Web FSA API
+        if (typeof window !== 'undefined' && !window.electron && webDirectoryHandle) {
+            try {
+                // Handle rename
+                if (note.metadata.previousFilename && note.metadata.previousFilename !== baseName) {
+                    try {
+                        await webDirectoryHandle.removeEntry(`${encodeURIComponent(note.metadata.previousFilename)}.json`);
+                    } catch (e) { }
+                }
+
+                const fileHandle = await webDirectoryHandle.getFileHandle(fileName, { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(JSON.stringify(note, null, 2));
+                await writable.close();
+                note.metadata.previousFilename = baseName;
+                return;
+            } catch (e) {
+                console.error('Web FSA API save failed:', e);
+            }
+        }
+
+        // 3. Browser LocalStorage (Fallback)
+        if (typeof window !== 'undefined' && !window.electron) {
             const saved = localStorage.getItem('jsonote_web_storage_notes');
             let notes: Note[] = saved ? JSON.parse(saved) : [];
             const index = notes.findIndex(n => n.metadata.id === note.metadata.id);
             if (index >= 0) notes[index] = note;
             else notes.push(note);
             localStorage.setItem('jsonote_web_storage_notes', JSON.stringify(notes));
-            return;
         }
-
-        if (!this.config.path || typeof window === 'undefined' || !window.electron) return;
-        const baseName = note.metadata.customFilename || note.metadata.id;
-        const fileName = `${encodeURIComponent(baseName)}.json`;
-
-        // Handle rename
-        if (note.metadata.previousFilename && note.metadata.previousFilename !== baseName) {
-            try {
-                await window.electron.deleteNote(this.config.path, `${encodeURIComponent(note.metadata.previousFilename)}.json`);
-            } catch (e) {
-                console.warn('Old file deletion failed (non-fatal):', e);
-            }
-        }
-
-        const result = await window.electron.saveNote(this.config.path, fileName, JSON.stringify(note, null, 2));
-        if (!result.success) {
-            throw new Error(result.error || 'Failed to save locally');
-        }
-        note.metadata.previousFilename = baseName;
     }
 
     async deleteNote(note: Note): Promise<void> {
-        if (!this.config.path && typeof window !== 'undefined' && !window.electron) {
-            // Web fallback
+        const baseName = note.metadata.customFilename || note.metadata.id;
+        const fileName = `${encodeURIComponent(baseName)}.json`;
+
+        // 1. Electron Native
+        if (typeof window !== 'undefined' && window.electron && this.config.path) {
+            await window.electron.deleteNote(this.config.path, fileName);
+            return;
+        }
+
+        // 2. Web FSA API
+        if (typeof window !== 'undefined' && !window.electron && webDirectoryHandle) {
+            try {
+                await webDirectoryHandle.removeEntry(fileName);
+                return;
+            } catch (e) {
+                console.error('Web FSA API delete failed:', e);
+            }
+        }
+
+        // 3. Browser LocalStorage
+        if (typeof window !== 'undefined' && !window.electron) {
             const saved = localStorage.getItem('jsonote_web_storage_notes');
             if (saved) {
                 let notes: Note[] = JSON.parse(saved);
                 notes = notes.filter(n => n.metadata.id !== note.metadata.id);
                 localStorage.setItem('jsonote_web_storage_notes', JSON.stringify(notes));
             }
-            return;
         }
-
-        if (!this.config.path || typeof window === 'undefined' || !window.electron) return;
-        const baseName = note.metadata.customFilename || note.metadata.id;
-        await window.electron.deleteNote(this.config.path, `${encodeURIComponent(baseName)}.json`);
     }
 }
 
