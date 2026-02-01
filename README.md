@@ -59,7 +59,7 @@ npm run start
 
 ### 1. Universal Storage Synchronization
 - **GitHub Native**: Store notes as `.json` in your private repo.
-- **Local / Browser**: High-performance local folder storage (Desktop) and seamless browser storage (Web).
+- **Local / Browser**: Direct local folder storage via Electron (Desktop) or File System Access API (Web - Chrome/Edge).
 - Real-time sync with visual feedback.
 
 ### 2. Notion-Inspired Workspace
