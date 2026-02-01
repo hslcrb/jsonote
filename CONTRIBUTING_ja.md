@@ -1,5 +1,7 @@
 # JSONOTE 貢献ガイド
 
+<p align="center"><img src="public/logo.svg" width="200"></p>
+
 [![English](./CONTRIBUTING.md)](./CONTRIBUTING.md) [![Korean](./CONTRIBUTING_ko.md)](./CONTRIBUTING_ko.md)
 [![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)

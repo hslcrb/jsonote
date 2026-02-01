@@ -186,6 +186,12 @@ export class LocalStorage implements IJsonoteStorage {
     }
 
     async fetchNotes(): Promise<Note[]> {
+        if (!this.config.path && typeof window !== 'undefined' && !window.electron) {
+            // Web fallback: use browser localStorage
+            const saved = localStorage.getItem('jsonote_web_storage_notes');
+            return saved ? JSON.parse(saved) : [];
+        }
+
         if (!this.config.path || typeof window === 'undefined' || !window.electron) return [];
         try {
             const notes = await window.electron.readNotes(this.config.path);
@@ -201,6 +207,17 @@ export class LocalStorage implements IJsonoteStorage {
     }
 
     async saveNote(note: Note): Promise<void> {
+        if (!this.config.path && typeof window !== 'undefined' && !window.electron) {
+            // Web fallback
+            const saved = localStorage.getItem('jsonote_web_storage_notes');
+            let notes: Note[] = saved ? JSON.parse(saved) : [];
+            const index = notes.findIndex(n => n.metadata.id === note.metadata.id);
+            if (index >= 0) notes[index] = note;
+            else notes.push(note);
+            localStorage.setItem('jsonote_web_storage_notes', JSON.stringify(notes));
+            return;
+        }
+
         if (!this.config.path || typeof window === 'undefined' || !window.electron) return;
         const baseName = note.metadata.customFilename || note.metadata.id;
         const fileName = `${encodeURIComponent(baseName)}.json`;
@@ -222,6 +239,17 @@ export class LocalStorage implements IJsonoteStorage {
     }
 
     async deleteNote(note: Note): Promise<void> {
+        if (!this.config.path && typeof window !== 'undefined' && !window.electron) {
+            // Web fallback
+            const saved = localStorage.getItem('jsonote_web_storage_notes');
+            if (saved) {
+                let notes: Note[] = JSON.parse(saved);
+                notes = notes.filter(n => n.metadata.id !== note.metadata.id);
+                localStorage.setItem('jsonote_web_storage_notes', JSON.stringify(notes));
+            }
+            return;
+        }
+
         if (!this.config.path || typeof window === 'undefined' || !window.electron) return;
         const baseName = note.metadata.customFilename || note.metadata.id;
         await window.electron.deleteNote(this.config.path, `${encodeURIComponent(baseName)}.json`);

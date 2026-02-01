@@ -398,7 +398,7 @@ export default function Home() {
           className="sidebar"
         >
           <div className="sidebar-header">
-            <span className="logo-text">JSONOTE</span>
+            <img src="/logo.svg" alt="JSONOTE Logo" style={{ height: '32px', filter: theme === 'dark' ? 'invert(1)' : 'none' }} />
             <button onClick={() => setIsSidebarOpen(false)} className="icon-btn mobile-only">
               <X size={20} />
             </button>

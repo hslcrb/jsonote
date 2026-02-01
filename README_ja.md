@@ -1,5 +1,9 @@
 # JSONOTE (v1.0.5)
 
+<p align="center">
+  <img src="public/logo.svg" alt="JSONOTE Logo" width="400">
+</p>
+
 [![English](https://img.shields.io/badge/Language-English-blue)](./README.md) [![Korean](https://img.shields.io/badge/Language-Korean-red)](./README_ko.md)
 [![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -53,10 +57,10 @@ npm run start
 
 ## 🚀 主な機能
 
-### 1. GitHubネイティブ同期
-- ノートはプライベートGitHubリポジトリに `.json` ファイルとして保存されます。
-- Gitを通じた完全なバージョン管理。
-- **視覚的フィードバック**（保存中... -> 保存完了！）を伴うリアルタイム同期。
+### 1. ユニバーサルストレージ同期
+- **GitHubネイティブ**: ノートをプライベートGitHubリポジトリに `.json` ファイルとして保存。
+- **ローカル / ブラウザ**: デスクトップアプリでの高性能ローカルフォルダ保存、およびウェブ版でのシームレスなブラウザ保存をサポート。
+- リアルタイム同期と視覚的なフィードバック。
 
 ### 2. Notionにインスパイアされたワークスペース
 - **無限の階層構造**: ページ内にページをネストしてナレッジベースを構築できます。

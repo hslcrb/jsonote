@@ -1,5 +1,9 @@
 # JSONOTE (v1.0.5)
 
+<p align="center">
+  <img src="public/logo.svg" alt="JSONOTE Logo" width="400">
+</p>
+
 [![English](https://img.shields.io/badge/Language-English-blue)](./README.md) [![Japanese](https://i.namu.wiki/i/-6zD4tIyEplQ_Q44rBjydwhDQ1pOaig6biAKN_MiK01bU7T0_4iZg5IVcNyOzzUolTyLp8aAFKrjJhqutcQx74i37kT2DzzsROquAUrnNy7VFmpFuQTccFJT552leCkTpg9LDJgd2xNwWOv5NYZ15g.svg)](./README_ja.md)
 [![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -53,9 +57,10 @@ npm run start
 
 ## 🚀 주요 기능
 
-### 1. GitHub 네이티브 동기화
-- 모든 노트는 개인 GitHub 저장소에 `.json` 파일로 저장됩니다.
-- Git을 통한 완벽한 버전 관리 및 실시간 동기화 피드백.
+### 1. 유니버설 스토리지 동기화
+- **GitHub Native**: 노트를 개인 GitHub 저장소에 `.json` 파일로 저장합니다.
+- **로컬 / 브라우저**: 데스크톱 앱에서의 고성능 로컬 폴더 저장 및 웹 버전에서의 심리스한 브라우저 저장 기능을 지원합니다.
+- 실시간 동기화 피드백 제공.
 
 ### 2. 노션 영감의 워크스페이스
 - **무한 계층 구조**: 페이지 안에 페이지를 중첩하여 지식 베이스 구축.

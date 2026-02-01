@@ -1,5 +1,9 @@
 # JSONOTE (v1.0.5)
 
+<p align="center">
+  <img src="public/logo.svg" alt="JSONOTE Logo" width="400">
+</p>
+
 [![Korean](https://i.namu.wiki/i/sWPT7gp9y6RDK_9IVVHmBDwc-JIlzbRbxyS_Jy2TUAFm3O97u34B3Y-vJXWbGOAS0aXzDXDLsRP5PffCMB5hdKdrLLZ_TZZlA3WdKP_xgmtX_QZaLZNuMc7tHM1CZBjBGrtlF7numCKhlOQFRN7IaA.svg)](./README_ko.md) [![Japanese](https://i.namu.wiki/i/-6zD4tIyEplQ_Q44rBjydwhDQ1pOaig6biAKN_MiK01bU7T0_4iZg5IVcNyOzzUolTyLp8aAFKrjJhqutcQx74i37kT2DzzsROquAUrnNy7VFmpFuQTccFJT552leCkTpg9LDJgd2xNwWOv5NYZ15g.svg)](./README_ja.md)
 [![Version](https://img.shields.io/github/v/release/hslcrb/jsonote?color=green&label=Version)](https://github.com/hslcrb/jsonote/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -53,10 +57,10 @@ npm run start
 
 ## 🚀 Key Features
 
-### 1. GitHub Native Synchronization
-- Your notes are stored as `.json` files in your private GitHub repository.
-- Full version control through Git.
-- Real-time sync with **visual feedback** (Saving... -> Saved!).
+### 1. Universal Storage Synchronization
+- **GitHub Native**: Store notes as `.json` in your private repo.
+- **Local / Browser**: High-performance local folder storage (Desktop) and seamless browser storage (Web).
+- Real-time sync with visual feedback.
 
 ### 2. Notion-Inspired Workspace
 - **Infinite Hierarchy**: Nest pages within pages to build a knowledge base.
