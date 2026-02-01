@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion';
 import {
-  Database, Cloud, Globe, HardDrive, Settings, Link as LinkIcon, Languages, Folder
+  Database, Cloud, Globe, HardDrive, Settings, Languages, Folder,
+  Github, ShieldCheck
 } from 'lucide-react';
 import { StorageConfig, StorageProvider } from '@/types/note';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Language } from '@/lib/i18n';
 
 interface SettingsModalProps {
   config: StorageConfig | null;
@@ -14,7 +16,7 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-const PROVIDERS: { id: StorageProvider; name: string; icon: any }[] = [
+const PROVIDERS: { id: StorageProvider; name: string; icon: React.ElementType }[] = [
   { id: 'github', name: 'GITHUB', icon: Github },
   { id: 'gitlab', name: 'GITLAB', icon: Globe },
   { id: 'gitea', name: 'GITEA', icon: Database },
@@ -65,8 +67,8 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
       } else {
         alert(`❌ ${t('settings.fail')}\n\n${data.logs.join('\n')}\n\nError: ${data.message}`);
       }
-    } catch (e: any) {
-      alert(t('settings.fail') + ': ' + e.message);
+    } catch (e: unknown) {
+      alert(t('settings.fail') + ': ' + (e instanceof Error ? e.message : String(e)));
     } finally {
       setIsDiagnosing(false);
     }
@@ -89,7 +91,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
         setEditedConfig(prev => ({ ...prev, path }));
       });
     }
-  }, [activeTab, isElectron]);
+  }, [activeTab, isElectron, editedConfig.path]);
 
   return (
     <div className="modal-overlay">
@@ -278,7 +280,7 @@ export default function SettingsModal({ config, onSave, onClose }: SettingsModal
                       <button
                         key={lang.id}
                         className={`lang-option ${language === lang.id ? 'selected' : ''}`}
-                        onClick={() => setLanguage(lang.id as any)}
+                        onClick={() => setLanguage(lang.id as Language)}
                       >
                         <span className="lang-flag">{lang.flag}</span>
                         <span className="lang-name">{lang.name}</span>
