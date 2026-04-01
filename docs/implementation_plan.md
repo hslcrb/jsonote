@@ -1,54 +1,41 @@
-# JSONOTE 고도화 및 치명적 버그 수정
+# 일기(저널) 템플릿 자동화 기능 구현 계획
 
-앞서 분석한 오류들을 반영하여 앱의 치명적인 데스크톱 구동 및 CI 배포 오류를 완벽히 수정하고 프로젝트의 안정성을 확보합니다.
+사용자가 몇 번의 '딸깍'과 최소한의 키보드 입력만으로 손쉽게 일기를 남길 수 있도록, JSONOTE 앱에 맞춤형 저널(Journal) 템플릿 생성 기능을 추가합니다.
 
 ## User Review Required
 
-> [!CAUTION]
-> GitHub Actions 릴리즈 배포 실패(403 Forbidden)는 코드 수정만으로는 해결되지 않을 수 있습니다. 저장소 설정(**Settings > Actions > General > Workflow permissions**)에서 `Read and write permissions`가 올바르게 활성화되어 있는지 사용자의 수동 확인이 필요합니다.
+- 날짜 생성 시 시스템 언어 설정과 무관하게 요일을 무조건 영어 3자리(`Mon`, `Wed` 등)로 표기하기 위해, 내부적으로 영어(US) 로케일 모듈을 바인딩합니다.
+- 새 노트를 만드는 사이드바 UI 그리드가 현재 '투두', 'DB' 2열 구조로 꽉 차 있습니다. 일기 버튼을 추가하기 위해 CSS 그리드를 3열(`1fr 1fr 1fr`) 구조로 변경합니다.
 
 ## Proposed Changes
 
-### Electron 메인 로직 보완
-사용자 컴퓨터에 전역으로 설치된 Node.js 환경에 구애받지 않고, 자체 내장된 Node엔진을 통해 독립적으로 Next.js 서버가 실행되도록 변경합니다.
+### 클라이언트 UI 및 템플릿 주입 로직 변경
 
-#### [MODIFY] [main.js](file:///d:/jsonote/electron/main.js)
-- `spawn('node', ...)` 부분을 `spawn(process.execPath, ...)`로 교체합니다.
-- `env: { ...env, ELECTRON_RUN_AS_NODE: 1 }` 속성을 부여하여 완전한 로컬 격리를 구현합니다.
-
----
-
-### CI/CD 워크플로우 안정화 및 최적화
-네이티브 모듈 빌드 에러를 방지하고 Next.js 빌드 속도를 개선합니다.
-
-#### [MODIFY] [auto-cd.yml](file:///d:/jsonote/.github/workflows/auto-cd.yml)
-- `setup-node` 의 `node-version: 20` 을 `node-version: 22`로 상향 조치합니다.
-- Next.js 성능 향상을 위한 Build Cache Action(`actions/cache`) 스탭을 신규 추가합니다.
-- (옵션) 오래된 서드파티 액션(`action-electron-builder`) 대신 순수 `npx electron-builder` 명령으로 교체하여 유지보수성을 극대화합니다.
-
----
-
-### 문서 구조 및 구동 환경 동기화
-요구되는 Node.js 사양 확장에 따라 프로젝트의 모든 문서 가이드를 갱신합니다.
-
-#### [MODIFY] [README.md](file:///d:/jsonote/README.md)
-#### [MODIFY] [README_ko.md](file:///d:/jsonote/README_ko.md)
-#### [MODIFY] [README_ja.md](file:///d:/jsonote/README_ja.md)
-- `Node.js v20.9.0 이상` 문구를 `Node.js v22.12.0 이상`으로 상향 변경합니다.
-
-#### [MODIFY] [package.json](file:///d:/jsonote/package.json)
-- 구동 명세(`engines`)를 Node 22(`>=22.12.0`) 이상으로 최신화합니다.
+#### [MODIFY] [page.tsx](file:///d:/jsonote/src/app/page.tsx)
+- **라이브러리 불러오기**: 상단에 `import { enUS } from 'date-fns/locale';`를 추가하여 영문 날짜 포맷을 준비합니다.
+- **새 일기 버튼 추가**: 사이드바의 `.new-grid` 영역 첫 번째 칸에 `일기` 생성 전용 버튼을 배치합니다.
+- **스타일 시트 수정**: `.new-grid`의 CSS 속성을 `grid-template-columns: 1fr 1fr;`에서 `1fr 1fr 1fr;`로 확장하여 세 개의 위젯이 예쁘게 나란히 정렬되게 합니다.
+- **`createNewNote` 템플릿 함수 고도화**:
+  버튼에서 `type === 'journal'`을 호출하면 다음 두 가지가 즉시 주입된 상태로 에디터가 팝업됩니다.
+  1. 제목(Title): 자동 지정 `format(new Date(), 'yyyyMMdd EEE', { locale: enUS })` (결과: `20260401 Wed`)
+  2. 내용(Content): 즉각 타이핑할 수 있도록 설계된 마크다운 구조
+     ```markdown
+     # 20260401 Wed
+     
+     ## 📋 오늘의 할 일
+     - [ ] 
+     
+     ## 📝 기록
+     - 
+     ```
 
 ## Open Questions
 
-> [!IMPORTANT]
-> 1. 보안 위험이 있는 의존성 패키지(`rimraf`, `tar` 등) 해결을 위해 `npm audit fix` 명령어를 임의로 실행하여 패키지 버전을 일괄 업데이트해도 괜찮을까요?
-> 2. CI 파일(`auto-cd.yml`)에서 유지보수가 중단된 구형 `samuelmeuli/action-electron-builder@v1`을 제거하고, 공식 `npm run electron:build` 파이프라인으로 구조를 아예 개편해도 될까요?
+> [!TIP]
+> 템플릿 본문(마크다운) 구조를 위와 같이 심플한 [할일 + 기록] 영역으로 짰습니다. 혹시 추가로 미리 적혀있었으면 하는 항목(예: 오늘 있었던 감사한 일, 날씨, 기분 점수 등)이 있다면 말씀해 주세요! 
 
 ## Verification Plan
 
-### Automated Tests
-- 수정된 코드로 CI를 실행하여 GitHub 릴리즈(Release) 자산이 정상적으로 컴파일 및 업로드(`status 200/201`)되는지 자동 검증합니다.
-
 ### Manual Verification
-- 테스트 브랜치 내 `npm run electron:build` 후 생성된 Windows `.exe` 파일을 바탕화면에서 즉시 구동했을 때 하얀 화면(Blank) 없이 원활하게 구동되는지 확인 부탁드립니다 (Node.js 미설치 PC 우대).
+- 저장 직후 Next.js 개발 서버(`npm run dev`)를 통해 자동으로 HMR 갱신된 화면을 띄웁니다.
+- `일기` 버튼을 눌렀을 때, 우측 에디터에 제목과 탬플릿이 정상적으로 초기화되었는지 개발자 도구의 에러 없이 검증합니다.
