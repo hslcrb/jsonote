@@ -21,7 +21,30 @@
   src: url('/fonts/nanum-800.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'Nanum Myeongjo';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/NanumMyeongjo.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Nanum Myeongjo';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/NanumMyeongjoBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Nanum Myeongjo';
+  font-style: normal;
+  font-weight: 800;
+  src: url('/fonts/NanumMyeongjoExtraBold.ttf') format('truetype');
+}
+
 :root {
+  --font-family-primary: 'Nanum Gothic', sans-serif;
+  
   /* Premium Dark Mode - Deep Charcoal Gray */
   --bg-primary: #0c0c0e;
   --bg-secondary: #141416;
@@ -48,6 +71,10 @@
 
   --transition-fast: 0.15s ease;
   --transition-slow: 0.3s ease;
+}
+
+[data-font='myeongjo'] {
+  --font-family-primary: 'Nanum Myeongjo', serif;
 }
 
 [data-theme='light'] {
@@ -83,7 +110,7 @@ body,
   max-width: 100vw;
   height: 100vh;
   overflow: hidden;
-  font-family: 'Nanum Gothic', sans-serif;
+  font-family: var(--font-family-primary);
   background-color: var(--bg-primary);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
@@ -97,7 +124,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'Nanum Gothic', sans-serif;
+  font-family: var(--font-family-primary);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;

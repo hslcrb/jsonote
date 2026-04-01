@@ -28,6 +28,7 @@ export default function Home() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [isWarmMode, setIsWarmMode] = useState(false);
   const [warmIntensity, setWarmIntensity] = useState(30);
+  const [font, setFont] = useState<'gothic' | 'myeongjo'>('gothic');
 
   const [filterType, setFilterType] = useState<NoteType | 'all'>('all');
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
@@ -47,6 +48,8 @@ export default function Home() {
     if (savedTheme) setTheme(savedTheme || 'dark');
     setIsWarmMode(savedWarm);
     if (savedIntensity) setWarmIntensity(parseInt(savedIntensity));
+    const savedFont = localStorage.getItem('jsonote_font') as 'gothic' | 'myeongjo';
+    if (savedFont) setFont(savedFont);
 
     if (!savedNotes) {
       const mockNotes: Note[] = [
@@ -76,6 +79,11 @@ export default function Home() {
     localStorage.setItem('jsonote_warm', isWarmMode.toString());
     localStorage.setItem('jsonote_warm_intensity', warmIntensity.toString());
   }, [isWarmMode, warmIntensity]);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-font', font);
+    localStorage.setItem('jsonote_font', font);
+  }, [font]);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -191,6 +199,10 @@ export default function Home() {
   }, [storageConfig]);
 
   const handleSaveNote = async (updatedNote: Note) => {
+    // 0. Sync filename with title / 제목과 파일명 동기화
+    const sanitizedTitle = updatedNote.metadata.title.replace(/[\\/:*?"<>|]/g, '_') || updatedNote.metadata.id;
+    updatedNote.metadata.customFilename = sanitizedTitle;
+
     // 1. Immediately update local state / 1. 로컬 상태 즉시 업데이트
     const newNotes = notes.map(n => n.metadata.id === updatedNote.metadata.id ? updatedNote : n);
     if (!notes.find(n => n.metadata.id === updatedNote.metadata.id)) {
@@ -309,12 +321,12 @@ export default function Home() {
   const createNewNote = (type: NoteType = 'general') => {
     let defaultTitle = type === 'todo' ? t('editor.syntax.todo') : type === 'database' ? t('views.table') : t('editor.untitled');
     let defaultContent = '';
-    let defaultTags: string[] = [];
+    let defaultTags: string[] = [type];
 
     if (type === 'journal') {
       defaultTitle = format(new Date(), 'yyyyMMdd EEE', { locale: enUS });
       defaultContent = `# ${defaultTitle}\n\n## 📋 오늘의 할 일\n- [ ] \n\n## 📝 기록\n- `;
-      defaultTags = ['diary'];
+      defaultTags = ['diary', 'journal'];
     }
 
     const newNote: Note = {
@@ -379,6 +391,7 @@ export default function Home() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   const toggleWarmMode = () => setIsWarmMode(prev => !prev);
+  const toggleFont = () => setFont(prev => prev === 'gothic' ? 'myeongjo' : 'gothic');
 
   const filteredNotes = notes.filter(n => {
     const matchesSearch = n.metadata.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -503,6 +516,9 @@ export default function Home() {
               </button>
               <button onClick={toggleWarmMode} className={`icon-btn-minimal ${isWarmMode ? 'active' : ''}`} title="나이트 모드 (블루라이트 차단)">
                 <Zap size={16} />
+              </button>
+              <button onClick={toggleFont} className="icon-btn-minimal" title="폰트 전환 (고딕/명조)">
+                <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>{font === 'gothic' ? '가' : '漢'}</span>
               </button>
             </div>
             <div className={`warm-control-panel ${isWarmMode ? 'active' : ''}`}>

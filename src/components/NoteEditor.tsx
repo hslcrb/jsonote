@@ -266,20 +266,10 @@ export default function NoteEditor({
               </div>
               <div className="filename-wrapper">
                 <span className="label">{t('editor.filename')}:</span>
-                <input
-                  type="text"
-                  className="filename-input"
-                  value={editedNote.metadata.customFilename || ''}
-                  onChange={(e) => {
-                    const filteredValue = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
-                    setEditedNote({
-                      ...editedNote,
-                      metadata: { ...editedNote.metadata, customFilename: filteredValue }
-                    });
-                  }}
-                  placeholder={editedNote.metadata.id}
-                />
-                <span className="ext">.json</span>
+                <div className="filename-display">
+                  {editedNote.metadata.title.replace(/[\\/:*?"<>|]/g, '_') || editedNote.metadata.id}
+                  <span className="ext">.json</span>
+                </div>
               </div>
             </div>
           </div>
@@ -734,7 +724,7 @@ export default function NoteEditor({
           outline: none;
           font-size: 1.5rem;
           font-weight: 900;
-          font-family: 'Nanum Gothic', sans-serif;
+          font-family: var(--font-family-primary);
           color: var(--text-primary);
           width: 100%;
           text-transform: uppercase;
@@ -749,16 +739,12 @@ export default function NoteEditor({
           color: var(--text-muted);
         }
 
-        .filename-input {
-          background: transparent;
-          border: none;
-          border-bottom: 1px solid var(--border-glass);
-          outline: none;
+        .filename-display {
           color: var(--text-secondary);
-          padding: 0;
-          width: auto;
-          min-width: 100px;
           font-family: 'JetBrains Mono', monospace;
+          background: var(--bg-tertiary);
+          padding: 0.1rem 0.4rem;
+          border-radius: 4px;
         }
 
         .header-actions {

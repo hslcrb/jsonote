@@ -110,7 +110,7 @@ export default function PromptDialog({
               font-weight: 800;
               text-transform: uppercase;
               letter-spacing: 0.05em;
-              font-family: 'Nanum Gothic', sans-serif;
+              font-family: var(--font-family-primary);
               color: var(--text-primary);
             }
 
@@ -131,7 +131,7 @@ export default function PromptDialog({
               font-size: 1rem;
               margin-bottom: 2rem;
               outline: none;
-              font-family: 'Nanum Gothic', sans-serif;
+              font-family: var(--font-family-primary);
               transition: var(--transition-fast);
             }
 
@@ -153,7 +153,7 @@ export default function PromptDialog({
               text-transform: uppercase;
               border-radius: var(--radius-md);
               transition: var(--transition-fast);
-              font-family: 'Nanum Gothic', sans-serif;
+              font-family: var(--font-family-primary);
               border: none;
               cursor: pointer;
             }
