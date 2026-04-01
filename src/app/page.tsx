@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Plus, Settings, Search, Trash2, Menu, Info, Star, Cloud, Github, HardDrive, Sun, Moon, Monitor, Smartphone, LinkIcon, Zap, X, Table, Layout, ChevronRight, ChevronDown, HardHat, CheckCircle, Database } from 'lucide-react';
 import { format } from 'date-fns';
+import { enUS } from 'date-fns/locale';
 import { Note, NoteType, StorageConfig } from '@/types/note';
 import NoteEditor from '@/components/NoteEditor';
 import SettingsModal from '@/components/SettingsModal';
@@ -306,16 +307,26 @@ export default function Home() {
   };
 
   const createNewNote = (type: NoteType = 'general') => {
+    let defaultTitle = type === 'todo' ? t('editor.syntax.todo') : type === 'database' ? t('views.table') : t('editor.untitled');
+    let defaultContent = '';
+    let defaultTags: string[] = [];
+
+    if (type === 'journal') {
+      defaultTitle = format(new Date(), 'yyyyMMdd EEE', { locale: enUS });
+      defaultContent = `# ${defaultTitle}\n\n## 📋 오늘의 할 일\n- [ ] \n\n## 📝 기록\n- `;
+      defaultTags = ['diary'];
+    }
+
     const newNote: Note = {
       metadata: {
         id: Math.random().toString(36).substr(2, 9),
-        title: type === 'todo' ? t('editor.syntax.todo') : type === 'database' ? t('views.table') : t('editor.untitled'),
+        title: defaultTitle,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         type: type,
-        tags: [],
+        tags: defaultTags,
       },
-      content: '',
+      content: defaultContent,
     };
     setSelectedNote(newNote);
     setIsEditorOpen(true);
@@ -411,6 +422,9 @@ export default function Home() {
                 <span>{t('sidebar.new_page')}</span>
               </button>
               <div className="new-grid">
+                <button className="new-sub-btn" onClick={() => createNewNote('journal')}>
+                  <Star size={14} /> <span>일기</span>
+                </button>
                 <button className="new-sub-btn" onClick={() => createNewNote('todo')}>
                   <CheckCircle size={14} /> <span>투두</span>
                 </button>
@@ -848,7 +862,7 @@ export default function Home() {
 
         .new-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: 1fr 1fr 1fr;
           gap: 0.5rem;
         }
 
