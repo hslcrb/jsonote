@@ -499,53 +499,43 @@ export default function Home() {
 
           <div className="sidebar-footer">
             <button className="nav-item-minimal" onClick={() => setIsSettingsOpen(true)}>
-              <Settings size={16} />
+              <Settings size={18} />
               <span>{t('sidebar.settings')}</span>
             </button>
-            <div className="footer-controls">
-              <div className="control-group">
-                <label>LANGUAGE</label>
+            <div className="footer-actions">
+              <div className="action-row">
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value as any)}
-                  className="footer-select"
+                  className="minimal-select"
                 >
-                  <option value="en">🇺🇸 ENGLISH</option>
-                  <option value="ko">🇰🇷 한국어</option>
-                  <option value="ja">🇯🇵 日本語</option>
+                  <option value="ko">한국어</option>
+                  <option value="en">EN</option>
+                  <option value="ja">日本語</option>
                 </select>
-              </div>
-              <div className="control-group">
-                <label>APPEARANCE (FONT)</label>
-                <div className="font-toggle-bar" onClick={toggleFont}>
-                  <div className={`active-indicator ${font === 'myeongjo' ? 'shifted' : ''}`} />
-                  <span className={font === 'gothic' ? 'active' : ''}>GOTHIC</span>
-                  <span className={font === 'myeongjo' ? 'active' : ''}>MYEONGJO</span>
+                <div className="compact-font-toggle" onClick={toggleFont}>
+                  <span className={font === 'gothic' ? 'active' : ''}>고딕</span>
+                  <div className="divider" />
+                  <span className={font === 'myeongjo' ? 'active' : ''}>명조</span>
                 </div>
               </div>
-              <div className="toggle-row">
-                <button onClick={toggleTheme} className="icon-btn-minimal" title="테마 전환">
-                  {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              <div className="action-row">
+                <button onClick={toggleTheme} className="footer-icon-btn" title="테마">
+                  {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
                 </button>
-                <button onClick={toggleWarmMode} className={`icon-btn-minimal ${isWarmMode ? 'active' : ''}`} title="나이트 모드 (블루라이트 차단)">
-                  <Zap size={16} />
+                <button onClick={toggleWarmMode} className={`footer-icon-btn ${isWarmMode ? 'active' : ''}`} title="나이트">
+                  <Zap size={14} />
                 </button>
+                {isWarmMode && (
+                  <input
+                    type="range"
+                    min="1" max="100"
+                    value={warmIntensity}
+                    onChange={(e) => setWarmIntensity(parseInt(e.target.value))}
+                    className="mini-slider"
+                  />
+                )}
               </div>
-            </div>
-            <div className={`warm-control-panel ${isWarmMode ? 'active' : ''}`}>
-              <div className="intensity-row">
-                <div className="intensity-label">차단 강도</div>
-                <div className="intensity-value">{warmIntensity}%</div>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="100"
-                step="1"
-                value={warmIntensity}
-                onChange={(e) => setWarmIntensity(parseInt(e.target.value))}
-                className="warm-slider"
-              />
             </div>
           </div>
         </motion.aside>
@@ -992,116 +982,104 @@ export default function Home() {
         }
 
         .sidebar-footer {
-          padding: 2rem 1.5rem;
+          padding: 1.5rem 1.25rem;
           border-top: 1px solid var(--border-glass);
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
-          background: rgba(0, 0, 0, 0.1);
+          gap: 1rem;
         }
 
-        .footer-controls {
+        .footer-actions {
           display: flex;
           flex-direction: column;
-          gap: 1.25rem;
+          gap: 0.75rem;
         }
 
-        .control-group {
+        .action-row {
           display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
+          align-items: center;
+          gap: 0.75rem;
         }
 
-        .control-group label {
-          font-size: 0.6rem;
-          font-weight: 900;
-          color: var(--text-muted);
-          letter-spacing: 0.1em;
-        }
-
-        .footer-select {
-          width: 100%;
+        .minimal-select {
           background: var(--bg-tertiary);
           border: 1px solid var(--border-glass);
           color: var(--text-primary);
-          padding: 0.5rem;
-          font-size: 0.7rem;
-          font-weight: 800;
+          padding: 0.35rem 0.5rem;
+          font-size: 0.75rem;
+          font-weight: 700;
           border-radius: 4px;
           outline: none;
         }
 
-        .font-toggle-bar {
-          width: 100%;
+        .compact-font-toggle {
+          display: flex;
+          align-items: center;
           background: var(--bg-tertiary);
           border: 1px solid var(--border-glass);
-          padding: 0.3rem;
-          display: flex;
-          position: relative;
-          cursor: pointer;
-          border-radius: 6px;
-        }
-
-        .font-toggle-bar span {
-          flex: 1;
-          text-align: center;
-          font-size: 0.65rem;
-          font-weight: 800;
-          z-index: 1;
-          color: var(--text-muted);
-          transition: var(--transition-fast);
-          padding: 0.4rem 0;
-        }
-
-        .font-toggle-bar span.active {
-          color: var(--bg-primary);
-        }
-
-        [data-theme='light'] .font-toggle-bar span.active {
-          color: var(--bg-primary);
-        }
-
-        .active-indicator {
-          position: absolute;
-          left: 0.3rem;
-          top: 0.3rem;
-          bottom: 0.3rem;
-          width: calc(50% - 0.3rem);
-          background: var(--text-primary);
           border-radius: 4px;
-          transition: transform var(--transition-fast);
+          padding: 0.15rem;
+          cursor: pointer;
         }
 
-        .active-indicator.shifted {
-          transform: translateX(100%);
-        }
-
-        .toggle-row {
-          display: flex;
-          gap: 0.75rem;
-          margin-top: 0.5rem;
-        }
-
-        .icon-btn-minimal {
-          width: 36px;
-          height: 36px;
+        .compact-font-toggle span {
+          padding: 0.2rem 0.5rem;
+          font-size: 0.7rem;
+          font-weight: 700;
           color: var(--text-muted);
+          transition: all 0.2s;
+        }
+
+        .compact-font-toggle span.active {
+          color: var(--text-primary);
+          background: var(--bg-secondary);
+          border-radius: 2px;
+          box-shadow: var(--shadow-sm);
+        }
+
+        .divider {
+          width: 1px;
+          height: 10px;
+          background: var(--border-glass);
+        }
+
+        .footer-icon-btn {
+          width: 30px;
+          height: 30px;
           display: flex;
           align-items: center;
           justify-content: center;
           border: 1px solid var(--border-glass);
-          border-radius: 8px;
-          transition: var(--transition-fast);
+          color: var(--text-muted);
+          border-radius: 4px;
         }
 
-        .icon-btn-minimal:hover {
-          background: var(--bg-tertiary);
+        .footer-icon-btn:hover {
           color: var(--text-primary);
+          background: var(--bg-tertiary);
         }
 
-        .icon-btn-minimal.active {
-          background: var(--text-primary);
+        .footer-icon-btn.active {
           color: var(--bg-primary);
+          background: var(--text-primary);
+        }
+
+        .mini-slider {
+          flex: 1;
+          height: 4px;
+          -webkit-appearance: none;
+          background: var(--border-glass);
+          border-radius: 2px;
+          outline: none;
+        }
+
+        .mini-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 12px;
+          height: 12px;
+          background: var(--text-primary);
+          border-radius: 50%;
+          cursor: pointer;
         }
 
         .main-content {

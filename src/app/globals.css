@@ -35,13 +35,6 @@
   src: url('/fonts/NanumMyeongjoBold.ttf') format('truetype');
 }
 
-@font-face {
-  font-family: 'Nanum Myeongjo';
-  font-style: normal;
-  font-weight: 800;
-  src: url('/fonts/NanumMyeongjoExtraBold.ttf') format('truetype');
-}
-
 :root {
   --font-family-primary: 'Nanum Gothic', sans-serif;
   
@@ -60,18 +53,18 @@
   --text-secondary: #b0b0b0;
   --text-muted: #777777;
 
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.4);
-  --border-glow: 0 0 10px rgba(255, 255, 255, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.2);
+  --border-glow: none;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-full: 9999px;
 
-  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.15s ease;
+  --transition-slow: 0.3s ease;
 }
 
 [data-font='myeongjo'] {
