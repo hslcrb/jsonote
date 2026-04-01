@@ -199,9 +199,13 @@ export default function Home() {
   }, [storageConfig]);
 
   const handleSaveNote = async (updatedNote: Note) => {
-    // 0. Sync filename with title / 제목과 파일명 동기화
+    // 0. Sync filename with title & Add Schema Version / 제목과 파일명 동기화 및 스키마 버전 추가
     const sanitizedTitle = updatedNote.metadata.title.replace(/[\\/:*?"<>|]/g, '_') || updatedNote.metadata.id;
     updatedNote.metadata.customFilename = sanitizedTitle;
+    
+    // Data enhancement for premium format / 프리미엄 데이터 규격 강화
+    (updatedNote.metadata as any).version = '1.0';
+    updatedNote.metadata.updatedAt = new Date().toISOString();
 
     // 1. Immediately update local state / 1. 로컬 상태 즉시 업데이트
     const newNotes = notes.map(n => n.metadata.id === updatedNote.metadata.id ? updatedNote : n);
@@ -212,10 +216,10 @@ export default function Home() {
     setNotes(newNotes);
     localStorage.setItem('jsonote_notes', JSON.stringify(newNotes));
 
-    // Update selected state for editor sync and list refresh / 에디터 상태 동기화 및 UI 목록 갱신을 위해 선택된 상태 업데이트
+    // Update selected state for editor sync and list refresh
     setSelectedNote(updatedNote);
 
-    // 2. Direct push to remote repository / 2. 원격 저장소에 즉시 다이렉트 푸시
+    // 2. Direct push to remote repository
     if (storageConfig?.enabled) {
       const storage = getStorage(storageConfig);
       if (storage) {
@@ -225,7 +229,6 @@ export default function Home() {
         } catch (error) {
           console.error('Remote save failed:', error);
           showToast('원격 저장소 반영에 실패했습니다. 네트워크를 확인하세요.', 'error');
-          // Don't throw error - local save succeeded, so editor proceeds / 에러를 throw하지 않음 - 로컬 저장은 성공했으므로 편집기는 정상 진행
         }
       }
     }
@@ -499,27 +502,35 @@ export default function Home() {
               <Settings size={16} />
               <span>{t('sidebar.settings')}</span>
             </button>
-            <div className="toggle-row">
-              <div className="language-switcher-mini">
+            <div className="footer-controls">
+              <div className="control-group">
+                <label>LANGUAGE</label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value as any)}
-                  className="lang-select-minimal"
+                  className="footer-select"
                 >
-                  <option value="en">🇺🇸 EN</option>
-                  <option value="ko">🇰🇷 KO</option>
-                  <option value="ja">🇯🇵 JA</option>
+                  <option value="en">🇺🇸 ENGLISH</option>
+                  <option value="ko">🇰🇷 한국어</option>
+                  <option value="ja">🇯🇵 日本語</option>
                 </select>
               </div>
-              <button onClick={toggleTheme} className="icon-btn-minimal" title="테마 전환">
-                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-              </button>
-              <button onClick={toggleWarmMode} className={`icon-btn-minimal ${isWarmMode ? 'active' : ''}`} title="나이트 모드 (블루라이트 차단)">
-                <Zap size={16} />
-              </button>
-              <button onClick={toggleFont} className="icon-btn-minimal" title="폰트 전환 (고딕/명조)">
-                <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>{font === 'gothic' ? '가' : '漢'}</span>
-              </button>
+              <div className="control-group">
+                <label>APPEARANCE (FONT)</label>
+                <div className="font-toggle-bar" onClick={toggleFont}>
+                  <div className={`active-indicator ${font === 'myeongjo' ? 'shifted' : ''}`} />
+                  <span className={font === 'gothic' ? 'active' : ''}>GOTHIC</span>
+                  <span className={font === 'myeongjo' ? 'active' : ''}>MYEONGJO</span>
+                </div>
+              </div>
+              <div className="toggle-row">
+                <button onClick={toggleTheme} className="icon-btn-minimal" title="테마 전환">
+                  {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                </button>
+                <button onClick={toggleWarmMode} className={`icon-btn-minimal ${isWarmMode ? 'active' : ''}`} title="나이트 모드 (블루라이트 차단)">
+                  <Zap size={16} />
+                </button>
+              </div>
             </div>
             <div className={`warm-control-panel ${isWarmMode ? 'active' : ''}`}>
               <div className="intensity-row">
@@ -981,43 +992,116 @@ export default function Home() {
         }
 
         .sidebar-footer {
-          padding: 1.5rem;
+          padding: 2rem 1.5rem;
           border-top: 1px solid var(--border-glass);
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 1.5rem;
+          background: rgba(0, 0, 0, 0.1);
         }
 
-        .nav-item-minimal {
+        .footer-controls {
           display: flex;
-          align-items: center;
-          gap: 0.75rem;
+          flex-direction: column;
+          gap: 1.25rem;
+        }
+
+        .control-group {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .control-group label {
+          font-size: 0.6rem;
+          font-weight: 900;
+          color: var(--text-muted);
+          letter-spacing: 0.1em;
+        }
+
+        .footer-select {
+          width: 100%;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-glass);
+          color: var(--text-primary);
           padding: 0.5rem;
-          font-size: 0.85rem;
-          color: var(--text-secondary);
-          font-weight: 600;
+          font-size: 0.7rem;
+          font-weight: 800;
+          border-radius: 4px;
+          outline: none;
+        }
+
+        .font-toggle-bar {
+          width: 100%;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-glass);
+          padding: 0.3rem;
+          display: flex;
+          position: relative;
+          cursor: pointer;
+          border-radius: 6px;
+        }
+
+        .font-toggle-bar span {
+          flex: 1;
+          text-align: center;
+          font-size: 0.65rem;
+          font-weight: 800;
+          z-index: 1;
+          color: var(--text-muted);
+          transition: var(--transition-fast);
+          padding: 0.4rem 0;
+        }
+
+        .font-toggle-bar span.active {
+          color: var(--bg-primary);
+        }
+
+        [data-theme='light'] .font-toggle-bar span.active {
+          color: var(--bg-primary);
+        }
+
+        .active-indicator {
+          position: absolute;
+          left: 0.3rem;
+          top: 0.3rem;
+          bottom: 0.3rem;
+          width: calc(50% - 0.3rem);
+          background: var(--text-primary);
+          border-radius: 4px;
+          transition: transform var(--transition-fast);
+        }
+
+        .active-indicator.shifted {
+          transform: translateX(100%);
         }
 
         .toggle-row {
           display: flex;
-          gap: 0.5rem;
+          gap: 0.75rem;
+          margin-top: 0.5rem;
         }
 
         .icon-btn-minimal {
-          padding: 0.6rem;
+          width: 36px;
+          height: 36px;
           color: var(--text-muted);
           display: flex;
           align-items: center;
           justify-content: center;
           border: 1px solid var(--border-glass);
-          border-radius: var(--radius-full);
-          flex: 1;
+          border-radius: 8px;
           transition: var(--transition-fast);
         }
 
         .icon-btn-minimal:hover {
           background: var(--bg-tertiary);
           color: var(--text-primary);
+        }
+
+        .icon-btn-minimal.active {
+          background: var(--text-primary);
+          color: var(--bg-primary);
         }
 
         .main-content {
