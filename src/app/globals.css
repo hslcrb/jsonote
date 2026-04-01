@@ -35,6 +35,13 @@
   src: url('/fonts/NanumMyeongjoBold.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'Nanum Myeongjo';
+  font-style: normal;
+  font-weight: 800;
+  src: url('/fonts/NanumMyeongjoExtraBold.ttf') format('truetype');
+}
+
 :root {
   --font-family-primary: 'Nanum Gothic', sans-serif;
   
@@ -69,6 +76,11 @@
 
 [data-font='myeongjo'] {
   --font-family-primary: 'Nanum Myeongjo', serif;
+}
+
+[data-font='myeongjo'] html,
+[data-font='myeongjo'] body {
+  font-weight: 500;
 }
 
 [data-theme='light'] {
