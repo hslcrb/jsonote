@@ -35,7 +35,7 @@ docker run -d -p 3000:3000 --name jsonote-instance ghcr.io/hslcrb/jsonote:latest
 Visit `http://localhost:3000` to start.
 
 ### 3. 🏗️ Developer Quick Start (Native Build)
-Requires Node.js **v20.9.0** or higher.
+Requires Node.js **v22.12.0** or higher.
 ```bash
 # 1. Clone
 git clone https://github.com/hslcrb/jsonote.git

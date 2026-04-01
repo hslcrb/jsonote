@@ -35,7 +35,7 @@ docker run -d -p 3000:3000 --name jsonote-local ghcr.io/hslcrb/jsonote:latest
 `http://localhost:3000` でアクセスして開始します。
 
 ### 3. 🏗️ 開発者向けクイックスタート (ビルド)
-Node.js **v20.9.0** 以上が必要です。
+Node.js **v22.12.0** 以上が必要です。
 ```bash
 # 1. クローン
 git clone https://github.com/hslcrb/jsonote.git

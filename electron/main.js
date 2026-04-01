@@ -75,9 +75,12 @@ async function loadProduction() {
 
     console.log('Starting Next.js server from:', scriptPath);
 
-    nextServerProcess = spawn('node', [scriptPath], {
+    nextServerProcess = spawn(process.execPath, [scriptPath], {
         cwd: standaloneDir,
-        env,
+        env: {
+            ...env,
+            ELECTRON_RUN_AS_NODE: '1'
+        },
         stdio: 'inherit' // Pipe output to Electron's main process
     });
 

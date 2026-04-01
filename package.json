@@ -6,6 +6,9 @@
   "author": "Rheehose <admin@rheehose.com>",
   "main": "electron/main.js",
   "homepage": "https://rheehose.com",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
