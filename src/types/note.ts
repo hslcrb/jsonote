@@ -13,6 +13,7 @@ export interface NoteMetadata {
     type: NoteType;
     tags: string[];
     repository?: string;
+    version?: string; // Schema version for future-proofing / 데이터 포맷 버전을 관리하여 동기화 안정성 확보
     customFilename?: string;
     previousFilename?: string;
     parentId?: string; // Field for infinite hierarchy / 무한 계층 구조를 위한 필드

@@ -836,7 +836,7 @@ export default function Home() {
         }
 
         .logo-text {
-          font-family: 'Nanum Gothic';
+          font-family: var(--font-family-primary);
           font-weight: 900;
           font-size: 1.5rem;
           letter-spacing: -0.05em;
